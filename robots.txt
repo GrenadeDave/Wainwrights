@@ -3,5 +3,4 @@ Allow: /
 Disallow: /portal/
 Disallow: /admin/
 
-# Replace with your real address once the site is live.
-Sitemap: https://YOUR-SITE-ADDRESS/sitemap.xml
+Sitemap: https://wainwrightshandyman.com/sitemap.xml
