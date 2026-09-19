@@ -55,6 +55,11 @@
   --amber-ink:  #8A4A00;
   --amber-050:  #FFF3D9;
 
+  /* Pastel sky — the service tiles, so they lift off the page */
+  --sky-050:    #E9F1FB;
+  --sky-100:    #DCE8F7;
+  --sky-line:   #C3D8F0;
+
   /* Signal */
   --fire:       #B4452E;
   --fire-050:   #FBEDE9;
@@ -1356,3 +1361,22 @@ body.header-hidden .dst-panel { top: 20px; }
 .legal li { margin-bottom: 8px; }
 .legal a { color: var(--pine-700); font-weight: 600; }
 .legal-date { font-family: var(--f-cond); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: .9rem; color: var(--muted); }
+
+/* --------------------------------------------------------------------------
+   Service tiles in pastel blue, so they lift off the page
+   -------------------------------------------------------------------------- */
+.svc-grid .card {
+  background: var(--sky-050);
+  border-color: var(--sky-line);
+  box-shadow: 0 1px 2px rgba(10,27,51,.05), 0 6px 18px -12px rgba(10,27,51,.28);
+}
+.svc-grid .card:hover {
+  background: var(--white);
+  border-color: var(--sky-line);
+  box-shadow: 0 14px 34px -18px rgba(10,27,51,.45);
+}
+/* On the tinted tile the icon needs the white to read as a chip. */
+.svc-grid .svc-icon { background: var(--white); color: var(--pine-600); box-shadow: 0 1px 2px rgba(10,27,51,.06); }
+.svc-grid .card:hover .svc-icon { background: var(--amber); color: var(--ink); }
+.svc-grid .svc-num { color: var(--sky-line); }
+.svc-grid .svc-tags li { background: var(--white); border-color: var(--sky-line); }
