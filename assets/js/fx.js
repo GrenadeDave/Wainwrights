@@ -519,7 +519,7 @@
       var r = dial ? dial.getBoundingClientRect()
                    : { left: window.innerWidth / 2, top: window.innerHeight / 2, width: 0, height: 0 };
       var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-      var colours = ['#FAA90D', '#24497C', '#0D1723', '#F09C00', '#8FB0D6'];
+      var colours = ['#FAA90D', '#2D5A93', '#0D1723', '#F09C00', '#8FB0D6'];
       for (var i = 0; i < 28; i++) {
         var p = document.createElement('i');
         p.className = 'burst';
