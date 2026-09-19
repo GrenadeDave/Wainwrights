@@ -10,6 +10,13 @@
    multiply the labour on a clearing job — and a published fixed price would
    commit Bryan to losing money on exactly those.
    ========================================================================== */
+/* ⚠️ THE $1,000 LIMIT IS THE LAW, NOT A PREFERENCE.
+   Bryan is not a licensed contractor. California Business & Professions Code
+   §7027.2 lets him advertise only work whose TOTAL — labour, materials and
+   everything else — comes to less than $1,000, and §7048 only exempts jobs
+   that need no building permit. So no figure here, and no "starting from"
+   price, may imply a job at or above $1,000. Splitting a bigger job into
+   smaller ones to stay under the line is illegal too.                       */
 window.WAINWRIGHTS_RATES = {
 
   /* false = show "Free estimate" instead of any figure. */

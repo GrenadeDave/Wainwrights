@@ -1380,3 +1380,11 @@ body.header-hidden .dst-panel { top: 20px; }
 .svc-grid .card:hover .svc-icon { background: var(--amber); color: var(--ink); }
 .svc-grid .svc-num { color: var(--sky-line); }
 .svc-grid .svc-tags li { background: var(--white); border-color: var(--sky-line); }
+
+/* The licence notice the law requires: quiet, but legible on every page. */
+.legal-note {
+  max-width: 78ch; margin: 0 0 22px; padding-top: 22px;
+  border-top: 1px solid rgba(255,255,255,.12);
+  font-size: .9375rem; line-height: 1.6; color: rgba(240,246,242,.72);
+}
+.legal-note b { color: rgba(255,255,255,.92); }
