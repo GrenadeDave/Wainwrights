@@ -192,6 +192,12 @@
           '<button class="btn btn-outline" value="no">' + P.esc(opts.cancel || 'Not yet') + '</button>' +
         '</div>';
       document.body.appendChild(d);
+      /* Remember anything typed in the dialog, so callers can read it. */
+      d.addEventListener('close', function () {
+        var box = d.querySelector('textarea, input[type="text"]');
+        P._lastDialogText = box ? box.value.trim() : '';
+      });
+      if (typeof opts.before === 'function') setTimeout(function () { opts.before(d); }, 30);
       d.addEventListener('click', function (e) {
         if (e.target === d) { d.close('no'); return; }               // backdrop
         var b = e.target.closest('button[value]');
@@ -292,6 +298,31 @@
   /* ----------------------------------------------------------------------
      Page chrome: tabs under the header, plus the demo banner.
      ---------------------------------------------------------------------- */
+  function signOutNow(e) {
+    if (e) e.preventDefault();
+    P.api.signOut().then(function () {
+      w.location.replace(P.demo ? 'login.html?demo=0#nodemo' : 'login.html');
+    });
+  }
+
+  /* "Delete my account" — a request, not an instant wipe: completed work has
+     to stay in Bryan's books for tax. He sees the request on his job board. */
+  P.askDeletion = async function () {
+    var yes = await P.confirm({
+      title: 'Ask Bryan to delete your account?',
+      html: '<p>This tells Bryan you want your details removed. He will take out everything he is allowed to; ' +
+            'records of finished work have to stay in his books for tax, with nothing extra kept.</p>' +
+            '<p>You can add anything he should know:</p>' +
+            '<textarea id="del-why" maxlength="1000" rows="3" placeholder="Optional"></textarea>',
+      ok: 'Send the request', cancel: 'Not now', danger: true,
+      before: function (dialog) { var f = dialog.querySelector('#del-why'); if (f) f.focus(); }
+    });
+    if (!yes) return;
+    var note = P._lastDialogText || '';
+    var r = await P.api.requestDeletion(note);
+    P.toast(r && r.error ? r.error.message : 'Sent. Bryan will be in touch about your account.');
+  };
+
   P.mount = function (active) {
     showFlash();
     var header = document.querySelector('.portal-header');
@@ -317,12 +348,42 @@
       header.parentNode.insertBefore(nav, header.nextSibling);
     }
 
+    /* The account menu. California gives people the right to see, correct and
+       delete what a business holds about them, so those three live together
+       here, one tap from every page, next to a way to reach a human. */
+    if (!document.querySelector('.acct')) {
+      var wrapEl = header.querySelector('.header-inner') || header;
+      var acct = document.createElement('div');
+      acct.className = 'acct';
+      acct.innerHTML =
+        '<button class="acct-btn" type="button" aria-expanded="false" aria-controls="acct-menu" aria-label="Account menu">' +
+          '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>' +
+        '</button>' +
+        '<div class="acct-menu" id="acct-menu" hidden>' +
+          '<a href="profile.html"><b>My details</b><small>Change your name, phone or address</small></a>' +
+          '<a href="mydata.html"><b>My information</b><small>Everything Bryan holds about you</small></a>' +
+          '<a href="tel:+12094561846"><b>Call Bryan</b><small>(209) 456-1846 · Mon–Fri 8–5</small></a>' +
+          '<a href="mailto:Bwain94Work@gmail.com"><b>Email Bryan</b><small>Bwain94Work@gmail.com</small></a>' +
+          '<button type="button" id="acct-delete"><b>Delete my account</b><small>Ask Bryan to remove your details</small></button>' +
+          '<button type="button" id="acct-signout"><b>Sign out</b><small>On this device</small></button>' +
+        '</div>';
+      var who = wrapEl.querySelector('.who');
+      if (who) who.parentNode.insertBefore(acct, who.nextSibling); else wrapEl.appendChild(acct);
+
+      var btn = acct.querySelector('.acct-btn'), menu = acct.querySelector('.acct-menu');
+      var open = function (want) {
+        menu.hidden = !want;
+        btn.setAttribute('aria-expanded', String(want));
+      };
+      btn.addEventListener('click', function () { open(menu.hidden); });
+      document.addEventListener('click', function (e) { if (!acct.contains(e.target)) open(false); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !menu.hidden) { open(false); btn.focus(); } });
+      acct.querySelector('#acct-signout').addEventListener('click', signOutNow);
+      acct.querySelector('#acct-delete').addEventListener('click', function () { open(false); P.askDeletion(); });
+    }
+
     var out = document.getElementById('signout');
-    if (out) out.addEventListener('click', async function (e) {
-      e.preventDefault();
-      await P.api.signOut();
-      w.location.replace(P.demo ? 'login.html?demo=0#nodemo' : 'login.html');
-    });
+    if (out) out.addEventListener('click', signOutNow);
   };
 
   /* Send visitors without a session to the login page. */
@@ -389,6 +450,7 @@
     note:   function (id, text) { return act('note', 'customer_add_note', { p_job: id, p_text: text }); },
     reslot: function (id, day, slot) { return act('reslot', 'customer_request_slot', { p_job: id, p_day: day, p_slot: slot }); },
     cancel: function (id) { return act('cancel', 'customer_cancel', { p_job: id }); },
+    requestDeletion: function (note) { return act('delete_request', 'customer_request_deletion', { p_note: note || '' }); },
     request: function (r) {
       return act('request', 'customer_new_request', {
         p_service: r.service, p_details: r.details, p_address: r.address,

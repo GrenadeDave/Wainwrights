@@ -28,22 +28,23 @@
   --line-soft:  #E7E3D8;
 
   /* Ink */
-  --ink:        #111B15;
-  --body:       #38443D;
-  --muted:      #56635B;   /* 5.7 on paper, 5.2 on paper-2, 6.3 on white */
+  --ink:        #0D1723;
+  --body:       #35414F;
+  --muted:      #566276;   /* 5.7 on paper, 5.2 on paper-2, 6.3 on white */
 
-  /* Pine */
-  --pine-950:   #0B1610;
-  --pine-900:   #0F2018;
-  --pine-800:   #152C21;
-  --pine-700:   #1C3B2C;
-  --pine-600:   #24503B;
-  --pine-500:   #2F6A4E;
-  --pine-400:   #4C8A6B;
-  --pine-300:   #8FBBA3;
-  --pine-200:   #BFD9CA;
-  --pine-100:   #DDEBE3;
-  --pine-050:   #EEF5F1;
+  /* Denim — the same blues as Bryan's MyDiD app. The token names stay
+     --pine-* so every file that already uses them keeps working. */
+  --pine-950:   #071224;
+  --pine-900:   #0A1B33;
+  --pine-800:   #102847;
+  --pine-700:   #163864;
+  --pine-600:   #1B3A66;
+  --pine-500:   #24497C;
+  --pine-400:   #3D6AA8;
+  --pine-300:   #8FB0D6;
+  --pine-200:   #C3D5EA;
+  --pine-100:   #DEE8F4;
+  --pine-050:   #EFF4FA;
 
   /* Hi-vis amber. Dark ink on amber is 9.6:1 — it carries text happily.
      Amber itself never carries light text. On light grounds, text accents

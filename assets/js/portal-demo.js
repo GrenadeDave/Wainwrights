@@ -274,6 +274,13 @@
       return ok({ booked: occupied(db), blackouts: db.blackouts.map(function (b) { return b.day; }) });
     },
 
+    requestDeletion: function (note) {
+      var db = load();
+      db.profiles[ME].deletion_requested_at = new Date().toISOString();
+      db.profiles[ME].deletion_note = note || '';
+      save(db); return ok();
+    },
+
     /* Demo only: put the sample data back as it started. */
     reset: function () { try { w.localStorage.removeItem(KEY); } catch (e) {} return Promise.resolve(); }
   };
@@ -282,7 +289,7 @@
      stand-in for the Supabase client, covering exactly the calls the admin
      pages make. Bryan is admin, so — as in the real database — he sees
      every row. */
-  var TABLES = { jobs: 'jobs', job_events: 'events', job_notes: 'notes', blackouts: 'blackouts', devices: 'devices' };
+  var TABLES = { jobs: 'jobs', job_events: 'events', job_notes: 'notes', blackouts: 'blackouts', devices: 'devices', profiles: 'profiles' };
   var KEYS   = { job_notes: 'job_id', blackouts: 'day' };
 
   function Query(table) { this.table = table; this.op = 'select'; this.where = []; this.sort = null; this.mode = 'many'; this.payload = null; }
@@ -304,6 +311,14 @@
   Query.prototype.run = function () {
     var db = load(), name = TABLES[this.table];
     if (!name) return no('Unknown table ' + this.table);
+    /* profiles live as a map keyed by id — present them as a table. */
+    if (name === 'profiles') {
+      var list = Object.keys(db.profiles).map(function (k) { return db.profiles[k]; });
+      var picked = list.filter(function (r) { return this.where.every(function (f) { return f(r); }); }, this);
+      if (this.op === 'select') return ok(clone(picked));
+      if (this.op === 'update') { picked.forEach(function (r) { Object.assign(r, this.payload); }, this); save(db); return ok(); }
+      return no('Not in the demo.');
+    }
     if (!db[name]) db[name] = [];
     var rows = db[name], where = this.where;
     var hit = function (r) { return where.every(function (f) { return f(r); }); };
@@ -374,7 +389,12 @@
     from: function (t) { return new Query(t); },
     /* Only Bryan's pairing code is ever called this way from the admin pages.
        In the demo, "typing it into the phone" is simulated a few seconds later. */
-    rpc: function (fn) {
+    rpc: function (fn, args) {
+      if (fn === 'clear_deletion_request') {
+        var db = load(), who = db.profiles[(args || {}).p_customer];
+        if (who) { who.deletion_requested_at = null; who.deletion_note = null; save(db); }
+        return ok();
+      }
       if (fn !== 'create_pairing_code') return no('Not in the demo.');
       var hex = '0123456789ABCDEF', c = '';
       for (var i = 0; i < 8; i++) c += hex[Math.floor(Math.random() * 16)];

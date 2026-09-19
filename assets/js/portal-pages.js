@@ -361,7 +361,9 @@
       '</form>' +
       '<div class="panel-card" style="margin-top:20px"><h2>Your information</h2>' +
         '<p style="color:var(--muted)">Bryan keeps your name, contact details, address and the jobs you have asked for — nothing else. ' +
-        'No card or bank details are ever stored here; you pay Bryan directly. To have your information removed, just ask him.</p>' +
+        'No card or bank details are ever stored here; you pay Bryan directly.</p>' +
+        '<div class="btn-row"><a class="btn btn-outline" href="mydata.html">See my information</a>' +
+        '<button class="btn btn-dark" type="button" id="del-acct">Delete my account</button></div>' +
         (P.demo ? '<button class="btn btn-outline" id="reset">Reset the demo data</button>' : '') +
       '</div>';
 
@@ -377,11 +379,82 @@
       P.toast(r.error ? r.error.message : 'Saved.');
     });
 
+    var del = document.getElementById('del-acct');
+    if (del) del.addEventListener('click', function () { P.askDeletion(); });
+
     var reset = document.getElementById('reset');
     if (reset) reset.addEventListener('click', async function () {
       await P.api.reset(); P.flashNext('Demo data reset.'); w.location.href = 'index.html';
     });
   }
 
-  w.WPages = { dashboard: dashboard, job: job, newRequest: newRequest, profile: profile };
+
+  /* ======================================================================
+     MY INFORMATION  — everything held about this customer, in one place.
+     California's privacy law calls this the right to know; this is it,
+     without having to ask anyone.
+     ====================================================================== */
+  async function myData() {
+    var session = await begin('me'); if (!session) return;
+    var me = (await P.api.profile()).data || {};
+    var res = await P.api.jobs();
+    if (res.error) return problem('Could not load your information', res.error.message);
+    var jobs = res.data || [];
+
+    /* Messages live per job, so gather them job by job. */
+    var threads = await Promise.all(jobs.map(function (j) { return P.api.events(j.id); }));
+
+    var rows = function (pairs) {
+      return '<dl class="kv">' + pairs.filter(function (p) { return p[1]; })
+        .map(function (p) { return '<dt>' + esc(p[0]) + '</dt><dd>' + esc(p[1]) + '</dd>'; }).join('') + '</dl>';
+    };
+
+    var html =
+      '<div class="portal-title"><h1>My information</h1>' +
+        '<p>Everything Bryan holds about you, taken straight from his records. ' +
+        'Anything wrong? Change it under <a href="profile.html">My details</a>, or tell him.</p></div>' +
+
+      '<div class="panel-card"><h2>About you</h2>' +
+        rows([['Name', me.name], ['Email', me.email || session.user.email], ['Phone', me.phone],
+              ['Address', me.address], ['Account created', P.dateTime(me.created_at)]]) +
+      '</div>' +
+
+      '<div class="panel-card"><h2>Your jobs (' + jobs.length + ')</h2>' +
+        (jobs.length ? jobs.map(function (j, i) {
+          var evs = (threads[i] && threads[i].data) || [];
+          var msgs = evs.filter(function (e) { return e.note; });
+          return '<div class="data-job">' +
+            '<h3>' + esc(j.service) + ' <span class="data-when">asked ' + esc(P.dateTime(j.created_at) || '') + '</span></h3>' +
+            rows([['Where it got to', P.STATUS[j.status] ? P.STATUS[j.status].label : j.status],
+                  ['What you told Bryan', j.details],
+                  ['Property', j.address],
+                  ['Price', P.total(j) != null ? P.money(P.total(j)) : ''],
+                  ['You said go ahead', P.dateTime(j.quote_accepted_at)],
+                  ['Booked for', j.scheduled_for ? (P.date(j.scheduled_for) + (P.window(j) ? ', ' + P.window(j) : '')) : '']]) +
+            (msgs.length ? '<p class="data-sub">Messages (' + msgs.length + ')</p><ul class="data-msgs">' +
+              msgs.map(function (e) {
+                var who = e.author === 'customer' ? 'You' : (e.author === 'bryan' ? 'Bryan' : 'The website');
+                return '<li><b>' + esc(who) + '</b> · ' + esc(P.dateTime(e.created_at) || '') + '<br>' + esc(e.note) + '</li>';
+              }).join('') + '</ul>' : '') +
+          '</div>';
+        }).join('') : '<p style="color:var(--muted);margin:0">None yet.</p>') +
+      '</div>' +
+
+      '<div class="panel-card"><h2>What is never kept</h2>' +
+        '<p style="margin:0 0 10px">No card or bank details — you pay Bryan directly. No tracking, no advertising, ' +
+        'and nothing is ever sold or shared for marketing. See the ' +
+        '<a href="../privacy.html">privacy page</a> for the full picture.</p>' +
+      '</div>' +
+
+      '<div class="btn-row" style="margin-top:24px">' +
+        '<button class="btn btn-outline" type="button" id="print-me">Print or save as PDF</button>' +
+        '<button class="btn btn-dark" type="button" id="ask-delete">Delete my account</button>' +
+      '</div>';
+
+    root().innerHTML = html;
+    document.getElementById('print-me').addEventListener('click', function () { w.print(); });
+    document.getElementById('ask-delete').addEventListener('click', function () { P.askDeletion(); });
+  }
+
+  w.WPages = { dashboard: dashboard, job: job, newRequest: newRequest, profile: profile, myData: myData };
 })(window);

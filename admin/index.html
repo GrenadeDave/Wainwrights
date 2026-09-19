@@ -72,6 +72,38 @@
   var filter = 'live';
   var allJobs = [];
 
+  function paintDeletionRequests(people) {
+    var box = document.getElementById('privacy-requests');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'privacy-requests';
+      root.parentNode.insertBefore(box, root);
+    }
+    if (!people.length) { box.innerHTML = ''; return; }
+    box.innerHTML = '<div class="wrap"><div class="panel-card panel-card--act" style="margin-bottom:22px">' +
+      '<h2>' + people.length + (people.length === 1 ? ' person has' : ' people have') + ' asked you to delete their account</h2>' +
+      '<p>California gives them that right. Remove what you can; records of finished work stay in your books for tax, ' +
+      'and nothing else. Ring them if you are not sure what they want gone.</p>' +
+      '<ul class="device-list">' + people.map(function (p) {
+        return '<li class="device"><div><b>' + P.esc(p.name || p.email) + '</b>' +
+          '<span>' + P.esc(p.email || '') + (p.phone ? ' · ' + P.esc(p.phone) : '') + '</span>' +
+          '<span>Asked ' + P.esc(P.dateTime(p.deletion_requested_at) || '') + '</span>' +
+          (p.deletion_note ? '<span style="color:var(--body)">“' + P.esc(p.deletion_note) + '”</span>' : '') +
+        '</div>' +
+        '<button class="btn btn-outline" type="button" data-done="' + P.esc(p.id) + '">Mark done</button></li>';
+      }).join('') + '</ul>' +
+      '<p class="form-note" style="text-align:left;margin-top:14px">To close the account itself: Supabase dashboard → ' +
+      'Authentication → Users → find the email → Delete user. Their jobs stay, no longer linked to a sign-in.</p>' +
+    '</div></div>';
+    box.querySelectorAll('[data-done]').forEach(function (b) {
+      b.addEventListener('click', async function () {
+        var r = await P.client().rpc('clear_deletion_request', { p_customer: b.dataset.done });
+        if (r.error) return alert('Could not clear that: ' + r.error.message);
+        b.closest('li').remove();
+      });
+    });
+  }
+
   function matches(job) {
     if (filter === 'all')  return true;
     if (filter === 'live') return job.status !== 'completed' && job.status !== 'cancelled';
@@ -146,6 +178,14 @@
         '</div>';
       return;
     }
+
+    /* Anyone who has asked for their account to be deleted comes first: it is
+       a legal request with a clock on it, not a job. */
+    var del = await P.client().from('profiles')
+      .select('id, name, email, phone, deletion_requested_at, deletion_note')
+      .not('deletion_requested_at', 'is', null)
+      .order('deletion_requested_at', { ascending: true });
+    paintDeletionRequests(del.data || []);
 
     var res = await P.client().from('jobs').select('*').order('created_at', { ascending: false });
     if (res.error) {
