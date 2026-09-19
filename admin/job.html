@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Job — Wainwrights admin</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/portal.css">
+</head>
+<body class="portal-body">
+
+<header class="site-header portal-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <img class="brand-mark" src="../assets/img/logo-wide-light.png" width="260" height="176" alt="">
+      <span class="brand-text"><span class="brand-name">Wainwrights</span><span class="brand-sub">Bryan&rsquo;s Job Board</span></span>
+    </a>
+    <div class="who">
+      <a class="plain" href="index.html">All jobs</a>
+      <a class="plain" href="schedule.html">Schedule</a>
+      <a class="plain" href="mydid.html">MyDiD</a>
+      <a class="plain" href="#" id="signout">Sign out</a>
+    </div>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="wrap" id="root">
+    <p style="color:var(--muted)">Loading&hellip;</p>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/rates.js"></script>
+<script src="../assets/js/schedule.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
+<script src="../assets/js/portal.js"></script>
+<script src="../assets/js/portal-demo.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+(function () {
+  'use strict';
+  var P = window.WPortal;
+  var R = window.WAINWRIGHTS_RATES;
+  var S = window.WAINWRIGHTS_SCHEDULE;
+  var root  = document.getElementById('root');
+  var toast = document.getElementById('toast');
+
+  if (!P.ready()) { root.innerHTML = P.notConfiguredHtml(); return; }
+
+  document.getElementById('signout').addEventListener('click', async function (e) {
+    e.preventDefault();
+    await P.signOut();
+    window.location.replace('../portal/login.html');
+  });
+
+  var id = new URLSearchParams(window.location.search).get('id');
+  var job = null;
+
+  function flash(msg) {
+    toast.textContent = msg;
+    toast.classList.add('is-up');
+    setTimeout(function () { toast.classList.remove('is-up'); }, 2600);
+  }
+
+  /* Dollars typed in a box → integer cents, without float drift.
+     Returns null for an empty box, NaN for nonsense. */
+  function toCents(text) {
+    var t = String(text == null ? '' : text).replace(/[$,\s]/g, '').trim();
+    if (t === '') return null;
+    if (!/^\d+(\.\d{0,2})?$/.test(t)) return NaN;
+    var parts = t.split('.');
+    var whole = parseInt(parts[0], 10);
+    var frac  = parts[1] ? (parts[1] + '00').slice(0, 2) : '00';
+    return whole * 100 + parseInt(frac, 10);
+  }
+
+  function dollars(cents) {
+    return cents == null ? '' : (cents / 100).toFixed(2);
+  }
+
+  async function reload() {
+    var res = await P.client().from('jobs').select('*').eq('id', id).maybeSingle();
+    if (res.error || !res.data) {
+      root.innerHTML = '<div class="portal-empty"><h2>Job not found</h2>' +
+        '<a class="btn btn-outline" href="index.html">Back to the board</a></div>';
+      return false;
+    }
+    job = res.data;
+    /* Private notes live in their own admin-only table, so that no policy on
+       `jobs` can ever expose them to the customer. */
+    var n = await P.client().from('job_notes').select('body').eq('job_id', id).maybeSingle();
+    job.admin_notes = (n.data && n.data.body) || '';
+    return true;
+  }
+
+  function paint(events) {
+    var total = P.total(job);
+    var statusOptions = P.ORDER.concat(['cancelled']).map(function (k) {
+      return '<option value="' + k + '"' + (k === job.status ? ' selected' : '') + '>' +
+             P.STATUS[k].label + '</option>';
+    }).join('');
+
+    root.innerHTML =
+      '<p class="crumbs-p">' +
+        '<a href="index.html" style="color:var(--moss-600)">Job board</a> &rsaquo; ' +
+        P.esc(job.contact_name) +
+      '</p>' +
+      '<div class="portal-title">' +
+        '<h1>' + P.esc(job.contact_name) + '</h1>' +
+        '<p>' + P.esc(job.service) + ' &middot; asked ' + P.esc(P.dateTime(job.created_at) || '') + '</p>' +
+      '</div>' +
+
+      (job.quote_accepted_at && job.status === 'quoted'
+        ? '<div class="panel-card panel-card--ok" style="margin-bottom:18px"><h2>They said go ahead</h2>' +
+          '<p style="margin:0">Accepted ' + P.esc(P.dateTime(job.quote_accepted_at) || '') +
+          '. Pick a day below and set the status to Scheduled.</p></div>' : '') +
+
+      '<div class="admin-grid">' +
+        '<div>' +
+
+          '<div class="panel-card">' +
+            '<h2>What they asked for</h2>' +
+            '<dl class="kv">' +
+              '<dt>Phone</dt><dd><a href="tel:' + P.esc((job.contact_phone||'').replace(/[^\d+]/g,'')) + '">' +
+                P.esc(job.contact_phone || '—') + '</a></dd>' +
+              '<dt>Email</dt><dd><a href="mailto:' + P.esc(job.contact_email) + '">' + P.esc(job.contact_email) + '</a></dd>' +
+              (job.address ? '<dt>Property</dt><dd>' + P.esc(job.address) + '</dd>' : '') +
+              (job.contact_time ? '<dt>Best time</dt><dd>' + P.esc(job.contact_time) + '</dd>' : '') +
+              (job.requested_day
+                 ? '<dt>Asked for</dt><dd>' + P.esc(S.prettyDate(job.requested_day)) +
+                   (job.requested_slot != null
+                      ? '<br><span style="font-weight:500;color:var(--muted)">' +
+                        P.esc(S.slotLabel(job.requested_slot)) + '</span>' : '') + '</dd>'
+                 : '') +
+              '<dt>Account</dt><dd>' + (job.customer_id
+                 ? 'Signed up — can see this in the portal'
+                 : '<span style="color:var(--muted);font-weight:500">Not signed up yet. Claimed automatically when they sign in with this email.</span>') + '</dd>' +
+            '</dl>' +
+            (job.details ?
+              '<p class="mini-label" style="margin-top:22px">Their description</p>' +
+              '<p style="white-space:pre-wrap;margin:0">' + P.esc(job.details) + '</p>' : '') +
+            '<div class="btn-row" style="margin-top:22px">' +
+              '<a class="btn btn-moss" href="tel:' + P.esc((job.contact_phone||'').replace(/[^\d+]/g,'')) + '">Call them</a>' +
+              '<a class="btn btn-outline" href="mailto:' + P.esc(job.contact_email) + '">Email them</a>' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="panel-card">' +
+            '<h2>Private notes</h2>' +
+            '<p class="form-note" style="text-align:left;margin:0 0 12px">Only you see these. The customer never does.</p>' +
+            '<div class="field" style="margin-bottom:12px">' +
+              '<textarea id="admin-notes" placeholder="Access is tight, bring the small trailer…">' +
+                P.esc(job.admin_notes || '') + '</textarea>' +
+            '</div>' +
+            '<button class="btn btn-outline" id="save-notes">Save notes</button>' +
+          '</div>' +
+
+          (events && events.length ?
+            '<div class="panel-card">' +
+              '<h2>History</h2>' +
+              '<ul class="timeline">' + events.map(function (e) {
+                var lbl = e.status && P.STATUS[e.status] ? P.STATUS[e.status].label
+                        : e.author === 'customer' ? 'Customer' : e.author === 'bryan' ? 'You' : 'Update';
+                return '<li><div class="t-when">' + P.esc(P.dateTime(e.created_at) || '') + '</div>' +
+                  '<div class="t-what">' + P.esc(lbl) + '</div>' +
+                  (e.note ? '<div class="t-note">' + P.esc(e.note) + '</div>' : '') + '</li>';
+              }).join('') + '</ul>' +
+            '</div>' : '') +
+
+        '</div>' +
+
+        '<div>' +
+          '<div class="panel-card">' +
+            '<h2>Update the job</h2>' +
+
+            '<div class="field">' +
+              '<label for="status">Status</label>' +
+              '<select id="status">' + statusOptions + '</select>' +
+            '</div>' +
+
+            '<div class="field">' +
+              '<label for="quote">Price <span class="hint">(dollars)</span></label>' +
+              '<input type="text" id="quote" inputmode="decimal" placeholder="0.00" value="' +
+                P.esc(dollars(job.quote_cents)) + '">' +
+            '</div>' +
+
+            '<div class="field">' +
+              '<label for="surcharge">Disposal &amp; handling <span class="hint">(dollars)</span></label>' +
+              '<input type="text" id="surcharge" inputmode="decimal" placeholder="0.00" value="' +
+                P.esc(dollars(job.surcharge_cents || 0)) + '">' +
+              '<p class="form-note" style="text-align:left;margin-top:8px" id="surcharge-hint"></p>' +
+            '</div>' +
+
+            '<div class="field">' +
+              '<label for="scheduled">Date</label>' +
+              '<input type="date" id="scheduled" value="' + P.esc(job.scheduled_for || '') + '">' +
+              (job.requested_day
+                 ? '<p class="form-note" style="text-align:left;margin-top:8px">' +
+                   'They asked for <b>' + P.esc(S.prettyDate(job.requested_day)) + '</b>. ' +
+                   '<button type="button" class="linkish" id="use-requested">Use that</button></p>'
+                 : '') +
+            '</div>' +
+
+            '<div class="field-2">' +
+              '<div class="field" style="margin:0">' +
+                '<label for="slot-start">Start slot</label>' +
+                '<select id="slot-start">' +
+                  '<option value="">Not set</option>' +
+                  S.slots.map(function (s) {
+                    return '<option value="' + s.key + '"' +
+                           (job.slot_start === s.key ? ' selected' : '') + '>' +
+                           s.label + ' \u2014 ' + s.time + '</option>';
+                  }).join('') +
+                '</select>' +
+              '</div>' +
+              '<div class="field" style="margin:0">' +
+                '<label for="slots-needed">Slots <span class="hint">(3 hrs each)</span></label>' +
+                '<select id="slots-needed">' +
+                  [1,2,3].map(function (n) {
+                    return '<option value="' + n + '"' +
+                           ((job.slots_needed || 1) === n ? ' selected' : '') + '>' +
+                           n + (n === 1 ? ' slot' : ' slots') + ' \u2014 ' + S.scopeNote[n] + '</option>';
+                  }).join('') +
+                '</select>' +
+              '</div>' +
+            '</div>' +
+            '<p class="form-note" style="text-align:left;margin:-8px 0 20px" id="slot-echo"></p>' +
+
+            '<div class="field">' +
+              '<label for="note">Note for the customer <span class="hint">(optional)</span></label>' +
+              '<textarea id="note" style="min-height:90px" placeholder="Came out today — need to bring the chipper back Thursday."></textarea>' +
+              '<p class="form-note" style="text-align:left;margin-top:8px">This appears on their timeline. Leave blank for no message.</p>' +
+            '</div>' +
+
+            '<button class="btn btn-primary btn-block" id="save">Save changes</button>' +
+            '<div class="form-status" id="save-status" role="status"></div>' +
+
+            '<div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line-soft)">' +
+              '<span class="mini-label">Total the customer sees</span>' +
+              '<div class="price-row total" style="border:0;padding-top:4px">' +
+                '<span class="label">Total</span>' +
+                '<span class="amount" id="live-total">' + (total != null ? P.money(total) : '—') + '</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="panel-card">' +
+            '<span class="mini-label">Customer view</span>' +
+            '<p style="font-size:.9375rem;color:var(--muted);margin:0 0 14px">' +
+              'Exactly what they see for this job.</p>' +
+            P.track(job.status) +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    wire();
+  }
+
+  function wire() {
+    var quote     = document.getElementById('quote');
+    var surcharge = document.getElementById('surcharge');
+    var liveTotal = document.getElementById('live-total');
+    var hint      = document.getElementById('surcharge-hint');
+
+    /* Nudge toward the standard junk fee, without forcing it. */
+    var junk = R.services && R.services.junk && R.services.junk.surcharge;
+    if (junk && /junk|haul|debris/i.test(job.service)) {
+      hint.innerHTML = 'Usual for hauling: <b>' + R.from(junk.amount) + '</b> — ' + P.esc(junk.note);
+    } else {
+      hint.textContent = 'Normally only on junk and debris hauling.';
+    }
+
+    function recalc() {
+      var q = toCents(quote.value), s = toCents(surcharge.value);
+      if (isNaN(q) || isNaN(s)) { liveTotal.textContent = '—'; return; }
+      if (q == null) { liveTotal.textContent = '—'; return; }
+      liveTotal.textContent = P.money(q + (s || 0));
+    }
+    quote.addEventListener('input', recalc);
+    surcharge.addEventListener('input', recalc);
+
+    var slotStartEl = document.getElementById('slot-start');
+    var slotsEl     = document.getElementById('slots-needed');
+    var echo        = document.getElementById('slot-echo');
+
+    /* Spell the booking back out in hours, because 'slot 1, 2 slots' is not
+       something anyone should have to decode at 6am. */
+    function echoSlots() {
+      var st = slotStartEl.value;
+      if (st === '') { echo.textContent = 'No time set yet.'; return; }
+      var n = Number(slotsEl.value) || 1;
+      var start = Number(st);
+      if (start + n > S.slots.length) {
+        echo.innerHTML = '<span style="color:var(--fire)"><b>Will not fit</b> \u2014 ' + n +
+                         ' slots cannot start at ' + P.esc(S.slots[start].label) + '.</span>';
+        return;
+      }
+      var from = S.slots[start].time.split('\u2013')[0].trim();
+      var to   = S.slots[start + n - 1].time.split('\u2013')[1].trim();
+      echo.innerHTML = 'On site <b>' + P.esc(from) + ' \u2013 ' + P.esc(to) + '</b>' +
+                       (n > 1 ? ' (' + n + ' slots back to back)' : '');
+    }
+    slotStartEl.addEventListener('change', echoSlots);
+    slotsEl.addEventListener('change', echoSlots);
+    echoSlots();
+
+    var useReq = document.getElementById('use-requested');
+    if (useReq) {
+      useReq.addEventListener('click', function () {
+        document.getElementById('scheduled').value = job.requested_day;
+        if (job.requested_slot != null) slotStartEl.value = String(job.requested_slot);
+        echoSlots();
+      });
+    }
+
+    document.getElementById('save-notes').addEventListener('click', async function () {
+      var res = await P.client().from('job_notes').upsert({
+        job_id: id,
+        body: document.getElementById('admin-notes').value,
+        updated_at: new Date().toISOString()
+      });
+      flash(res.error ? 'Could not save: ' + res.error.message : 'Notes saved');
+    });
+
+    document.getElementById('save').addEventListener('click', async function () {
+      var btn    = this;
+      var status = document.getElementById('save-status');
+      var q = toCents(quote.value), s = toCents(surcharge.value);
+
+      function bad(msg) {
+        status.textContent = msg;
+        status.classList.add('is-visible');
+        status.style.background = 'var(--fire-050)';
+        status.style.borderColor = '#E8C0B6';
+        status.style.color = 'var(--fire)';
+      }
+
+      if (isNaN(q)) return bad('The price needs to be a number, like 450 or 450.00');
+      if (isNaN(s)) return bad('The disposal fee needs to be a number, like 60 or 60.00');
+
+      var newStatus = document.getElementById('status').value;
+      var note      = document.getElementById('note').value.trim();
+
+      if (newStatus === 'quoted' && q == null) {
+        return bad('Set a price before marking this quoted — the customer would see a quote with no figure.');
+      }
+      var slotStartRaw = document.getElementById('slot-start').value;
+      var slotStart   = slotStartRaw === '' ? null : Number(slotStartRaw);
+      var slotsNeeded = Number(document.getElementById('slots-needed').value) || 1;
+      var theDate     = document.getElementById('scheduled').value || null;
+
+      if (newStatus === 'scheduled' || newStatus === 'in_progress') {
+        if (!theDate)           return bad('Set a date before marking this scheduled.');
+        if (slotStart === null) return bad('Pick a start slot before marking this scheduled.');
+      }
+      if (slotStart !== null && slotStart + slotsNeeded > S.slots.length) {
+        return bad('That does not fit in the day. ' + slotsNeeded +
+                   ' slots cannot start at ' + S.slots[slotStart].label + '.');
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+
+      var res = await P.client().from('jobs').update({
+        status:          newStatus,
+        quote_cents:     q,
+        surcharge_cents: s || 0,
+        scheduled_for:   theDate,
+        slot_start:      slotStart,
+        slots_needed:    slotsNeeded
+      }).eq('id', id);
+
+      /* A note is its own timeline entry. The status change writes one by
+         itself via the trigger, so this is only for Bryan's own message. */
+      if (!res.error && note) {
+        await P.client().from('job_events').insert({ job_id: id, status: null, note: note, author: 'bryan' });
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Save changes';
+
+      if (res.error) return bad('Could not save: ' + res.error.message);
+
+      flash('Saved');
+      if (await reload()) {
+        var ev = await P.client().from('job_events').select('*')
+          .eq('job_id', id).order('created_at', { ascending: false });
+        paint(ev.data || []);
+      }
+    });
+  }
+
+  (async function () {
+    var session = await P.requireSession('../portal/login.html');
+    if (!session) return;
+
+    var profile = await P.profile();
+    if (!profile || !profile.is_admin) {
+      root.innerHTML = '<div class="portal-empty"><h2>This page is Bryan’s</h2>' +
+        '<p>Your account does not have admin access.</p>' +
+        '<a class="btn btn-outline" href="../portal/index.html">Your own jobs</a></div>';
+      return;
+    }
+
+    if (!id || !(await reload())) return;
+    var ev = await P.client().from('job_events').select('*')
+      .eq('job_id', id).order('created_at', { ascending: false });
+    paint(ev.data || []);
+  })();
+})();
+</script>
+</body>
+</html>

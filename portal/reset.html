@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Choose a new password — Wainwrights Handyman &amp; Land Management</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/portal.css">
+</head>
+<body class="portal-body">
+
+<header class="site-header portal-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-mark" src="../assets/img/logo-wide-light.png" width="260" height="176" alt="">
+      <span class="brand-text"><span class="brand-name">Wainwrights</span><span class="brand-sub">Customer Portal</span></span>
+    </a>
+    <div class="who"><a class="plain" href="../index.html">Back to the website</a></div>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="wrap" id="root">
+    <div class="signin-card">
+      <h1>Choose a new password</h1>
+      <p class="sub">Then you are signed straight in.</p>
+
+      <form id="form-reset" novalidate hidden>
+        <input type="email" name="username" autocomplete="username" id="rs-user" hidden>
+        <div class="field">
+          <label for="rs-pass">New password <span class="field-hint">8 characters or more</span></label>
+          <div class="pw-wrap">
+            <input type="password" id="rs-pass" name="password" autocomplete="new-password" minlength="8" required>
+            <button type="button" class="pw-toggle" aria-controls="rs-pass" aria-pressed="false">Show</button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-lg btn-block" type="submit">Save my new password</button>
+      </form>
+
+      <div class="form-status" role="status" aria-live="polite" id="status"></div>
+
+      <p class="form-note" style="margin-top:22px">
+        Trouble? Call Bryan on <a href="tel:+12094561846">(209) 456-1846</a>.
+      </p>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
+<script src="../assets/js/portal.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+(function () {
+  'use strict';
+  var P = window.WPortal;
+  var form = document.getElementById('form-reset');
+  var status = document.getElementById('status');
+
+  function say(html, ok) {
+    status.innerHTML = html;
+    status.classList.add('is-visible');
+    status.style.background  = ok === false ? 'var(--fire-050)' : 'var(--sage-050)';
+    status.style.borderColor = ok === false ? '#E8C0B6' : 'var(--sage-200)';
+    status.style.color       = ok === false ? 'var(--fire)' : 'var(--moss-800)';
+  }
+
+  if (!P.configured()) { document.getElementById('root').innerHTML = P.notConfiguredHtml(); return; }
+
+  document.querySelector('.pw-toggle').addEventListener('click', function () {
+    var input = document.getElementById('rs-pass'), show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    this.textContent = show ? 'Hide' : 'Show';
+    this.setAttribute('aria-pressed', String(show));
+  });
+
+  /* The emailed link signs the person in for this one purpose. supabase-js
+     reads it from the address bar when the client starts; give it a moment. */
+  var c = P.client();
+  var shown = false;
+  function ready(session) {
+    if (shown || !session) return;
+    shown = true;
+    status.classList.remove('is-visible'); status.innerHTML = '';   // clear any "expired" notice
+    document.getElementById('rs-user').value = session.user.email || '';   // lets password managers save the pair
+    form.hidden = false;
+    document.getElementById('rs-pass').focus();
+  }
+  c.auth.onAuthStateChange(function (event, session) {
+    if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') ready(session);
+  });
+  c.auth.getSession().then(function (r) { ready(r.data.session); });
+  // Only call the link dead after a generous wait: on a slow phone the sign-in
+  // from the link can take several seconds to arrive.
+  var linkInUrl = /access_token|type=recovery|code=/.test(window.location.hash + window.location.search);
+  setTimeout(function () {
+    if (!shown) say('<strong>This link has expired or was already used.</strong><br>' +
+                    '<a href="login.html#forgot">Ask for a new one</a> — it only takes a moment.', false);
+  }, linkInUrl ? 10000 : 3000);
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var pass = document.getElementById('rs-pass');
+    if (!pass.checkValidity() || pass.value.length < 8) { say('Your password needs 8 characters or more.', false); pass.focus(); return; }
+    var btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    var r = await c.auth.updateUser({ password: pass.value });
+    btn.disabled = false; btn.textContent = 'Save my new password';
+    if (r.error) {
+      var m = (r.error.message || '').toLowerCase();
+      return say(m.indexOf('different from the old') !== -1 ? 'That is the same as your old password. Please choose a new one.'
+               : m.indexOf('weak') !== -1 || m.indexOf('pwned') !== -1 ? 'That password is too easy to guess. Please choose a different one.'
+               : 'Could not save it: ' + P.esc(r.error.message), false);
+    }
+    P.flashNext('Password saved. You are signed in.');
+    window.location.replace('index.html');
+  });
+})();
+</script>
+</body>
+</html>

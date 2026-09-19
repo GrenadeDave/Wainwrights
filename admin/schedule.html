@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Schedule — Wainwrights admin</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/portal.css">
+</head>
+<body class="portal-body">
+
+<header class="site-header portal-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <img class="brand-mark" src="../assets/img/logo-wide-light.png" width="260" height="176" alt="">
+      <span class="brand-text"><span class="brand-name">Wainwrights</span><span class="brand-sub">Schedule</span></span>
+    </a>
+    <div class="who">
+      <a class="plain" href="index.html">Job board</a>
+      <a class="plain" href="mydid.html">MyDiD</a>
+      <a class="plain" href="#" id="signout">Sign out</a>
+    </div>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="wrap" id="root">
+    <p style="color:var(--muted)">Loading the schedule&hellip;</p>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/rates.js"></script>
+<script src="../assets/js/schedule.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
+<script src="../assets/js/portal.js"></script>
+<script src="../assets/js/portal-demo.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+(function () {
+  'use strict';
+  var P = window.WPortal;
+  var S = window.WAINWRIGHTS_SCHEDULE;
+  var root  = document.getElementById('root');
+  var toast = document.getElementById('toast');
+
+  if (!P.ready()) { root.innerHTML = P.notConfiguredHtml(); return; }
+
+  document.getElementById('signout').addEventListener('click', async function (e) {
+    e.preventDefault();
+    await P.signOut();
+    window.location.replace('../portal/login.html');
+  });
+
+  /* On a Saturday or Sunday the week just gone is no use — open on the coming one. */
+  function thisWorkWeek() {
+    var d = new Date();
+    if (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 2);
+    return startOfWeek(d);
+  }
+  var weekStart = thisWorkWeek();
+  var jobs = [], blackouts = [];
+
+  function startOfWeek(d) {
+    var x = new Date(d); x.setHours(0,0,0,0);
+    x.setDate(x.getDate() - ((x.getDay() + 6) % 7));   // Monday
+    return x;
+  }
+  function flash(m) {
+    toast.textContent = m; toast.classList.add('is-up');
+    setTimeout(function(){ toast.classList.remove('is-up'); }, 2600);
+  }
+
+  function weekDays() {
+    var out = [];
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(weekStart); d.setDate(d.getDate() + i);
+      if (S.isWorkingDay(d)) out.push(S.ymd(d));
+    }
+    return out;
+  }
+
+  async function load() {
+    var days = weekDays();
+    if (!days.length) return;
+    var res = await Promise.all([
+      P.client().from('jobs').select('*')
+        .gte('scheduled_for', days[0]).lte('scheduled_for', days[days.length-1])
+        .not('slot_start', 'is', null)
+        .order('slot_start'),
+      P.client().from('blackouts').select('*')
+        .gte('day', days[0]).lte('day', days[days.length-1])
+    ]);
+    if (res[0].error) { root.innerHTML = '<div class="portal-empty"><h2>Could not load</h2><p>'+P.esc(res[0].error.message)+'</p></div>'; return; }
+    jobs = res[0].data || [];
+    blackouts = (res[1].data || []).map(function(b){ return b.day; });
+
+    /* Notes are in the admin-only job_notes table; fetch them for this week's
+       jobs so the MyDiD export can carry them. */
+    if (jobs.length) {
+      var ids = jobs.map(function (j) { return j.id; });
+      var nr = await P.client().from('job_notes').select('job_id, body').in('job_id', ids);
+      var byId = {};
+      (nr.data || []).forEach(function (n) { byId[n.job_id] = n.body; });
+      jobs.forEach(function (j) { j.admin_notes = byId[j.id] || ''; });
+    }
+    paint();
+  }
+
+  /* A job occupies its start slot and the ones after it. */
+  function jobAt(day, slot) {
+    return jobs.filter(function (j) {
+      return j.scheduled_for === day &&
+             slot >= j.slot_start && slot < j.slot_start + j.slots_needed;
+    })[0];
+  }
+
+  function paint() {
+    var days = weekDays();
+    var label = S.parseYmd(days[0]).toLocaleDateString('en-US', { month:'long', day:'numeric' }) +
+                ' – ' +
+                S.parseYmd(days[days.length-1]).toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+
+    var booked = jobs.length;
+
+    var html =
+      '<div class="portal-title"><h1>Schedule</h1><p>' + P.esc(label) + ' · ' +
+        booked + (booked === 1 ? ' job booked' : ' jobs booked') + '</p></div>' +
+
+      '<div class="admin-bar">' +
+        '<button class="chip" id="prev">&larr; Previous week</button>' +
+        '<button class="chip" id="today">This week</button>' +
+        '<button class="chip" id="next">Next week &rarr;</button>' +
+        '<span class="count"><button class="chip" id="export">Export for MyDiD</button></span>' +
+      '</div>' +
+
+      '<div class="week">' +
+        days.map(function (day) {
+          var off = blackouts.indexOf(day) !== -1;
+          var d = S.parseYmd(day);
+          return '<div class="day-col' + (off ? ' is-off' : '') + '">' +
+            '<div class="day-head">' +
+              '<b>' + d.toLocaleDateString('en-US', { weekday:'short' }) + '</b>' +
+              '<span>' + d.toLocaleDateString('en-US', { month:'short', day:'numeric' }) + '</span>' +
+              '<button class="day-off" data-day="' + day + '" title="' +
+                (off ? 'Make this day available again' : 'Mark yourself unavailable') + '">' +
+                (off ? 'Unblock' : 'Block') + '</button>' +
+            '</div>' +
+            S.slots.map(function (s) {
+              if (off) return '<div class="slot-cell is-blocked"><span>Not working</span></div>';
+              var j = jobAt(day, s.key);
+              if (!j) {
+                return '<div class="slot-cell is-free">' +
+                  '<b>' + P.esc(s.label) + '</b><span>' + P.esc(s.time) + '</span></div>';
+              }
+              var first = j.slot_start === s.key;
+              return '<a class="slot-cell is-taken' + (first ? ' is-first' : ' is-cont') + '" ' +
+                       'href="job.html?id=' + encodeURIComponent(j.id) + '">' +
+                (first
+                  ? '<b>' + P.esc(j.contact_name) + '</b>' +
+                    '<span>' + P.esc(j.service) + '</span>' +
+                    (j.slots_needed > 1 ? '<em>' + j.slots_needed + ' slots</em>' : '')
+                  : '<span class="cont">&#8595; continues</span>') +
+              '</a>';
+            }).join('') +
+          '</div>';
+        }).join('') +
+      '</div>';
+
+    root.innerHTML = html;
+
+    document.getElementById('prev').addEventListener('click', function(){ weekStart.setDate(weekStart.getDate()-7); load(); });
+    document.getElementById('next').addEventListener('click', function(){ weekStart.setDate(weekStart.getDate()+7); load(); });
+    document.getElementById('today').addEventListener('click', function(){ weekStart = thisWorkWeek(); load(); });
+    document.getElementById('export').addEventListener('click', exportMydid);
+
+    root.querySelectorAll('.day-off').forEach(function (b) {
+      b.addEventListener('click', async function () {
+        var day = b.dataset.day;
+        var off = blackouts.indexOf(day) !== -1;
+        var res = off
+          ? await P.client().from('blackouts').delete().eq('day', day)
+          : await P.client().from('blackouts').insert({ day: day });
+        if (res.error) return flash('Could not change that: ' + res.error.message);
+        flash(off ? 'Day opened back up' : 'Day blocked out');
+        load();
+      });
+    });
+  }
+
+  /* ----------------------------------------------------------------------
+     Export this week for MyDiD.
+
+     MyDiD has no server and never will, so nothing is pushed to it. This
+     writes the CSV that MyDiD's customer import reads, with the schedule in
+     the notes so Bryan has the time and the job detail on his phone.
+     See LINKING-TO-MYDID.md.
+     ---------------------------------------------------------------------- */
+  function csvField(v) {
+    return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  }
+
+  function exportMydid() {
+    var rows = jobs.slice().sort(function (a, b) {
+      return a.scheduled_for === b.scheduled_for
+        ? a.slot_start - b.slot_start
+        : a.scheduled_for < b.scheduled_for ? -1 : 1;
+    });
+
+    if (!rows.length) return flash('Nothing booked this week to export');
+
+    var out = ['name,phone,email,address,notes'];
+    rows.forEach(function (j) {
+      var when = S.prettyDate(j.scheduled_for) + ', ' + S.slotLabel(j.slot_start) +
+                 (j.slots_needed > 1 ? ' (' + j.slots_needed + ' slots)' : '');
+      var total = P.total(j);
+      var notes = [
+        j.service,
+        when,
+        j.details || '',
+        total != null ? 'Quoted ' + P.money(total) : 'No price yet',
+        j.admin_notes || ''
+      ].filter(Boolean).join(' | ');
+      out.push([j.contact_name, j.contact_phone, j.contact_email, j.address, notes]
+        .map(csvField).join(','));
+    });
+
+    var text = out.join('\n');
+    var name = 'wainwrights-' + S.ymd(weekStart) + '-for-mydid.csv';
+
+    /* Offer the file, and also drop it on the clipboard — pasting is far
+       easier than finding a download on an Android phone. */
+    try {
+      var blob = new Blob([text], { type: 'text/csv' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+    } catch (e) { /* fall through to the clipboard */ }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function(){ flash(rows.length + ' jobs exported — also copied, ready to paste into MyDiD'); },
+        function(){ flash(rows.length + ' jobs exported'); }
+      );
+    } else {
+      flash(rows.length + ' jobs exported');
+    }
+  }
+
+  (async function () {
+    var session = await P.requireSession('../portal/login.html');
+    if (!session) return;
+    var profile = await P.profile();
+    if (!profile || !profile.is_admin) {
+      root.innerHTML = '<div class="portal-empty"><h2>This page is Bryan’s</h2>' +
+        '<p>Your account does not have admin access.</p>' +
+        '<a class="btn btn-outline" href="../portal/index.html">Your own jobs</a></div>';
+      return;
+    }
+    load();
+  })();
+})();
+</script>
+</body>
+</html>

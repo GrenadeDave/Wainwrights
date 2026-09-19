@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MyDiD phone — Wainwrights admin</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/portal.css">
+</head>
+<body class="portal-body">
+
+<header class="site-header portal-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <img class="brand-mark" src="../assets/img/logo-wide-light.png" width="260" height="176" alt="">
+      <span class="brand-text"><span class="brand-name">Wainwrights</span><span class="brand-sub">MyDiD phone</span></span>
+    </a>
+    <div class="who">
+      <a class="plain" href="index.html">Job board</a>
+      <a class="plain" href="schedule.html">Schedule</a>
+      <a class="plain" href="#" id="signout">Sign out</a>
+    </div>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="wrap wrap--portal" id="root">
+    <p style="color:var(--muted)">Loading&hellip;</p>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/rates.js"></script>
+<script src="../assets/js/schedule.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
+<script src="../assets/js/portal.js"></script>
+<script src="../assets/js/portal-demo.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+(function () {
+  'use strict';
+  var P = window.WPortal;
+  var root  = document.getElementById('root');
+  var toast = document.getElementById('toast');
+  var timer = null;
+  var known = 0;          // phones connected when the code was made
+
+  if (!P.ready()) { root.innerHTML = P.notConfiguredHtml(); return; }
+
+  document.getElementById('signout').addEventListener('click', async function (e) {
+    e.preventDefault();
+    await P.signOut();
+    window.location.replace('../portal/login.html');
+  });
+
+  function flash(m) {
+    toast.textContent = m; toast.classList.add('is-up');
+    setTimeout(function () { toast.classList.remove('is-up'); }, 2600);
+  }
+
+  function phoneRow(d) {
+    var seen = d.last_seen_at ? 'Last checked in ' + P.ago(d.last_seen_at) : 'Not checked in yet';
+    return '<li class="device">' +
+      '<div><b>' + P.esc(d.label) + '</b>' +
+        '<span>' + P.esc('Connected ' + (P.date(d.created_at) || '') + ' · ' + seen) + '</span>' +
+        (d.fcm_token ? '<span class="device-ok">Notifications on</span>'
+                     : '<span class="device-warn">Notifications off — open MyDiD to turn them back on</span>') +
+      '</div>' +
+      '<button class="btn btn-outline" type="button" data-drop="' + P.esc(d.id) + '" data-name="' + P.esc(d.label) + '">Disconnect</button>' +
+    '</li>';
+  }
+
+  async function paint() {
+    var res = await P.client().from('devices').select('*').order('created_at', { ascending: true });
+    if (res.error) {
+      root.innerHTML = '<div class="portal-empty"><h2>Could not load</h2><p>' + P.esc(res.error.message) + '</p></div>';
+      return;
+    }
+    var phones = res.data || [];
+    known = phones.length;
+
+    root.innerHTML =
+      '<div class="portal-title"><h1>MyDiD phone</h1>' +
+        '<p>Connect MyDiD so new requests buzz your phone and land in your job tiles.</p></div>' +
+
+      '<div class="panel-card" id="pair-card">' +
+        '<h2>Connect a phone</h2>' +
+        '<ol class="steps-plain">' +
+          '<li>Press <b>Get a pairing code</b>.</li>' +
+          '<li>On the phone, open <b>MyDiD → Settings → Connect to website</b>.</li>' +
+          '<li>Type the code in. It works once, for 10 minutes.</li>' +
+        '</ol>' +
+        '<div id="code-box"></div>' +
+        '<button class="btn btn-primary" type="button" id="get-code">Get a pairing code</button>' +
+      '</div>' +
+
+      '<div class="panel-card">' +
+        '<h2>Connected phones</h2>' +
+        (phones.length
+          ? '<ul class="device-list">' + phones.map(phoneRow).join('') + '</ul>'
+          : '<p style="margin:0;color:var(--muted)">None yet.</p>') +
+        '<p class="form-note" style="text-align:left;margin-top:14px">Lost or replaced a phone? Disconnect it here. ' +
+        'It stops getting alerts and can no longer see jobs, straight away.</p>' +
+      '</div>';
+
+    document.getElementById('get-code').addEventListener('click', getCode);
+    root.querySelectorAll('[data-drop]').forEach(function (b) {
+      b.addEventListener('click', async function () {
+        var ok = await P.confirm({
+          title: 'Disconnect ' + b.dataset.name + '?',
+          body: 'It will stop getting alerts and can no longer see jobs. You can connect it again with a new code.',
+          ok: 'Disconnect', cancel: 'Keep it', danger: true
+        });
+        if (!ok) return;
+        var r = await P.client().from('devices').delete().eq('id', b.dataset.drop);
+        flash(r.error ? 'Could not disconnect: ' + r.error.message : 'Phone disconnected');
+        paint();
+      });
+    });
+  }
+
+  async function getCode() {
+    var btn = document.getElementById('get-code');
+    btn.disabled = true;
+    var r = await P.client().rpc('create_pairing_code');
+    btn.disabled = false;
+    if (r.error) return flash('Could not make a code: ' + r.error.message);
+
+    var box = document.getElementById('code-box');
+    var until = Date.now() + 10 * 60 * 1000;
+    box.innerHTML = '<div class="pair-code" aria-live="polite"><span class="pair-code-value">' + P.esc(r.data) + '</span>' +
+                    '<span class="pair-code-left" id="code-left"></span></div>';
+    btn.textContent = 'Get a new code';
+
+    clearInterval(timer);
+    var tick = function () {
+      var left = Math.max(0, Math.round((until - Date.now()) / 1000));
+      var el = document.getElementById('code-left');
+      if (!el) return clearInterval(timer);
+      if (!left) {
+        clearInterval(timer);
+        box.innerHTML = '<p class="form-note" style="text-align:left">That code has expired. Get a new one when the phone is ready.</p>';
+        return;
+      }
+      el.textContent = 'Expires in ' + Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
+      // Every few seconds, see whether the phone has used the code yet.
+      if (left % 4 === 0) {
+        P.client().from('devices').select('id').then(function (r) {
+          if (r.data && r.data.length > known) {
+            clearInterval(timer);
+            flash('Phone connected');
+            paint();
+          }
+        });
+      }
+    };
+    tick(); timer = setInterval(tick, 1000);
+  }
+
+  (async function () {
+    var session = await P.requireSession('../portal/login.html');
+    if (!session) return;
+    var profile = await P.profile();
+    if (!profile || !profile.is_admin) {
+      root.innerHTML = '<div class="portal-empty"><h2>This page is Bryan’s</h2>' +
+        '<p>Your account does not have admin access.</p>' +
+        '<a class="btn btn-outline" href="../portal/index.html">Your own jobs</a></div>';
+      return;
+    }
+    paint();
+  })();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+# Publishes the website to GitHub Pages on every push to main.
+#
+# Nothing is built — the site is plain HTML, CSS and JavaScript. This workflow
+# just uploads the repository as-is and tells Pages to serve it.
+#
+# One-time setup in the repo: Settings → Pages → Source → "GitHub Actions".
+name: Deploy website
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:      # lets you re-publish by hand from the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# If two pushes land close together, let the newer one win rather than
+# queueing a stale deploy behind it.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fail if internal notes slipped into the repo
+        # These files say things like "every price is a placeholder" and discuss
+        # whether Bryan is licensed. They must never reach the public site.
+        run: |
+          leaked=$(ls ASK-BRYAN.md SECURITY.md FILL-THESE-IN.txt SETUP-PORTAL.md \
+                      "READ ME FIRST.txt" README.md 2>/dev/null || true)
+          if [ -n "$leaked" ]; then
+            echo "::error::Internal notes are in the repo and would be published:"
+            echo "$leaked"
+            echo "Check .gitignore, then: git rm --cached <file>"
+            exit 1
+          fi
+          echo "No internal notes found. Good."
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4

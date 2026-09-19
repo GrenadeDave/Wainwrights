@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sign in — Wainwrights Handyman &amp; Land Management</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/portal.css">
+</head>
+<body class="portal-body">
+
+<header class="site-header portal-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-mark" src="../assets/img/logo-wide-light.png" width="260" height="176" alt="">
+      <span class="brand-text"><span class="brand-name">Wainwrights</span><span class="brand-sub">Customer Portal</span></span>
+    </a>
+    <div class="who"><a class="plain" href="../index.html">Back to the website</a></div>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="wrap" id="root">
+
+    <div class="signin-card">
+      <h1 id="card-title">Check on your job</h1>
+      <p class="sub" id="card-sub">Sign in to see your prices, booked dates and messages from Bryan.</p>
+
+      <div class="auth-tabs" role="tablist" aria-label="Sign in or create an account">
+        <button type="button" role="tab" id="tab-signin" aria-controls="form-signin" aria-selected="true">Sign in</button>
+        <button type="button" role="tab" id="tab-create" aria-controls="form-create" aria-selected="false">New here? Create account</button>
+      </div>
+
+      <button class="btn btn-google btn-block" type="button" id="google-btn">
+        <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.2-.4-4.7H24v8.9h11.8c-.5 2.7-2 5-4.4 6.6v5.5h7.1c4.2-3.8 6.6-9.5 6.6-16.3z"/>
+          <path fill="#34A853" d="M24 46c6 0 11-2 14.6-5.2l-7.1-5.5c-2 1.3-4.5 2.1-7.5 2.1-5.8 0-10.7-3.9-12.4-9.1H4.3v5.7C7.9 41.2 15.4 46 24 46z"/>
+          <path fill="#FBBC05" d="M11.6 28.3c-.4-1.3-.7-2.7-.7-4.3s.3-3 .7-4.3v-5.7H4.3A22 22 0 0 0 2 24c0 3.6.9 6.9 2.3 9.9l7.3-5.6z"/>
+          <path fill="#EA4335" d="M24 10.8c3.3 0 6.2 1.1 8.5 3.3l6.3-6.3C35 4.2 30 2 24 2 15.4 2 7.9 6.8 4.3 14.1l7.3 5.7c1.7-5.2 6.6-9 12.4-9z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="or-rule" id="or-rule"><span>or use your email</span></div>
+
+      <!-- Sign in -->
+      <form id="form-signin" role="tabpanel" aria-labelledby="tab-signin" novalidate>
+        <div class="field">
+          <label for="si-email">Email address</label>
+          <input type="email" id="si-email" name="email" autocomplete="username" inputmode="email" required placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label for="si-pass">Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="si-pass" name="password" autocomplete="current-password" required>
+            <button type="button" class="pw-toggle" aria-controls="si-pass" aria-pressed="false">Show</button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-lg btn-block" type="submit">Sign in</button>
+        <p class="auth-aside"><a href="#forgot" data-mode="forgot">Forgot your password?</a></p>
+      </form>
+
+      <!-- Create account -->
+      <form id="form-create" role="tabpanel" aria-labelledby="tab-create" novalidate hidden>
+        <div class="field">
+          <label for="cr-name">Your name</label>
+          <input type="text" id="cr-name" name="name" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label for="cr-email">Email address <span class="field-hint">the one you gave Bryan</span></label>
+          <input type="email" id="cr-email" name="email" autocomplete="username" inputmode="email" required placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label for="cr-pass">Choose a password <span class="field-hint">8 characters or more</span></label>
+          <div class="pw-wrap">
+            <input type="password" id="cr-pass" name="password" autocomplete="new-password" minlength="8" required>
+            <button type="button" class="pw-toggle" aria-controls="cr-pass" aria-pressed="false">Show</button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-lg btn-block" type="submit">Create my account</button>
+        <p class="auth-aside">We send one email to confirm the address is yours. After that you just sign in.</p>
+      </form>
+
+      <!-- Forgot password -->
+      <form id="form-forgot" novalidate hidden>
+        <p class="auth-lead">Type your email and we will send a link to choose a new password.</p>
+        <div class="field">
+          <label for="fg-email">Email address</label>
+          <input type="email" id="fg-email" name="email" autocomplete="username" inputmode="email" required placeholder="you@example.com">
+        </div>
+        <button class="btn btn-primary btn-lg btn-block" type="submit">Email me a reset link</button>
+        <p class="auth-aside"><a href="#signin" data-mode="signin">Back to sign in</a></p>
+      </form>
+
+      <div class="form-status" role="status" aria-live="polite" id="status"></div>
+
+      <p class="auth-tip"><b>Tip:</b> use the same email address you gave Bryan. That is how your jobs find you.</p>
+
+      <p class="form-note" style="margin-top:18px">
+        Curious what is inside? <a href="index.html?demo=1#demo">See a demo with sample data</a>.<br>
+        Trouble signing in? Just call Bryan on <a href="tel:+12094561846">(209) 456-1846</a>.<br>
+        <a href="../privacy.html">How your information is handled</a>
+      </p>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer" style="padding-top:34px">
+  <div class="wrap">
+    <div class="footer-bottom" style="margin-top:0;border-top:0">
+      <span>&copy; <span data-year>2026</span> Wainwrights Handyman &amp; Land Management</span>
+      <span><a href="tel:+12094561846">(209) 456-1846</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/rates.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
+<script src="../assets/js/schedule.js"></script>
+<script src="../assets/js/portal.js"></script>
+<script src="../assets/js/portal-demo.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+(function () {
+  'use strict';
+  var P = window.WPortal;
+  var root = document.getElementById('root');
+
+  if (P.demo) { window.location.replace('index.html'); return; }
+  if (!P.configured()) { root.innerHTML = P.notConfiguredHtml(); return; }
+
+  var CFG    = window.WAINWRIGHTS_SUPABASE;
+  var status = document.getElementById('status');
+  var forms  = { signin: document.getElementById('form-signin'), create: document.getElementById('form-create'), forgot: document.getElementById('form-forgot') };
+  var tabs   = { signin: document.getElementById('tab-signin'), create: document.getElementById('tab-create') };
+  var TITLES = {
+    signin: ['Check on your job', 'Sign in to see your prices, booked dates and messages from Bryan.'],
+    create: ['Create your account', 'Takes a minute. You will see every job you have asked Bryan about.'],
+    forgot: ['Reset your password', 'It happens to everyone.']
+  };
+
+  function say(html, ok) {
+    status.innerHTML = html;
+    status.classList.add('is-visible');
+    status.style.background  = ok === false ? 'var(--fire-050)' : 'var(--sage-050)';
+    status.style.borderColor = ok === false ? '#E8C0B6' : 'var(--sage-200)';
+    status.style.color       = ok === false ? 'var(--fire)' : 'var(--moss-800)';
+  }
+  function hush() { status.classList.remove('is-visible'); status.innerHTML = ''; }
+
+  function next() {
+    var q = new URLSearchParams(window.location.search).get('next');
+    /* Only ever a bare filename from our own folder. A full URL here would be
+       an open redirect — somewhere to send people after a "trusted" login. */
+    return (q && /^[a-z0-9._-]+\.html$/i.test(q)) ? q : 'index.html';
+  }
+  function here(page) {
+    return CFG.redirectTo || (window.location.origin + window.location.pathname.replace(/login\.html$/, '') + page);
+  }
+
+  /* Already signed in? Go straight through. */
+  P.session().then(function (s) { if (s) window.location.replace(next()); });
+
+  /* ------------------------------------------------------------ modes */
+  function mode(m, focus) {
+    Object.keys(forms).forEach(function (k) { forms[k].hidden = k !== m; });
+    Object.keys(tabs).forEach(function (k) { tabs[k].setAttribute('aria-selected', String(k === m)); });
+    document.querySelector('.auth-tabs').hidden = m === 'forgot';
+    document.getElementById('card-title').textContent = TITLES[m][0];
+    document.getElementById('card-sub').textContent = TITLES[m][1];
+    googleShown(m !== 'forgot');
+    hush();
+    // Carry a typed email across, so nobody types it twice.
+    var typed = (forms.signin.email.value || forms.create.email.value || forms.forgot.email.value).trim();
+    if (typed && !forms[m].email.value) forms[m].email.value = typed;
+    if (focus) { var first = forms[m].querySelector('input:not([value]), input'); if (first) first.focus(); }
+  }
+  tabs.signin.addEventListener('click', function () { mode('signin', true); });
+  tabs.create.addEventListener('click', function () { mode('create', true); });
+  document.querySelectorAll('[data-mode]').forEach(function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); mode(a.dataset.mode, true); });
+  });
+
+  /* Show / hide password — much kinder than retyping on a phone. */
+  document.querySelectorAll('.pw-toggle').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var input = document.getElementById(b.getAttribute('aria-controls'));
+      var show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      b.textContent = show ? 'Hide' : 'Show';
+      b.setAttribute('aria-pressed', String(show));
+    });
+  });
+
+  function busy(form, on, label) {
+    var b = form.querySelector('button[type="submit"]');
+    if (!b.dataset.label) b.dataset.label = b.textContent;
+    b.disabled = on;
+    b.textContent = on ? label : b.dataset.label;
+  }
+  function valid(form) {
+    // minlength is only checked by browsers for typed text, not pasted or autofilled — so check it here too.
+    var bad = Array.prototype.filter.call(form.querySelectorAll('input'), function (i) {
+      return !i.checkValidity() || (i.minLength > 0 && i.value.length < i.minLength);
+    })[0];
+    if (!bad) return true;
+    var name = bad.name === 'password' ? (bad.minLength > 0 && bad.value ? 'Your password needs 8 characters or more.' : 'Please type your password.')
+             : bad.name === 'email' ? 'Please check the email address.' : 'Please fill in your name.';
+    say(name, false); bad.focus();
+    return false;
+  }
+
+  /* Supabase's own error text, turned into something a customer can act on. */
+  function friendly(err) {
+    var m = (err && err.message || '').toLowerCase();
+    if (m.indexOf('invalid login') !== -1)
+      return 'That email and password do not match. Check for a typo, or <a href="#forgot" data-go="forgot">reset your password</a>.';
+    if (m.indexOf('not confirmed') !== -1)
+      return 'Please confirm your email address first. We sent you a link when you created the account. ' +
+             '<a href="#" data-go="resend">Send it again</a>.';
+    if (m.indexOf('rate') !== -1 || m.indexOf('too many') !== -1 || m.indexOf('security purposes') !== -1)
+      return 'Too many tries in a short time. Wait a few minutes and try again.';
+    if (m.indexOf('password') !== -1 && m.indexOf('least') !== -1)
+      return 'Your password needs 8 characters or more.';
+    if (m.indexOf('weak') !== -1 || m.indexOf('pwned') !== -1 || m.indexOf('leaked') !== -1)
+      return 'That password is too easy to guess. Please choose a different one.';
+    return 'Something went wrong: ' + P.esc(err && err.message || 'unknown') + '.';
+  }
+  status.addEventListener('click', async function (e) {
+    var a = e.target.closest('[data-go]'); if (!a) return;
+    e.preventDefault();
+    if (a.dataset.go === 'forgot') return mode('forgot', true);
+    if (a.dataset.go === 'resend') {
+      var addr = (forms.signin.email.value || forms.create.email.value).trim();
+      var r = await P.client().auth.resend({ type: 'signup', email: addr, options: { emailRedirectTo: here('index.html') } });
+      say(r.error ? friendly(r.error) : 'Sent again to <b>' + P.esc(addr) + '</b>. It can take a minute, and sometimes lands in spam.', !r.error);
+    }
+  });
+
+  /* ------------------------------------------------------------ sign in */
+  forms.signin.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!valid(this)) return;
+    busy(this, true, 'Signing in…');
+    var r = await P.client().auth.signInWithPassword({ email: this.email.value.trim(), password: this.password.value });
+    busy(this, false);
+    if (r.error) return say(friendly(r.error), false);
+    window.location.replace(next());
+  });
+
+  /* ------------------------------------------------------------ create */
+  forms.create.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!valid(this)) return;
+    busy(this, true, 'Creating your account…');
+    var addr = this.email.value.trim();
+    var r = await P.client().auth.signUp({
+      email: addr,
+      password: this.password.value,
+      options: { data: { name: this.elements['name'].value.trim() }, emailRedirectTo: here('index.html') }
+    });
+    busy(this, false);
+    if (r.error) return say(friendly(r.error), false);
+
+    // For an address that already has an account, Supabase answers "success"
+    // but with no identities — so nobody can use this form to test whether
+    // someone is a customer. Tell the person in front of us, kindly.
+    if (r.data && r.data.user && r.data.user.identities && r.data.user.identities.length === 0) {
+      mode('signin');
+      forms.signin.email.value = addr;
+      return say('You already have an account with <b>' + P.esc(addr) + '</b>. Sign in below, or ' +
+                 '<a href="#forgot" data-go="forgot">reset your password</a> if you never set one.', false);
+    }
+    if (r.data && r.data.session) return window.location.replace(next());   // email confirmation switched off
+
+    this.hidden = true;
+    say('<strong>One last step: check your email.</strong><br>We sent a link to <b>' + P.esc(addr) + '</b>. ' +
+        'Tap it once to confirm the address is yours, and you are in. From then on you just sign in with your password.<br>' +
+        '<span style="font-size:.9em">Nothing after a minute? Look in spam, or <a href="#" data-go="resend">send it again</a>.</span>');
+  });
+
+  /* ------------------------------------------------------------ forgot */
+  forms.forgot.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!valid(this)) return;
+    busy(this, true, 'Sending…');
+    var addr = this.email.value.trim();
+    var r = await P.client().auth.resetPasswordForEmail(addr, { redirectTo: here('reset.html') });
+    busy(this, false);
+    if (r.error) return say(friendly(r.error), false);
+    // Same answer whether or not the address has an account.
+    say('<strong>Check your email.</strong><br>If <b>' + P.esc(addr) + '</b> has an account, a link to choose a new password is on its way.');
+  });
+
+  /* ------------------------------------------------------------ Google */
+  /* Supabase only says Google is off AFTER sending the visitor to a raw
+     error page, so ask first. Until Google is switched on in the dashboard,
+     the button and its divider are simply not shown. */
+  var googleOn = (async function () {
+    try {
+      var r = await fetch(CFG.url + '/auth/v1/settings', { headers: { apikey: CFG.anonKey } });
+      var s = await r.json();
+      return !!(s.external && s.external.google);
+    } catch (e) { return true; }        // cannot tell: leave the button to try
+  })();
+  function googleShown(want) {
+    googleOn.then(function (on) {
+      document.getElementById('google-btn').hidden = !(on && want);
+      document.getElementById('or-rule').hidden = !(on && want);
+    });
+  }
+
+  document.getElementById('google-btn').addEventListener('click', async function () {
+    var btn = this;
+    btn.disabled = true;
+    var r = await P.client().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: here(next()) } });
+    if (r.error) { btn.disabled = false; say(friendly(r.error), false); }
+  });
+
+  /* Start in the mode the link asked for: login.html#create, #forgot. */
+  var start = (window.location.hash || '').replace('#', '');
+  mode(forms[start] ? start : 'signin', false);
+})();
+</script>
+</body>
+</html>

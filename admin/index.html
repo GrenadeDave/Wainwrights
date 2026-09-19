@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Job board — Wainwrights admin</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/portal.css">
+</head>
+<body class="portal-body">
+
+<header class="site-header portal-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <img class="brand-mark" src="../assets/img/logo-wide-light.png" width="260" height="176" alt="">
+      <span class="brand-text"><span class="brand-name">Wainwrights</span><span class="brand-sub">Bryan&rsquo;s Job Board</span></span>
+    </a>
+    <div class="who">
+      <a class="plain" href="../index.html">Website</a>
+      <a class="plain" href="schedule.html">Schedule</a>
+      <a class="plain" href="mydid.html">MyDiD</a>
+      <a class="plain" href="#" id="signout">Sign out</a>
+    </div>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="wrap" id="root">
+    <p style="color:var(--muted)">Loading the job board&hellip;</p>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/rates.js"></script>
+<script src="../assets/js/schedule.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
+<script src="../assets/js/portal.js"></script>
+<script src="../assets/js/portal-demo.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+(function () {
+  'use strict';
+  var P = window.WPortal;
+  var root = document.getElementById('root');
+
+  if (!P.ready()) { root.innerHTML = P.notConfiguredHtml(); return; }
+
+  document.getElementById('signout').addEventListener('click', async function (e) {
+    e.preventDefault();
+    await P.signOut();
+    window.location.replace('../portal/login.html');
+  });
+
+  var FILTERS = [
+    { key: 'live',        label: 'Live' },
+    { key: 'requested',   label: 'New requests' },
+    { key: 'quoted',      label: 'Quoted' },
+    { key: 'scheduled',   label: 'Scheduled' },
+    { key: 'in_progress', label: 'In progress' },
+    { key: 'completed',   label: 'Completed' },
+    { key: 'all',         label: 'Everything' }
+  ];
+  var filter = 'live';
+  var allJobs = [];
+
+  function matches(job) {
+    if (filter === 'all')  return true;
+    if (filter === 'live') return job.status !== 'completed' && job.status !== 'cancelled';
+    return job.status === filter;
+  }
+
+  function row(job) {
+    var when  = P.date(job.scheduled_for);
+    var total = P.total(job);
+    return '' +
+      '<a class="job-card" href="job.html?id=' + encodeURIComponent(job.id) + '">' +
+        '<div class="job-card-top">' +
+          '<h3>' + P.esc(job.contact_name) + ' — ' + P.esc(job.service) + '</h3>' +
+          (job.quote_accepted_at && job.status === 'quoted'
+            ? '<span class="pill pill--act">Go-ahead given — book it</span>' : P.statusPill(job.status)) +
+        '</div>' +
+        '<p class="meta">' +
+          (job.address ? P.esc(job.address) + ' &middot; ' : '') +
+          (job.contact_phone ? P.esc(job.contact_phone) : P.esc(job.contact_email)) +
+        '</p>' +
+        (job.details ? '<p class="meta" style="margin-top:6px;color:var(--body)">' +
+           P.esc(job.details.slice(0, 140)) + (job.details.length > 140 ? '…' : '') + '</p>' : '') +
+        '<div class="job-foot">' +
+          '<span>Asked ' + P.esc(P.dateTime(job.created_at) || '') + '</span>' +
+          (when ? '<span>Booked: <b>' + P.esc(when) + '</b></span>' : '') +
+          (total != null ? '<span>Price: <b>' + P.money(total) + '</b></span>' : '<span style="color:var(--clay-600)"><b>No price yet</b></span>') +
+        '</div>' +
+      '</a>';
+  }
+
+  function paint() {
+    var shown = allJobs.filter(matches);
+    var newCount = allJobs.filter(function (j) { return j.status === 'requested'; }).length;
+
+    var html =
+      '<div class="portal-title">' +
+        '<h1>Job board</h1>' +
+        '<p>' + (newCount
+          ? newCount + (newCount === 1 ? ' new request needs' : ' new requests need') + ' looking at.'
+          : 'Nothing new waiting.') + '</p>' +
+      '</div>' +
+      '<div class="admin-bar">' +
+        FILTERS.map(function (f) {
+          return '<button class="chip" data-filter="' + f.key + '" aria-pressed="' +
+                 (f.key === filter) + '">' + f.label + '</button>';
+        }).join('') +
+        '<span class="count">' + shown.length + ' shown</span>' +
+      '</div>';
+
+    html += shown.length
+      ? '<div class="job-list">' + shown.map(row).join('') + '</div>'
+      : '<div class="portal-empty"><h2>Nothing here</h2><p>No jobs match this filter.</p></div>';
+
+    root.innerHTML = html;
+
+    root.querySelectorAll('.chip').forEach(function (b) {
+      b.addEventListener('click', function () { filter = b.dataset.filter; paint(); });
+    });
+  }
+
+  (async function () {
+    var session = await P.requireSession('../portal/login.html');
+    if (!session) return;
+
+    var profile = await P.profile();
+    if (!profile || !profile.is_admin) {
+      root.innerHTML =
+        '<div class="portal-empty">' +
+          '<h2>This page is Bryan’s</h2>' +
+          '<p>Your account does not have admin access.</p>' +
+          '<a class="btn btn-outline" href="../portal/index.html">Go to your own jobs</a>' +
+        '</div>';
+      return;
+    }
+
+    var res = await P.client().from('jobs').select('*').order('created_at', { ascending: false });
+    if (res.error) {
+      root.innerHTML = '<div class="portal-empty"><h2>Could not load jobs</h2><p>' +
+        P.esc(res.error.message) + '</p></div>';
+      return;
+    }
+    allJobs = res.data || [];
+    paint();
+  })();
+})();
+</script>
+</body>
+</html>

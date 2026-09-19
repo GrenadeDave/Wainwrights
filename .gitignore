@@ -1,0 +1,48 @@
+# ============================================================================
+# Wainwrights website
+#
+# IMPORTANT: on a free GitHub account, GitHub Pages only works from a PUBLIC
+# repository. Anything committed here is readable by anyone who finds the repo,
+# AND is served at the website address.
+#
+# So the internal notes stay OUT. They say things like "every price is a
+# placeholder" and discuss whether Bryan is licensed — not for customers.
+# They live in this folder on your computer; they just are not published.
+# ============================================================================
+
+# Internal notes — never publish
+ASK-BRYAN.md
+SECURITY.md
+FILL-THESE-IN.txt
+README.md
+GOING-LIVE.md
+SETUP-PORTAL.md
+DEPLOY-GITHUB.md
+LINKING-TO-MYDID.md
+MYDID-CONNECT.md
+READ ME FIRST.txt
+START HERE.html
+docs/
+
+# Database setup — not secret, but not the public's business either
+supabase/
+
+# Editor / tooling
+.claude/
+.vscode/
+.idea/
+
+# OS cruft
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Working files
+*.bak
+_*.html
+_*.js
+.photo-staging/
+assets/img/README.txt
+
+# Local preview server settings
+serve.json
