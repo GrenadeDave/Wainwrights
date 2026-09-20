@@ -1388,3 +1388,29 @@ body.header-hidden .dst-panel { top: 20px; }
   font-size: .9375rem; line-height: 1.6; color: rgba(240,246,242,.72);
 }
 .legal-note b { color: rgba(255,255,255,.92); }
+
+/* --------------------------------------------------------------------------
+   Bryan, drawn: the cut-out figure in the hero and the closing band
+   -------------------------------------------------------------------------- */
+.hero-card:has(.hero-figure) { background: radial-gradient(70% 60% at 50% 42%, var(--pine-700), var(--pine-950) 78%); }
+.hero-figure {
+  object-fit: contain !important;
+  padding: 18px 12px 0;
+  filter: drop-shadow(0 26px 34px rgba(4,10,20,.55));
+}
+/* The closing band gets him at the edge, waving the list in. */
+.cta-band { text-align: center; }
+.cta-figure {
+  position: absolute; right: max(2vw, 14px); bottom: 0; z-index: -1;
+  width: clamp(180px, 22vw, 320px); height: auto; opacity: .95;
+  filter: drop-shadow(0 18px 26px rgba(17,27,21,.28));
+  pointer-events: none;
+}
+@media (max-width: 1100px) { .cta-figure { display: none; } }
+
+/* The services page: the drawn figure sits on a tinted panel, not cropped. */
+.media-frame .work-figure {
+  object-fit: contain;
+  background: linear-gradient(170deg, var(--sky-050), var(--sky-100));
+  padding: 14px 10px 0;
+}
