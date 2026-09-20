@@ -1469,3 +1469,10 @@ body.header-hidden .dst-panel { top: 20px; }
 }
 .star-pick button:hover { color: var(--amber-700); background: var(--amber-050); }
 .star-pick button.is-on { color: var(--amber); background: var(--amber-050); border-color: var(--amber); }
+
+/* A portrait drawing in a frame built for landscape photos: fit it, do not crop
+   his head off, and let the drawing's own dark ground fill the rest. */
+.media-frame .figure-tile {
+  object-fit: contain;
+  background: #0C1C33;
+}
