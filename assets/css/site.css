@@ -636,8 +636,30 @@ code { font-size: .9em; background: var(--paper-2); padding: 2px 6px; border-rad
   transition: top .38s var(--ease-out);
 }
 body.header-hidden .jumpbar { top: 0; }
-.jumpbar-inner { display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; scrollbar-width: none; }
+.jumpbar-inner {
+  display: flex; flex-wrap: wrap; gap: 6px; overflow-x: auto; padding-block: 10px; scrollbar-width: none;
+}
 .jumpbar-inner::-webkit-scrollbar { display: none; }
+
+/* The phone version: a picker, not a strip that runs off the screen. */
+.jump-select {
+  display: none; width: calc(100% - (var(--gutter) * 2)); margin: 10px var(--gutter);
+  min-height: 48px; padding: 12px 40px 12px 14px;
+  font: inherit; font-size: 1rem; font-weight: 600; color: var(--ink);
+  background: var(--white); border: 1.5px solid var(--line); border-radius: var(--r);
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%230D1723' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+}
+.jump-select:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+
+@media (max-width: 900px) {
+  .jumpbar-inner { display: none; }
+  .jump-select { display: block; }
+}
+/* Set by fx.js when the chips would need a second row. */
+.jumpbar--picker .jumpbar-inner { display: none; }
+.jumpbar--picker .jump-select { display: block; max-width: 420px; }
 .jumpbar a {
   flex: none; padding: 10px 16px; min-height: 44px; display: inline-flex; align-items: center;
   border-radius: var(--r-pill); text-decoration: none; white-space: nowrap;

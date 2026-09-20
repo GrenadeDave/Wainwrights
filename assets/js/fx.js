@@ -445,10 +445,53 @@
      ---------------------------------------------------------------------- */
   function initJumpbar() {
     var bar = $('.jumpbar');
-    if (!bar || !('IntersectionObserver' in window)) return;
+    if (!bar) return;
     var links = $$('a[href^="#"]', bar);
     var map = {};
     links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+
+    /* On a phone a row of ten long labels is a hidden sideways scroll: you see
+       a label and a half and no sign there is more. Build a picker from the
+       same links instead — one tap, everything visible. CSS decides which of
+       the two is shown at which width, so there is one list to keep right. */
+    var picker = null;
+    if (links.length > 3 && !$('.jump-select', bar)) {
+      picker = document.createElement('select');
+      picker.className = 'jump-select';
+      picker.setAttribute('aria-label', 'Jump to a section');
+      picker.innerHTML = '<option value="">Jump to a section&hellip;</option>' +
+        links.map(function (a) {
+          return '<option value="' + a.getAttribute('href') + '">' + a.textContent.trim() + '</option>';
+        }).join('');
+      picker.addEventListener('change', function () {
+        var id = picker.value.slice(1);
+        var sec = id && document.getElementById(id);
+        if (!sec) return;
+        sec.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+        history.replaceState(null, '', picker.value);
+      });
+      (bar.querySelector('.jumpbar-inner') || bar).parentNode.insertBefore(picker, bar.querySelector('.jumpbar-inner'));
+    }
+
+    /* Chips are nicer when they fit on one line. The moment they would wrap —
+       ten long section names, or a narrow window — the picker takes over. */
+    function chooseForm() {
+      var inner = bar.querySelector('.jumpbar-inner');
+      if (!inner || !picker) return;
+      bar.classList.remove('jumpbar--picker');
+      var oneRow = inner.firstElementChild ? inner.firstElementChild.offsetHeight + 24 : 68;
+      if (getComputedStyle(inner).display !== 'none' && inner.offsetHeight > oneRow) {
+        bar.classList.add('jumpbar--picker');
+      }
+    }
+    chooseForm();
+    var reflow;
+    window.addEventListener('resize', function () {
+      clearTimeout(reflow);
+      reflow = setTimeout(chooseForm, 150);
+    }, { passive: true });
+
+    if (!('IntersectionObserver' in window)) return;
 
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
@@ -457,10 +500,13 @@
         var a = map[en.target.id];
         if (a) {
           a.classList.add('is-active');
-          /* Keep the active pill in view on a phone, where the bar scrolls. */
+          /* Keep the active pill in view where the row still scrolls. */
           var inner = a.parentNode;
-          var target = a.offsetLeft - (inner.clientWidth - a.offsetWidth) / 2;
-          inner.scrollTo({ left: target, behavior: reduce ? 'auto' : 'smooth' });
+          if (inner.scrollWidth > inner.clientWidth) {
+            var target = a.offsetLeft - (inner.clientWidth - a.offsetWidth) / 2;
+            inner.scrollTo({ left: target, behavior: reduce ? 'auto' : 'smooth' });
+          }
+          if (picker) picker.value = '#' + en.target.id;   // the picker follows along
         }
       });
     }, { rootMargin: '-35% 0px -55% 0px' });
