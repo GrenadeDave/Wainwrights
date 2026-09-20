@@ -1392,17 +1392,21 @@ body.header-hidden .dst-panel { top: 20px; }
 /* --------------------------------------------------------------------------
    Bryan, drawn: the cut-out figure in the hero and the closing band
    -------------------------------------------------------------------------- */
+/* With the drawn figure there is no photo to frame, so the card itself goes:
+   no panel, no border, no shadow — just a soft glow he stands in. */
 .hero-card:has(.hero-figure) {
-  background: radial-gradient(74% 62% at 50% 44%, var(--pine-700), var(--pine-950) 76%);
+  background: radial-gradient(52% 44% at 50% 62%, rgba(45,90,147,.55), rgba(12,28,51,0) 72%);
+  box-shadow: none;
+  overflow: visible;
   aspect-ratio: 5 / 6;
 }
 .hero-card .hero-figure {
-  /* A cut-out figure, not a photograph: show all of him, no pale panel behind. */
+  /* A cut-out figure, not a photograph: show all of him, nothing behind. */
   background: none;
   object-fit: contain;
   object-position: bottom center;
-  padding: 26px 18px 10px;
-  filter: drop-shadow(0 26px 30px rgba(4,10,20,.5));
+  padding: 10px 6px 0;
+  filter: drop-shadow(0 22px 26px rgba(4,10,20,.45));
 }
 /* The closing band gets him at the edge, waving the list in. */
 .cta-band { text-align: center; }
