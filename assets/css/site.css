@@ -1476,3 +1476,28 @@ body.header-hidden .dst-panel { top: 20px; }
   object-fit: contain;
   background: #0C1C33;
 }
+
+/* --------------------------------------------------------------------------
+   Local rules (PML) — the resources page
+   -------------------------------------------------------------------------- */
+.rules { display: grid; gap: 14px; }
+.rule {
+  background: var(--white); border: 1px solid var(--line-soft); border-left: 4px solid var(--line);
+  border-radius: var(--r); padding: 18px 20px;
+}
+.rule--trade { border-left-color: var(--amber); background: var(--amber-050); }
+.rule-flag {
+  display: inline-block; margin-bottom: 8px;
+  font-family: var(--f-cond); font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  font-size: .8125rem; color: var(--amber-ink);
+}
+.rule-text { margin: 0; font-size: 1.0625rem; font-weight: 600; color: var(--ink); line-height: 1.5; }
+.rule-why { margin: 8px 0 0; color: var(--body); }
+.rule-meta { margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.rule-fine {
+  font-weight: 700; font-size: .875rem; color: var(--fire);
+  background: var(--fire-050); border-radius: 999px; padding: 4px 12px;
+}
+.rule-cite { font-size: .8125rem; color: var(--muted); }
+.section--sand .rule { background: var(--white); }
+.section--sand .rule--trade { background: var(--amber-050); }

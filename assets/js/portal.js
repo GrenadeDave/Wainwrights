@@ -362,6 +362,7 @@
         '<div class="acct-menu" id="acct-menu" hidden>' +
           '<a href="profile.html"><b>My details</b><small>Change your name, phone or address</small></a>' +
           '<a href="mydata.html"><b>My information</b><small>Everything Bryan holds about you</small></a>' +
+          '<a href="../resources.html"><b>Local rules</b><small>Pine Mountain Lake, in plain English</small></a>' +
           '<a href="tel:+12094561846"><b>Call Bryan</b><small>(209) 456-1846 · Mon–Fri 8–5</small></a>' +
           '<a href="mailto:Bwain94Work@gmail.com"><b>Email Bryan</b><small>Bwain94Work@gmail.com</small></a>' +
           '<button type="button" id="acct-delete"><b>Delete my account</b><small>Ask Bryan to remove your details</small></button>' +
