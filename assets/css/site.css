@@ -1392,11 +1392,17 @@ body.header-hidden .dst-panel { top: 20px; }
 /* --------------------------------------------------------------------------
    Bryan, drawn: the cut-out figure in the hero and the closing band
    -------------------------------------------------------------------------- */
-.hero-card:has(.hero-figure) { background: radial-gradient(70% 60% at 50% 42%, var(--pine-700), var(--pine-950) 78%); }
-.hero-figure {
-  object-fit: contain !important;
-  padding: 18px 12px 0;
-  filter: drop-shadow(0 26px 34px rgba(4,10,20,.55));
+.hero-card:has(.hero-figure) {
+  background: radial-gradient(74% 62% at 50% 44%, var(--pine-700), var(--pine-950) 76%);
+  aspect-ratio: 5 / 6;
+}
+.hero-card .hero-figure {
+  /* A cut-out figure, not a photograph: show all of him, no pale panel behind. */
+  background: none;
+  object-fit: contain;
+  object-position: bottom center;
+  padding: 26px 18px 10px;
+  filter: drop-shadow(0 26px 30px rgba(4,10,20,.5));
 }
 /* The closing band gets him at the edge, waving the list in. */
 .cta-band { text-align: center; }
@@ -1414,3 +1420,48 @@ body.header-hidden .dst-panel { top: 20px; }
   background: linear-gradient(170deg, var(--sky-050), var(--sky-100));
   padding: 14px 10px 0;
 }
+
+/* --------------------------------------------------------------------------
+   Reviews: the cards, the thumbs up, and the ask
+   -------------------------------------------------------------------------- */
+.review-grid:empty { display: none; }
+.review-card .stars { display: block; margin-bottom: 10px; color: var(--amber); letter-spacing: 2px; font-size: 1.1rem; }
+.review-card .stars .off { color: var(--line); }
+.review-card .quote-who { align-items: center; }
+.thumb {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+  min-height: 40px; padding: 8px 14px; border-radius: 999px;
+  background: var(--paper); border: 1px solid var(--line); color: var(--body);
+  font: inherit; font-size: .9375rem; font-weight: 700;
+  transition: background-color .2s var(--ease), color .2s var(--ease), transform .2s var(--ease);
+}
+.thumb:hover { background: var(--amber-050); border-color: var(--amber); color: var(--ink); }
+.thumb:active { transform: scale(.94); }
+.thumb.is-done { background: var(--amber); border-color: var(--amber); color: var(--ink); cursor: default; }
+.thumb:disabled { opacity: 1; }
+
+.review-empty {
+  grid-column: 1 / -1; text-align: center; padding: 34px 22px;
+  background: var(--sky-050); border: 1px dashed var(--sky-line); border-radius: var(--r-lg);
+}
+.review-empty h3 { margin-bottom: 8px; }
+.review-empty p { color: var(--muted); margin: 0 auto; max-width: 52ch; }
+
+.review-ask {
+  display: flex; align-items: center; justify-content: space-between; gap: 22px; flex-wrap: wrap;
+  margin-top: 30px; padding: 26px 30px; border-radius: var(--r-lg);
+  background: var(--pine-950); color: rgba(240,246,242,.8);
+}
+.review-ask h3 { color: var(--white); margin-bottom: 4px; }
+.review-ask p { margin: 0; max-width: 56ch; }
+
+/* Star picker on the review form */
+.label-like { display: block; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+.star-pick { display: flex; gap: 6px; }
+.star-pick button {
+  width: 52px; height: 52px; border-radius: 12px; cursor: pointer;
+  background: var(--paper); border: 1px solid var(--line); color: var(--line);
+  font-size: 1.7rem; line-height: 1; transition: color .15s var(--ease), background-color .15s var(--ease);
+}
+.star-pick button:hover { color: var(--amber-700); background: var(--amber-050); }
+.star-pick button.is-on { color: var(--amber); background: var(--amber-050); border-color: var(--amber); }

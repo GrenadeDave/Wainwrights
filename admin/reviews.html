@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reviews — Wainwrights admin</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/portal.css">
+</head>
+<body class="portal-body">
+
+<header class="site-header portal-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <img class="brand-mark" src="../assets/img/logo-wide-light.png" width="260" height="176" alt="">
+      <span class="brand-text"><span class="brand-name">Wainwrights</span><span class="brand-sub">Reviews</span></span>
+    </a>
+    <div class="who">
+      <a class="plain" href="index.html">Job board</a>
+      <a class="plain" href="schedule.html">Schedule</a>
+      <a class="plain" href="mydid.html">MyDiD</a>
+      <a class="plain" href="#" id="signout">Sign out</a>
+    </div>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="wrap wrap--portal" id="root">
+    <p style="color:var(--muted)">Loading&hellip;</p>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/rates.js"></script>
+<script src="../assets/js/schedule.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
+<script src="../assets/js/portal.js"></script>
+<script src="../assets/js/portal-demo.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+(function () {
+  'use strict';
+  var P = window.WPortal;
+  var root  = document.getElementById('root');
+  var toast = document.getElementById('toast');
+
+  if (!P.ready()) { root.innerHTML = P.notConfiguredHtml(); return; }
+
+  document.getElementById('signout').addEventListener('click', async function (e) {
+    e.preventDefault();
+    await P.signOut();
+    window.location.replace('../portal/login.html');
+  });
+
+  function flash(m) {
+    toast.textContent = m; toast.classList.add('is-up');
+    setTimeout(function () { toast.classList.remove('is-up'); }, 2600);
+  }
+
+  function stars(n) {
+    if (!n) return '<span style="color:var(--muted)">no stars given</span>';
+    var s = '';
+    for (var i = 1; i <= 5; i++) s += '<span style="color:' + (i <= n ? 'var(--amber)' : 'var(--line)') + '">&#9733;</span>';
+    return s;
+  }
+
+  function card(r) {
+    var live = r.status === 'published';
+    return '<div class="panel-card' + (r.status === 'pending' ? ' panel-card--act' : '') + '" style="margin-bottom:16px">' +
+      '<div class="status-line">' +
+        (r.status === 'pending' ? '<span class="pill pill--act">Waiting for you</span>'
+         : live ? '<span class="pill pill--ok">On the website</span>'
+                : '<span class="pill">Hidden</span>') +
+        '<span>' + stars(r.rating) + '</span>' +
+        '<span style="color:var(--muted)">' + P.esc(P.dateTime(r.created_at) || '') + '</span>' +
+        (live ? '<span style="color:var(--muted)">' + (r.upvotes || 0) + ' found it helpful</span>' : '') +
+      '</div>' +
+      '<p style="white-space:pre-wrap;font-size:1.0625rem">' + P.esc(r.body) + '</p>' +
+      '<p style="color:var(--muted);margin-bottom:16px"><b style="color:var(--ink)">' + P.esc(r.name) + '</b>' +
+        (r.town ? ' &middot; ' + P.esc(r.town) : '') + '</p>' +
+      '<div class="btn-row">' +
+        (live
+          ? '<button class="btn btn-outline" type="button" data-hide="' + r.id + '">Take it down</button>'
+          : '<button class="btn btn-primary" type="button" data-show="' + r.id + '">Put it on the website</button>') +
+        '<button class="btn btn-dark" type="button" data-del="' + r.id + '">Delete</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  async function paint() {
+    var res = await P.client().from('reviews').select('*').order('created_at', { ascending: false });
+    if (res.error) {
+      root.innerHTML = '<div class="portal-empty"><h2>Could not load</h2><p>' + P.esc(res.error.message) + '</p></div>';
+      return;
+    }
+    var all = res.data || [];
+    var waiting = all.filter(function (r) { return r.status === 'pending'; });
+    var live    = all.filter(function (r) { return r.status === 'published'; });
+    var hidden  = all.filter(function (r) { return r.status === 'hidden'; });
+
+    root.innerHTML =
+      '<div class="portal-title"><h1>Reviews</h1>' +
+        '<p>Nothing goes on the website until you say so. Take one down again any time.</p></div>' +
+      (waiting.length ? '<h2 class="p-h2">Waiting for you</h2>' + waiting.map(card).join('') : '') +
+      (live.length ? '<h2 class="p-h2">On the website</h2>' + live.map(card).join('') : '') +
+      (hidden.length ? '<h2 class="p-h2">Taken down</h2>' + hidden.map(card).join('') : '') +
+      (all.length ? '' : '<div class="portal-empty"><h2>None yet</h2>' +
+        '<p>When a customer leaves one it lands here, and you get an email. ' +
+        'The page they use is <b>wainwrightshandyman.com/review.html</b> &mdash; worth texting to anyone happy with a job.</p></div>');
+
+    root.querySelectorAll('[data-show]').forEach(function (b) {
+      b.addEventListener('click', async function () {
+        var r = await P.client().from('reviews')
+          .update({ status: 'published', published_at: new Date().toISOString() })
+          .eq('id', b.dataset.show);
+        flash(r.error ? 'Could not do that: ' + r.error.message : 'It is on the website now');
+        paint();
+      });
+    });
+    root.querySelectorAll('[data-hide]').forEach(function (b) {
+      b.addEventListener('click', async function () {
+        var r = await P.client().from('reviews').update({ status: 'hidden' }).eq('id', b.dataset.hide);
+        flash(r.error ? 'Could not do that: ' + r.error.message : 'Taken down');
+        paint();
+      });
+    });
+    root.querySelectorAll('[data-del]').forEach(function (b) {
+      b.addEventListener('click', async function () {
+        var ok = await P.confirm({
+          title: 'Delete this review?',
+          body: 'It goes for good. If you only want it off the website, take it down instead.',
+          ok: 'Delete', cancel: 'Keep it', danger: true
+        });
+        if (!ok) return;
+        var r = await P.client().from('reviews').delete().eq('id', b.dataset.del);
+        flash(r.error ? 'Could not delete: ' + r.error.message : 'Deleted');
+        paint();
+      });
+    });
+  }
+
+  (async function () {
+    var session = await P.requireSession('../portal/login.html');
+    if (!session) return;
+    var profile = await P.profile();
+    if (!profile || !profile.is_admin) {
+      root.innerHTML = '<div class="portal-empty"><h2>This page is Bryan’s</h2>' +
+        '<p>Your account does not have admin access.</p>' +
+        '<a class="btn btn-outline" href="../portal/index.html">Your own jobs</a></div>';
+      return;
+    }
+    paint();
+  })();
+})();
+</script>
+</body>
+</html>

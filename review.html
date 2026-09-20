@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Privacy | Wainwrights Handyman &amp; Land Management</title>
-<meta name="description" content="How Wainwrights Handyman &amp; Land Management handles the information you share when you ask for an estimate or use the customer portal.">
+<title>Leave a review | Wainwrights Handyman, Groveland CA</title>
+<meta name="description" content="Tell other people around Pine Mountain Lake how the job went. Bryan reads every review before it goes on the site.">
 <meta name="theme-color" content="#0C1C33">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Privacy | Wainwrights Handyman &amp; Land Management">
-<meta property="og:description" content="How Wainwrights Handyman &amp; Land Management handles the information you share when you ask for an estimate or use the customer portal.">
+<meta property="og:title" content="About Bryan Wainwright | Groveland CA Handyman">
+<meta property="og:description" content="Bryan Wainwright handles repairs, painting, land care and hauling around Pine Mountain Lake and Groveland, CA. Free estimates, plain prices.">
 <meta property="og:image" content="assets/img/social.jpg">
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="canonical" href="./privacy.html">
+<link rel="canonical" href="./review.html">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -67,10 +67,11 @@
 
 <section class="page-hero">
   <div class="wrap-narrow">
-    <p class="crumbs"><a href="index.html">Home</a> &rsaquo; Privacy</p>
-    <span class="eyebrow">Plain English</span>
-    <h1>Your information</h1>
-    <p class="lede">What we keep when you ask for an estimate or use the customer portal, and what we never do with it.</p>
+    <p class="crumbs"><a href="index.html">Home</a> &rsaquo; Leave a review</p>
+    <span class="eyebrow">Two minutes</span>
+    <h1>How did it go?</h1>
+    <p class="lede">Say it plainly &mdash; what the job was, and whether you would have him back. That is what
+    the next person up the hill wants to know.</p>
   </div>
   <div class="ridge" aria-hidden="true">
     <svg viewBox="0 0 1440 130" preserveAspectRatio="none">
@@ -81,96 +82,64 @@
 </section>
 
 <section class="section">
-  <div class="wrap-narrow legal">
-    <p class="legal-date">Last updated 19 September 2026</p>
+  <div class="wrap-narrow">
+    <form class="form-card" id="review-form" novalidate>
+      <div class="review-fields">
+        <div class="field">
+          <span class="label-like">How did the job go?</span>
+          <div class="star-pick" role="radiogroup" aria-label="Stars out of five">
+            <button type="button" data-star="1" role="radio" aria-checked="false" aria-label="1 star">&#9733;</button>
+            <button type="button" data-star="2" role="radio" aria-checked="false" aria-label="2 stars">&#9733;</button>
+            <button type="button" data-star="3" role="radio" aria-checked="false" aria-label="3 stars">&#9733;</button>
+            <button type="button" data-star="4" role="radio" aria-checked="false" aria-label="4 stars">&#9733;</button>
+            <button type="button" data-star="5" role="radio" aria-checked="false" aria-label="5 stars">&#9733;</button>
+          </div>
+          <p class="form-note" style="text-align:left;margin:6px 0 0">Optional, but people do look at it.</p>
+        </div>
 
-    <p>Wainwrights Handyman &amp; Land Management is a one-person business run by Bryan Wainwright in Groveland,
-    California. This page explains what information we collect through this website, why, and who else handles it.
-    The short version: <strong>we use your details to do your job, and nothing else. We never sell them.</strong></p>
+        <div class="field">
+          <label for="r-body">Your review <span class="req">(required)</span></label>
+          <textarea id="r-body" name="body" rows="6" maxlength="1500"
+            placeholder="For example: Bryan cleared forty years of pine needles off the roof and out of the gutters, turned up when he said he would, and left the place tidy."></textarea>
+        </div>
 
-    <h2>What we collect</h2>
-    <h3>When you ask for an estimate</h3>
-    <p>Your name, phone number, email address (if you give one), property address, the best time to reach you,
-    the kind of work you need, what you tell us about it, and the day and time you would prefer.</p>
+        <div class="grid-2">
+          <div class="field">
+            <label for="r-name">Your name <span class="req">(required)</span></label>
+            <input type="text" id="r-name" name="name" autocomplete="name" maxlength="80" placeholder="First name and last initial is fine">
+          </div>
+          <div class="field">
+            <label for="r-town">Where you are</label>
+            <input type="text" id="r-town" name="town" maxlength="80" placeholder="e.g. Pine Mountain Lake">
+          </div>
+        </div>
 
-    <h3>If you create an account in the customer portal</h3>
-    <ul>
-      <li>Your email address and a password. The password is stored scrambled by our sign-in provider; nobody here can read it.</li>
-      <li>If you choose <em>Continue with Google</em>, Google shares your name and email address with us. Nothing else.</li>
-      <li>Anything you add or do in the portal: your name, phone and address, messages to Bryan, when you say
-      &ldquo;go ahead&rdquo; on a price, and times you ask for.</li>
-    </ul>
+        <!-- Honeypot. Hidden from people and from screen readers; only a bot
+             fills it in, and the server throws those away silently. -->
+        <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+          <label for="r-company">Company</label>
+          <input type="text" id="r-company" name="company" tabindex="-1" autocomplete="off">
+        </div>
+      </div>
 
-    <h3>Kept only in your own browser</h3>
-    <ul>
-      <li>Your sign-in, so you do not have to sign in on every visit. Signing out removes it.</li>
-      <li>Your ticks on the fire-safe checklist. These never leave your device.</li>
-    </ul>
+      <button class="btn btn-primary btn-lg btn-block" type="submit">Send my review</button>
+      <div class="form-status" role="status" aria-live="polite"></div>
 
-    <p>This site has <strong>no advertising and no tracking</strong>. It does not use analytics tools or
-    advertising cookies. Its lettering (fonts) is loaded from Google Fonts, and the portal loads one piece of
-    code from jsDelivr, a public code library. Like any website you visit, those services can see your
-    device&rsquo;s internet address when they send those files.</p>
+      <p class="form-note" style="text-align:left;margin-top:18px">
+        Your name and the area show on the site. Your email and phone are not asked for and not shown.
+        Bryan reads every review before it appears &mdash; see <a href="privacy.html">how your information is handled</a>.
+      </p>
+    </form>
+  </div>
+</section>
 
-    <h2>How we use it</h2>
-    <ul>
-      <li>To reply to you, give you a price, book a time and do the work.</li>
-      <li>To show you your jobs, prices, booked dates and messages in the portal.</li>
-      <li>To keep the records any business keeps, such as what work was done and what was paid.</li>
-    </ul>
-    <p>We do not put you on marketing lists, and we do not sell, rent or trade your information to anyone.</p>
-
-    <h2>Who else handles it</h2>
-    <p>A few services do specific jobs for us. They only get what they need for that job.</p>
-    <ul>
-      <li><strong>Supabase</strong> stores the job records and runs the sign-in for the portal, on servers in the United States.</li>
-      <li><strong>Our email provider</strong> sends the sign-in and password emails, and the note to Bryan when you ask for an estimate.</li>
-      <li><strong>Google</strong>, if you choose to sign in with Google, and because Bryan&rsquo;s business email is Gmail.</li>
-      <li><strong>Firebase Cloud Messaging</strong> (from Google) delivers a short alert to Bryan&rsquo;s phone when you send a
-      request or a message. The alert contains your name and the kind of work only, never your phone number, address or message.</li>
-      <li><strong>Bryan&rsquo;s own phone</strong> keeps the details of his jobs, so he has your address and number when he is on his way.</li>
-    </ul>
-    <p>We may also share information if the law requires it.</p>
-
-    <h2>How we keep it safe</h2>
-    <ul>
-      <li>Everything travels over an encrypted (HTTPS) connection.</li>
-      <li>Each customer can see only their own jobs. Only Bryan can see everyone&rsquo;s.</li>
-      <li>Private notes Bryan keeps about a job (a gate code, where the key is) are never shown in the portal.</li>
-    </ul>
-    <p>No system is perfect, but we have taken care to keep your information to the people who need it.</p>
-
-    <h2>How long we keep it</h2>
-    <p>For as long as you are a customer, and after that for as long as records of the work are needed, for
-    example for taxes. Ask us to delete your details at any time and we will, except anything the law requires
-    us to keep.</p>
-
-    <h2>Your choices</h2>
-    <p>Everything below is in the customer portal, under the menu button at the top right of every page.</p>
-    <ul>
-      <li><b>See what we hold.</b> <em>My information</em> shows your details, every job, and every message, all
-      from our own records. It prints, so you can keep a copy.</li>
-      <li><b>Correct it.</b> <em>My details</em> lets you change your name, phone and address yourself.</li>
-      <li><b>Delete it.</b> <em>Delete my account</em> sends Bryan the request. He removes what he can and confirms
-      with you. Records of finished work stay in his books because tax law requires it, and nothing beyond that is kept.</li>
-      <li><b>Prefer to talk to someone?</b> Call or email Bryan, below. Either way works, and neither costs anything.</li>
-    </ul>
-    <p>We answer these requests ourselves, usually within a few days and always within 45 days. We never charge for
-    them, and we never treat anyone differently for asking.</p>
-    <p>Because this site does not track you, it treats every visit the same whether or not your browser sends a
-    &ldquo;Do Not Track&rdquo; signal.</p>
-
-    <h2>Children</h2>
-    <p>This site is for adults arranging work on their property. We do not knowingly collect information from
-    children under 13.</p>
-
-    <h2>Changes</h2>
-    <p>If this page changes, the date at the top changes with it.</p>
-
-    <h2>Questions</h2>
-    <p>Bryan Wainwright &middot; <a href="tel:+12094561846">(209) 456-1846</a> &middot;
-    <a href="mailto:Bwain94Work@gmail.com">Bwain94Work@gmail.com</a><br>
-    Pine Mountain Lake, Groveland, California</p>
+<section class="section section--sand">
+  <div class="wrap">
+    <div class="section-head center">
+      <span class="eyebrow">Already up</span>
+      <h2>What others have said</h2>
+    </div>
+    <div class="grid grid-3 review-grid" data-reviews></div>
   </div>
 </section>
 
@@ -240,6 +209,8 @@
 
 <script src="assets/js/config.js"></script>
 <script src="assets/js/site.js"></script>
+<script src="assets/js/supabase-config.js"></script>
+<script src="assets/js/reviews.js"></script>
 <script src="assets/js/fx.js"></script>
 </body>
 </html>

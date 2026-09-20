@@ -408,45 +408,25 @@
   </div>
 </section>
 
-<!-- ============================ REVIEWS ============================
-     The whole section is preview-only: it shows on your own machine so you can
-     see where reviews will go, and stays hidden on the live site until there
-     are real ones. Once Bryan sends three, remove `data-preview-only hidden`
-     from this <section> tag and delete the note-banner below. -->
-<section class="section" data-preview-only hidden>
+<!-- ===================== REVIEWS =====================
+     Live: whatever Bryan has published appears here, most helpful first.
+     Nothing reaches this section until he has read it. -->
+<section class="section" id="reviews">
   <div class="wrap">
     <div class="section-head center reveal">
       <span class="eyebrow">What people say</span>
       <h2>Word gets around up here</h2>
+      <p class="lede">Reviews from people whose work Bryan has actually done. Found one helpful? Give it a thumbs up.</p>
     </div>
 
-    <div class="grid grid-3">
-      <article class="quote-card reveal">
-        <p>This space is reserved for a real review from a real customer. Ask a happy customer for a couple of sentences and it goes right here.</p>
-        <div class="quote-who">
-          <span class="av">?</span>
-          <span><b>Customer name</b><span>Pine Mountain Lake</span></span>
-        </div>
-      </article>
-      <article class="quote-card reveal">
-        <p>A second review slot. Reviews that mention the specific job &mdash; "cleared 40 years of pine needles" &mdash; work far better than general praise.</p>
-        <div class="quote-who">
-          <span class="av">?</span>
-          <span><b>Customer name</b><span>Groveland</span></span>
-        </div>
-      </article>
-      <article class="quote-card reveal">
-        <p>A third review slot. If Bryan has Google or Facebook reviews already, those can be copied in word for word.</p>
-        <div class="quote-who">
-          <span class="av">?</span>
-          <span><b>Customer name</b><span>Big Oak Flat</span></span>
-        </div>
-      </article>
-    </div>
+    <div class="grid grid-3 review-grid reveal" data-reviews></div>
 
-    <div class="note-banner reveal" style="margin-top:28px">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-      <span><strong>Only you can see this section.</strong> It appears on your own computer and is hidden on the live site, so customers never see empty review cards. Send three real reviews and it gets switched on. See <code>ASK-BRYAN.md</code>.</span>
+    <div class="review-ask reveal">
+      <div>
+        <h3>Had work done?</h3>
+        <p>A couple of sentences about the job helps the next person decide. Bryan reads every one before it goes up.</p>
+      </div>
+      <a class="btn btn-primary" href="review.html">Leave a review</a>
     </div>
   </div>
 </section>
@@ -553,6 +533,8 @@
   });
 })();
 </script>
+<script src="assets/js/supabase-config.js"></script>
+<script src="assets/js/reviews.js"></script>
 <script src="assets/js/fx.js"></script>
 </body>
 </html>
