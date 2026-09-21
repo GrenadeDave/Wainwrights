@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/site.css?v=ca0fdb37">
-<link rel="stylesheet" href="../assets/css/portal.css?v=fc7402c7">
+<link rel="stylesheet" href="../assets/css/portal.css?v=0a69ec61">
 </head>
 <body class="portal-body">
 
@@ -137,50 +137,83 @@
 
     var booked = jobs.length;
 
-    var html =
-      '<div class="portal-title"><h1>Schedule</h1><p>' + P.esc(label) + ' · ' +
-        booked + (booked === 1 ? ' job booked' : ' jobs booked') + '</p></div>' +
+    var today = S.ymd(new Date());
 
-      '<div class="admin-bar">' +
-        '<button class="chip" id="prev">&larr; Previous week</button>' +
-        '<button class="chip" id="today">This week</button>' +
-        '<button class="chip" id="next">Next week &rarr;</button>' +
-        '<span class="count"><button class="chip" id="export">Export for MyDiD</button></span>' +
-      '</div>' +
+    /* The week, as a real week: one row per slot, one column per day, and a
+       job that runs two slots drawn as one tall block rather than a cell
+       saying "continues" under it. */
+    var grid =
+      '<div class="wk">' +
+        '<div class="wk-times" aria-hidden="true">' +
+          '<div class="wk-times-head"></div>' +
+          S.slots.map(function (s) {
+            return '<div class="wk-time"><b>' + P.esc(s.label) + '</b><span>' + P.esc(s.time) + '</span></div>';
+          }).join('') +
+        '</div>' +
 
-      '<div class="week">' +
         days.map(function (day) {
-          var off = blackouts.indexOf(day) !== -1;
-          var d = S.parseYmd(day);
-          return '<div class="day-col' + (off ? ' is-off' : '') + '">' +
-            '<div class="day-head">' +
-              '<b>' + d.toLocaleDateString('en-US', { weekday:'short' }) + '</b>' +
-              '<span>' + d.toLocaleDateString('en-US', { month:'short', day:'numeric' }) + '</span>' +
-              '<button class="day-off" data-day="' + day + '" title="' +
-                (off ? 'Make this day available again' : 'Mark yourself unavailable') + '">' +
-                (off ? 'Unblock' : 'Block') + '</button>' +
-            '</div>' +
-            S.slots.map(function (s) {
-              if (off) return '<div class="slot-cell is-blocked"><span>Not working</span></div>';
-              var j = jobAt(day, s.key);
+          var off  = blackouts.indexOf(day) !== -1;
+          var d    = S.parseYmd(day);
+          var isToday = day === today;
+          var cells = '';
+
+          if (off) {
+            cells = '<div class="wk-cell is-blocked" style="grid-row: span ' + S.slots.length + '">' +
+                      '<span>Not working</span></div>';
+          } else {
+            for (var n = 0; n < S.slots.length; n++) {
+              var s = S.slots[n], j = jobAt(day, s.key);
               if (!j) {
-                return '<div class="slot-cell is-free">' +
-                  '<b>' + P.esc(s.label) + '</b><span>' + P.esc(s.time) + '</span></div>';
+                cells += '<div class="wk-cell is-free"><span class="wk-free">Free</span>' +
+                         '<span class="wk-when">' + P.esc(s.time) + '</span></div>';
+                continue;
               }
-              var first = j.slot_start === s.key;
-              return '<a class="slot-cell is-taken' + (first ? ' is-first' : ' is-cont') + '" ' +
-                       'href="job.html?id=' + encodeURIComponent(j.id) + '">' +
-                (first
-                  ? '<b>' + P.esc(j.contact_name) + '</b>' +
-                    '<span>' + P.esc(j.service) + '</span>' +
-                    (j.slots_needed > 1 ? '<em>' + j.slots_needed + ' slots</em>' : '')
-                  : '<span class="cont">&#8595; continues</span>') +
+              if (j.slot_start !== s.key) continue;          // drawn by the block above
+              var runs = Math.min(j.slots_needed || 1, S.slots.length - n);
+              var last = S.slots[n + runs - 1];
+              var span = runs > 1 ? ' style="grid-row: span ' + runs + '"' : '';
+              cells += '<a class="wk-cell is-job is-' + P.esc(j.status || 'scheduled') + '"' + span +
+                         ' href="job.html?id=' + encodeURIComponent(j.id) + '">' +
+                '<b>' + P.esc(j.contact_name) + '</b>' +
+                '<span class="wk-what">' + P.esc(j.service) + '</span>' +
+                (j.address ? '<span class="wk-where">' + P.esc(String(j.address).split(',')[0]) + '</span>' : '') +
+                '<span class="wk-when">' + P.esc(s.time.split('\u2013')[0].trim()) + ' \u2013 ' +
+                  P.esc(last.time.split('\u2013')[1].trim()) + '</span>' +
               '</a>';
-            }).join('') +
+            }
+          }
+
+          return '<div class="wk-day' + (off ? ' is-off' : '') + (isToday ? ' is-today' : '') + '">' +
+            '<div class="wk-head">' +
+              '<div><b>' + d.toLocaleDateString('en-US', { weekday: 'long' }) + '</b>' +
+              '<span>' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+              (isToday ? ' \u00b7 today' : '') + '</span></div>' +
+              '<button class="wk-block" data-day="' + day + '" type="button" title="' +
+                (off ? 'Open this day back up' : 'Mark yourself unavailable all day') + '">' +
+                (off ? 'Open it up' : 'Block the day') + '</button>' +
+            '</div>' + cells +
           '</div>';
         }).join('') +
       '</div>';
 
+    var html =
+      '<div class="portal-title"><h1>Schedule</h1><p>' + P.esc(label) + ' \u00b7 ' +
+        booked + (booked === 1 ? ' job booked' : ' jobs booked') + '</p></div>' +
+
+      '<div class="wk-bar">' +
+        '<div class="wk-nav">' +
+          '<button class="chip" id="prev" type="button" aria-label="The week before">&larr;</button>' +
+          '<button class="chip" id="today" type="button">This week</button>' +
+          '<button class="chip" id="next" type="button" aria-label="The week after">&rarr;</button>' +
+        '</div>' +
+        '<button class="chip chip--go" id="export" type="button">Export for MyDiD</button>' +
+      '</div>' +
+
+      grid +
+
+      (booked ? '' :
+        '<div class="wk-none"><b>Nothing booked this week.</b>' +
+        '<span>Quotes the customer has accepted show up here once you give them a day and a time.</span></div>');
     root.innerHTML = html;
 
     document.getElementById('prev').addEventListener('click', function(){ weekStart.setDate(weekStart.getDate()-7); load(); });
@@ -188,7 +221,7 @@
     document.getElementById('today').addEventListener('click', function(){ weekStart = thisWorkWeek(); load(); });
     document.getElementById('export').addEventListener('click', exportMydid);
 
-    root.querySelectorAll('.day-off').forEach(function (b) {
+    root.querySelectorAll('.wk-block').forEach(function (b) {
       b.addEventListener('click', async function () {
         var day = b.dataset.day;
         var off = blackouts.indexOf(day) !== -1;

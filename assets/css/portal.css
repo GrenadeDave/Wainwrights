@@ -201,54 +201,145 @@ a.job-card:hover { transform: translateY(-3px); box-shadow: var(--sh-md); border
   .portal-header .who span.who-name { display: none; }
 }
 
-/* Week schedule ------------------------------------------------------------ */
-.week {
-  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px;
-  align-items: start;
+/* Week schedule ------------------------------------------------------------
+   One row per slot, one column per day, and a job that runs two slots drawn
+   as one tall block. The times are written once down the left rather than
+   repeated in every cell, which is what made the old grid read as a form.
+   -------------------------------------------------------------------------- */
+.wk-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 18px;
 }
-.day-col {
-  background: var(--white); border: 1px solid var(--line-soft);
-  border-radius: var(--r); overflow: hidden;
+.wk-nav { display: flex; gap: 6px; }
+.wk-bar .chip {
+  font-family: var(--f-body); font-weight: 650; font-size: .9375rem; cursor: pointer;
+  min-height: 42px; padding: 0 16px; border-radius: var(--r-pill);
+  background: var(--white); border: 1px solid var(--line); color: var(--ink);
+  transition: border-color .18s var(--ease), background-color .18s var(--ease), color .18s var(--ease);
 }
-.day-col.is-off { opacity: .72; }
+.wk-bar .chip:hover { border-color: var(--pine-500); color: var(--pine-700); }
+.wk-bar .chip--go {
+  margin-left: auto; background: var(--pine-800); border-color: var(--pine-800); color: var(--white);
+}
+.wk-bar .chip--go:hover { background: var(--pine-700); border-color: var(--pine-700); color: var(--white); }
 
-.day-head {
-  padding: 12px 12px 10px; border-bottom: 1px solid var(--line-soft);
-  text-align: center; background: var(--sand);
+.wk {
+  display: grid; grid-template-columns: 92px repeat(5, minmax(0, 1fr));
+  gap: 10px; align-items: start;
 }
-.day-head b    { display: block; font-size: .9375rem; color: var(--ink); }
-.day-head span { display: block; font-size: .8125rem; color: var(--muted); }
-.day-off {
-  margin-top: 8px; font-family: var(--f-body); font-size: .6875rem; font-weight: 700;
-  letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
-  background: none; border: 1px solid var(--line); border-radius: var(--r-pill);
-  padding: 4px 10px; color: var(--muted);
+
+/* The time gutter. Same row rhythm as a day column, with an empty box at the
+   top to sit under the day names. */
+.wk-times, .wk-day {
+  display: grid; grid-template-rows: auto repeat(3, var(--wk-row, 116px)); gap: 8px;
 }
-.day-off:hover { border-color: var(--clay); color: var(--clay-600); }
-
-.slot-cell {
-  display: block; padding: 12px; min-height: 84px;
-  border-bottom: 1px solid var(--line-soft); text-decoration: none;
-  font-size: .8125rem;
+.wk-times-head { height: 72px; }
+.wk-time {
+  display: grid; align-content: center; padding-right: 6px; text-align: right;
 }
-.slot-cell:last-child { border-bottom: 0; }
-.slot-cell b    { display: block; font-size: .875rem; color: var(--ink); margin-bottom: 2px; }
-.slot-cell span { display: block; color: var(--muted); }
-.slot-cell em   { display: block; font-style: normal; margin-top: 4px; font-size: .75rem;
-                  color: var(--clay-600); font-weight: 700; }
+.wk-time b    { display: block; font-size: .8125rem; color: var(--ink); font-weight: 700; }
+.wk-time span { display: block; font-size: .75rem; color: var(--muted); margin-top: 2px; }
 
-.slot-cell.is-free    { background: var(--white); }
-.slot-cell.is-blocked { background: repeating-linear-gradient(135deg,
-                          var(--sand) 0 8px, var(--line-soft) 8px 16px);
-                        color: var(--muted); display: grid; place-items: center; }
-.slot-cell.is-taken   { background: var(--sage-050); }
-.slot-cell.is-taken:hover { background: var(--sage-200); }
-.slot-cell.is-taken b { color: var(--moss-800); }
-.slot-cell.is-cont    { background: var(--sage-050); opacity: .72; display: grid; place-items: center; }
-.slot-cell .cont      { font-size: .75rem; color: var(--moss-600); font-weight: 600; }
+.wk-day { min-width: 0; }
+.wk-head {
+  display: grid; gap: 7px; justify-items: center; align-content: start;
+  height: 72px; padding: 2px 0 6px;
+}
+.wk-head > div { display: grid; gap: 1px; justify-items: center; }
+.wk-head b    { font-family: var(--f-head); font-size: 1rem; color: var(--ink); letter-spacing: -.01em; line-height: 1.2; }
+.wk-head span { font-size: .8125rem; color: var(--muted); }
+.wk-day.is-today .wk-head b    { color: var(--pine-700); }
+.wk-day.is-today .wk-head span { color: var(--amber-ink); font-weight: 650; }
 
-@media (max-width: 1080px) { .week { grid-template-columns: repeat(3, minmax(0,1fr)); } }
-@media (max-width: 640px)  { .week { grid-template-columns: 1fr; } }
+.wk-block {
+  font-family: var(--f-body); font-size: .75rem; font-weight: 600; cursor: pointer;
+  background: none; border: 0; padding: 2px 4px; color: var(--muted);
+  text-decoration: underline; text-underline-offset: 3px;
+  text-decoration-color: var(--line); border-radius: 6px;
+  transition: color .18s var(--ease), text-decoration-color .18s var(--ease);
+}
+.wk-block:hover { color: var(--pine-700); text-decoration-color: var(--pine-500); }
+
+.wk-cell {
+  display: grid; align-content: center; gap: 3px; min-width: 0;
+  padding: 12px; border-radius: var(--r); text-decoration: none;
+  border: 1px solid var(--line-soft); background: var(--white);
+}
+
+/* Free: quiet, so the eye goes to the work, not the gaps. */
+.wk-cell.is-free { background: var(--paper-2); border-style: dashed; justify-items: center; }
+.wk-cell.is-free .wk-free { font-size: .8125rem; color: var(--muted); font-weight: 600; }
+.wk-cell.is-free .wk-when { font-size: .6875rem; color: var(--muted); opacity: .8; }
+
+.wk-cell.is-blocked {
+  place-items: center; color: var(--muted); border-style: dashed;
+  background: repeating-linear-gradient(135deg, var(--paper-2) 0 9px, var(--sky-050) 9px 18px);
+}
+.wk-cell.is-blocked span { font-size: .8125rem; font-weight: 600; }
+
+/* Booked work: a solid card with a colour down its edge for the state. */
+.wk-cell.is-job {
+  background: var(--sky-050); border-color: var(--sky-line);
+  border-left: 4px solid var(--pine-600); align-content: start;
+  transition: transform .16s var(--ease), box-shadow .16s var(--ease), background-color .16s var(--ease);
+}
+.wk-cell.is-job:hover {
+  background: var(--sky-100); box-shadow: var(--sh-sm); transform: translateY(-1px);
+}
+.wk-cell.is-job b {
+  font-size: .9375rem; color: var(--pine-800); line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.wk-cell .wk-what  { font-size: .8125rem; color: var(--ink); overflow-wrap: anywhere; }
+.wk-cell .wk-where { font-size: .75rem; color: var(--muted); overflow-wrap: anywhere; }
+.wk-cell.is-job .wk-when {
+  margin-top: auto; padding-top: 6px; font-size: .75rem; color: var(--pine-600); font-weight: 650;
+}
+.wk-cell.is-in_progress { border-left-color: var(--amber); }
+.wk-cell.is-in_progress .wk-when { color: var(--amber-ink); }
+.wk-cell.is-completed   { border-left-color: var(--line); opacity: .78; }
+
+.wk-day.is-off .wk-head b, .wk-day.is-off .wk-head span { opacity: .6; }
+
+.wk-none {
+  display: grid; gap: 6px; margin-top: 20px; padding: 22px;
+  background: var(--white); border: 1px solid var(--line-soft); border-radius: var(--r);
+  text-align: center;
+}
+.wk-none b    { font-family: var(--f-head); font-size: 1.0625rem; color: var(--ink); }
+.wk-none span { color: var(--muted); font-size: .9375rem; }
+
+/* A narrower window: keep the week, tighten the rhythm. */
+@media (max-width: 1100px) {
+  .wk { grid-template-columns: 74px repeat(5, minmax(0, 1fr)); gap: 8px; --wk-row: 128px; }
+  .wk-time b { font-size: .75rem; }
+  .wk-time span { font-size: .6875rem; }
+  .wk-head b { font-size: .875rem; }
+  .wk-cell { padding: 9px; }
+  .wk-cell.is-job b { font-size: .8125rem; }
+}
+
+/* A phone: five columns of anything is unreadable, so the week becomes five
+   days one under another, each carrying its own times. */
+@media (max-width: 820px) {
+  .wk { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  .wk-times { display: none; }
+  .wk-times, .wk-day { grid-template-rows: none; }
+  .wk-day {
+    display: grid; gap: 8px; padding: 14px;
+    background: var(--white); border: 1px solid var(--line-soft); border-radius: var(--r);
+  }
+  .wk-head {
+    grid-template-columns: 1fr auto; justify-items: start; align-items: center;
+    min-height: 0; padding: 0 0 4px; border-bottom: 1px solid var(--line-soft);
+  }
+  .wk-head b { font-size: 1.0625rem; }
+  .wk-cell { min-height: 0; padding: 12px 14px; }
+  .wk-cell.is-job { display: grid; gap: 2px; }
+  .wk-cell.is-free { justify-items: start; grid-template-columns: 1fr auto; align-items: center; }
+  .wk-cell.is-free .wk-when { justify-self: end; }
+  .wk-cell.is-blocked { padding: 18px; }
+  .wk-bar .chip--go { margin-left: 0; width: 100%; }
+}
 
 .linkish {
   background: none; border: 0; padding: 0; cursor: pointer; font: inherit;
