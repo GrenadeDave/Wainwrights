@@ -21,7 +21,7 @@
   if (!P || !P.demo) return;
 
   var path = w.location.pathname;
-  var AREA = /\/admin(\/|$)/.test(path) ? 'admin' : (/\/portal(\/|$)/.test(path) ? 'portal' : '');
+  var AREA = /\/(admin|demo)(\/|$)/.test(path) ? 'admin' : (/\/portal(\/|$)/.test(path) ? 'portal' : '');
   if (!AREA) return;
 
   var KEY = 'w-portal-demo-v2';
@@ -445,8 +445,8 @@
       var b = document.createElement('div');
       b.className = 'demo-banner';
       b.innerHTML = '<b>Demo</b> — Bryan’s side, with sample data kept only in this browser. ' +
-                    '<a href="../portal/index.html">See the customer’s side</a>' +
-                    '<a href="../portal/login.html?demo=0#nodemo">Leave the demo</a>';
+                    '<a href="../portal/index.html?demo=1#demo">See the customer’s side</a>' +
+                    '<a href="../index.html">Leave the tour</a>';
       header.parentNode.insertBefore(b, header);
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', put); else put();

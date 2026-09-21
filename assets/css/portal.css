@@ -499,3 +499,14 @@ a.hero-card-p--act:hover { color: rgba(17,27,21,.8); }
   .site-header, .ptabs, .call-bar, .site-footer, .btn-row, .demo-banner, .to-top { display: none !important; }
   .panel-card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
 }
+
+/* MyDiD phone screens, shown on the tour in place of anything that pairs a
+   real phone. Two side by side on a desktop, stacked and centred on a phone. */
+.phone-shots {
+  display: flex; flex-wrap: wrap; gap: 28px; justify-content: center;
+  margin-top: 18px;
+}
+.phone-shot {
+  width: 260px; max-width: 100%; height: auto;
+  filter: drop-shadow(0 18px 34px rgba(12, 28, 51, .22));
+}

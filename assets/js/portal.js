@@ -94,6 +94,27 @@
     P.demo = w.sessionStorage.getItem('w-demo') === '1';
   } catch (e) { P.demo = wantsDemo && !leavesDemo; }
 
+  /* Where the tour may and may not run.
+
+     /demo/  is the tour, always, whatever the address bar says. Nothing there
+             can reach the real database even by accident.
+     /admin/ is Bryan's real side and is NEVER the tour. Anyone typing
+             ?demo=1 onto an admin address gets the sign-in page instead of a
+             look around — no sample job board, and no pretend buttons for
+             things like connecting a phone.
+
+     This is about what people are SHOWN. What actually holds the door is Row
+     Level Security in the database: every admin call is refused there unless
+     the caller is signed in and marked as an admin. */
+  var _path = w.location.pathname;
+  if (/\/demo(\/|$)/.test(_path)) P.demo = true;
+  if (/\/admin(\/|$)/.test(_path)) {
+    P.demo = false;
+    /* And forget the tour entirely, so stepping from Bryan's real side back
+       into the customer portal does not quietly land in sample data. */
+    try { w.sessionStorage.removeItem('w-demo'); } catch (e) {}
+  }
+
   P.configured = function () { return !!(CFG.url && CFG.anonKey); };
   P.ready      = function () { return P.demo || P.configured(); };
 
@@ -367,7 +388,7 @@
       var b = document.createElement('div');
       b.className = 'demo-banner';
       b.innerHTML = '<b>Demo</b> — sample data, stored only in this browser. Nothing here is real or sent anywhere. ' +
-                    '<a href="../admin/index.html">See Bryan’s side</a>' +
+                    '<a href="../demo/index.html">See Bryan’s side</a>' +
                     '<a href="login.html?demo=0#nodemo">Leave the demo</a>';
       header.parentNode.insertBefore(b, header);
     }

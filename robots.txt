@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /portal/
 Disallow: /admin/
+Disallow: /demo/
 
 Sitemap: https://wainwrightshandyman.com/sitemap.xml
