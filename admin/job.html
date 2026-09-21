@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/site.css?v=ca0fdb37">
-<link rel="stylesheet" href="../assets/css/portal.css?v=0a69ec61">
+<link rel="stylesheet" href="../assets/css/portal.css?v=719b3099">
 </head>
 <body class="portal-body">
 
@@ -45,7 +45,7 @@
 <script src="../assets/js/schedule.js?v=d47c8300"></script>
 <script src="../assets/js/supabase-config.js?v=ddcf7815"></script>
 <script src="../assets/js/portal.js?v=c9de8b68"></script>
-<script src="../assets/js/portal-demo.js?v=23857dae"></script>
+<script src="../assets/js/portal-demo.js?v=03e2a154"></script>
 <script src="../assets/js/site.js?v=a4fc789f"></script>
 <script>
 (function () {
@@ -109,10 +109,20 @@
 
   function paint(events) {
     var total = P.total(job);
-    var statusOptions = P.ORDER.concat(['cancelled']).map(function (k) {
+    /* 'cancelled' is deliberately NOT in this list. Turning someone down
+       means telling them why, so it has its own button and its own box at the
+       bottom of this card — not a value that can be picked by mistake on the
+       way to something else. A job that IS cancelled still shows as such. */
+    var picks = P.ORDER.slice();
+    if (job.status === 'cancelled') picks.push('cancelled');
+    var statusOptions = picks.map(function (k) {
       return '<option value="' + k + '"' + (k === job.status ? ' selected' : '') + '>' +
              P.STATUS[k].label + '</option>';
     }).join('');
+
+    var cancelled = job.status === 'cancelled';
+    var theirEmail = (job.contact_email || '').trim();
+    var firstName = String(job.contact_name || 'They').trim().split(/\s+/)[0];
 
     root.innerHTML =
       '<p class="crumbs-p">' +
@@ -249,6 +259,54 @@
             '<button class="btn btn-primary btn-block" id="save">Save changes</button>' +
             '<div class="form-status" id="save-status" role="status"></div>' +
 
+            /* Turning the job down. Separated from everything above by a rule,
+               because it sends an email the moment it is pressed. */
+            '<div class="turn-down">' +
+              (cancelled
+                ? '<span class="mini-label">Turned down</span>' +
+                  '<p class="td-when">' + P.esc(P.dateTime(job.cancelled_at) || '') +
+                    (job.cancelled_by === 'customer' ? ' \u2014 by the customer' : '') + '</p>' +
+                  (job.cancel_reason
+                    ? '<p class="td-why">' + P.esc(job.cancel_reason) + '</p>' +
+                      '<p class="form-note" style="text-align:left;margin:10px 0 0">' +
+                      'They were sent this, word for word. Changing it now would not reach them \u2014 ' +
+                      'ring them instead.</p>'
+                    : '<p class="form-note" style="text-align:left;margin:0">No reason was recorded.</p>')
+                : '<button type="button" class="linkish td-open" id="cancel-open">' +
+                    'Turn this request down\u2026</button>' +
+                  '<div class="td-box" id="cancel-box" hidden>' +
+                    '<h3>Turn this request down</h3>' +
+                    (theirEmail
+                      ? '<p>' + P.esc(firstName) + ' will be emailed, and will see exactly what you ' +
+                        'write here. Write it the way you would say it on the phone.</p>'
+                      : '<p class="td-noemail"><b>There is no email address on this request.</b> ' +
+                        'It will still be cancelled and the reason written down, but nobody will be ' +
+                        'told \u2014 ring them on ' + P.esc(job.contact_phone || 'the number they gave') +
+                        '.</p>') +
+                    '<div class="td-quick">' +
+                      ['Booked solid until the end of the month \u2014 I did not want to leave you waiting on me.',
+                       'This one is outside the area I cover.',
+                       'This is not work I take on, and you would be better off with someone who does it every day.']
+                        .map(function (r, n) {
+                          return '<button type="button" class="chip-mini" data-why="' + n + '">' +
+                            P.esc(['Booked solid', 'Outside my area', 'Not work I take on'][n]) + '</button>';
+                        }).join('') +
+                    '</div>' +
+                    '<div class="field">' +
+                      '<label class="sr-only" for="cancel-why">Reason</label>' +
+                      '<textarea id="cancel-why" maxlength="1000" style="min-height:104px" ' +
+                        'placeholder="Why can you not take this one?"></textarea>' +
+                      '<p class="form-note" style="text-align:left;margin-top:8px" id="cancel-count"></p>' +
+                    '</div>' +
+                    '<div class="btn-row">' +
+                      '<button type="button" class="btn btn-dark" id="cancel-do">' +
+                        (theirEmail ? 'Cancel it and tell them' : 'Cancel it') + '</button>' +
+                      '<button type="button" class="btn btn-outline" id="cancel-back">Keep it</button>' +
+                    '</div>' +
+                    '<div class="form-status" id="cancel-status" role="status"></div>' +
+                  '</div>') +
+            '</div>' +
+
             '<div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line-soft)">' +
               '<span class="mini-label">Total the customer sees</span>' +
               '<div class="price-row total" style="border:0;padding-top:4px">' +
@@ -268,6 +326,33 @@
       '</div>';
 
     wire();
+  }
+
+  /* Live, this goes through the cancel-request function: it runs the database
+     function as Bryan (which is what actually decides whether he may), then
+     emails the customer. In the tour there is no server, so the demo client
+     answers instead and nothing is sent anywhere. */
+  async function cancelJob(jobId, reason) {
+    if (P.demo) {
+      var d = await P.client().rpc('admin_cancel_job', { p_job: jobId, p_reason: reason });
+      if (d.error) return { error: d.error.message };
+      return { emailed: true, note: 'Nothing was really sent \u2014 this is the tour.' };
+    }
+    try {
+      var cfg = window.WAINWRIGHTS_SUPABASE;
+      var session = (await P.client().auth.getSession()).data.session;
+      if (!session) return { error: 'Your sign-in has expired. Sign in again and try that once more.' };
+      var res = await fetch(cfg.url + '/functions/v1/cancel-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+        body: JSON.stringify({ jobId: jobId, reason: reason })
+      });
+      var j = await res.json();
+      if (!res.ok || j.error) return { error: j.error || 'That did not go through.' };
+      return j;
+    } catch (e) {
+      return { error: 'That did not go through: ' + e.message };
+    }
   }
 
   function wire() {
@@ -324,6 +409,82 @@
         document.getElementById('scheduled').value = job.requested_day;
         if (job.requested_slot != null) slotStartEl.value = String(job.requested_slot);
         echoSlots();
+      });
+    }
+
+    /* ------------------------------------------------------------------
+       Turning the request down
+       ------------------------------------------------------------------
+       Nothing happens without a reason, and the reason is what the customer
+       reads, so it is quoted to them rather than summarised. The server does
+       the same checks again — this is only about not wasting Bryan's time
+       with a round trip he was always going to lose. */
+    var cancelOpen = document.getElementById('cancel-open');
+    if (cancelOpen) {
+      var box   = document.getElementById('cancel-box');
+      var why   = document.getElementById('cancel-why');
+      var count = document.getElementById('cancel-count');
+      var stat  = document.getElementById('cancel-status');
+      var QUICK = [
+        'Booked solid until the end of the month \u2014 I did not want to leave you waiting on me.',
+        'This one is outside the area I cover.',
+        'This is not work I take on, and you would be better off with someone who does it every day.'
+      ];
+
+      var tell = function (msg, good) {
+        stat.textContent = msg;
+        stat.classList.add('is-visible');
+        stat.style.background   = good ? 'var(--sky-050)' : 'var(--fire-050)';
+        stat.style.borderColor  = good ? 'var(--sky-line)' : '#E8C0B6';
+        stat.style.color        = good ? 'var(--pine-700)' : 'var(--fire)';
+      };
+      var tally = function () {
+        var n = why.value.trim().length;
+        count.textContent = n < 3
+          ? 'Say why before you send this.'
+          : n + ' character' + (n === 1 ? '' : 's') + ' \u2014 this is quoted to them exactly as written.';
+      };
+
+      cancelOpen.addEventListener('click', function () {
+        box.hidden = false; cancelOpen.hidden = true; why.focus(); tally();
+      });
+      document.getElementById('cancel-back').addEventListener('click', function () {
+        box.hidden = true; cancelOpen.hidden = false;
+      });
+      why.addEventListener('input', tally);
+      box.querySelectorAll('[data-why]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          why.value = QUICK[Number(b.dataset.why)] || '';
+          why.focus(); tally();
+        });
+      });
+
+      document.getElementById('cancel-do').addEventListener('click', async function () {
+        var btn = this, reason = why.value.trim();
+        if (reason.length < 3) { why.focus(); return tell('Say why first. They are shown exactly what you write.', false); }
+
+        var sure = await P.confirm({
+          title: 'Turn this request down?',
+          body: (job.contact_email
+                  ? (job.contact_name || 'They') + ' gets an email with this reason in it, straight away:\n\n'
+                  : 'Nobody is emailed \u2014 there is no address on this request \u2014 but the reason is written down:\n\n') +
+                '\u201c' + reason + '\u201d',
+          ok: 'Yes, turn it down', cancel: 'Not yet', danger: true
+        });
+        if (!sure) return;
+
+        btn.disabled = true; btn.textContent = 'Sending\u2026';
+        var r = await cancelJob(id, reason);
+        btn.disabled = false; btn.textContent = job.contact_email ? 'Cancel it and tell them' : 'Cancel it';
+
+        if (r.error) return tell(r.error, false);
+        flash(r.emailed ? 'Turned down \u2014 the email is on its way' : (r.note || 'Turned down'));
+        if (!r.emailed && r.note) tell(r.note, false);
+        if (await reload()) {
+          var ev2 = await P.client().from('job_events').select('*').eq('job_id', id)
+            .order('created_at', { ascending: false });
+          paint(ev2.data || []);
+        }
       });
     }
 

@@ -251,8 +251,9 @@
       if (!j) return no('Job not found.');
       if (j.status !== 'requested' && j.status !== 'quoted') return no('This job is already booked in. Please call Bryan to cancel it.');
       j.status = 'cancelled';
-      addEvent(db, id, 'system', '', 'cancelled');
-      addEvent(db, id, 'customer', 'Cancelled this request.');
+      j.cancelled_at = new Date().toISOString();
+      j.cancelled_by = 'customer';
+      addEvent(db, id, 'customer', 'Cancelled this request.', 'cancelled');
       save(db); return ok();
     },
     request: function (r) {
@@ -397,6 +398,22 @@
         var db = load(), who = db.profiles[(args || {}).p_customer];
         if (who) { who.deletion_requested_at = null; who.deletion_note = null; save(db); }
         return ok();
+      }
+      if (fn === 'admin_cancel_job') {
+        var dc = load(), which = (args || {}).p_job, reason = String((args || {}).p_reason || '').trim();
+        var jc = dc.jobs.filter(function (x) { return x.id === which; })[0];
+        if (!jc) return no('That job no longer exists.');
+        if (jc.status === 'cancelled') return no('This request was already cancelled.');
+        if (reason.length < 3) return no('Please say why. The customer is shown exactly what you write.');
+        if (reason.length > 1000) return no('That reason is too long. 1000 characters at most.');
+        jc.status = 'cancelled';
+        jc.cancel_reason = reason;
+        jc.cancelled_at = new Date().toISOString();
+        jc.cancelled_by = 'bryan';
+        jc.updated_at = jc.cancelled_at;
+        addEvent(dc, which, 'bryan', reason, 'cancelled');
+        save(dc);
+        return ok({ id: which, reason: reason, contact_email: jc.contact_email, has_account: true });
       }
       if (fn === 'grant_admin' || fn === 'revoke_admin') {
         var d2 = load(), addr = String((args || {}).p_email || '').trim().toLowerCase();

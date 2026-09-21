@@ -162,12 +162,42 @@
       html += '<p class="crumbs-p"><a href="index.html">My jobs</a> › ' + esc(j.service) + '</p>' +
         '<div class="portal-title"><h1>' + esc(j.service) + '</h1><p>Asked ' + esc(P.ago(j.created_at)) + '</p></div>';
 
-      /* ---- status ---- */
-      html += '<div class="panel-card"><div class="status-line">' + P.statusPill(j.status) +
-        '<span>' + esc(st.blurb) + '</span></div>' + P.track(j.status) + '</div>';
+      /* ---- status ----
+         A cancelled job skips this: the panel below says the same thing once,
+         properly, instead of three times in a row. */
+      if (j.status !== 'cancelled') {
+        html += '<div class="panel-card"><div class="status-line">' + P.statusPill(j.status) +
+          '<span>' + esc(st.blurb) + '</span></div>' + P.track(j.status) + '</div>';
+      }
+
+      /* ---- turned down ----
+         This goes above everything else. Someone opening this job wants one
+         thing: did it happen, and if not, why. Bryan's words, not ours. */
+      if (j.status === 'cancelled') {
+        var byBryan = j.cancelled_by !== 'customer';
+        html += '<div class="panel-card cancelled-card">' +
+          '<h2>' + (byBryan ? 'Bryan could not take this one' : 'You cancelled this request') + '</h2>' +
+          '<p class="cc-when">' + esc(P.dateTime(j.cancelled_at) || P.dateTime(j.updated_at) || '') + '</p>' +
+          (byBryan && j.cancel_reason
+            ? '<p class="mini-label" style="margin:18px 0 6px">In his words</p>' +
+              '<blockquote class="cc-why">' + esc(j.cancel_reason) + '</blockquote>'
+            : '') +
+          (byBryan
+            ? '<p style="margin:18px 0 0">Nothing is owed and nothing is booked. If you want to talk it ' +
+              'through, or there is something else, Bryan answers his own phone.</p>' +
+              '<div class="btn-row" style="margin-top:18px">' +
+                '<a class="btn btn-primary" href="tel:+12094561846">' + ICON.phone + ' Call Bryan</a>' +
+                '<a class="btn btn-outline" href="new.html">Ask about something else</a>' +
+              '</div>'
+            : '<div class="btn-row" style="margin-top:16px">' +
+                '<a class="btn btn-outline" href="new.html">Request something else</a></div>') +
+          '</div>';
+      }
 
       /* ---- the thing to do next ---- */
-      if (P.needsYou(j)) {
+      if (j.status === 'cancelled') {
+        /* nothing to do next on a job that is not happening */
+      } else if (P.needsYou(j)) {
         html += '<div class="panel-card panel-card--act">' +
           '<span class="hcp-label">Waiting on you</span>' +
           '<h2>Bryan has quoted ' + P.money(total) + '</h2>' +
