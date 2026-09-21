@@ -289,7 +289,8 @@
      stand-in for the Supabase client, covering exactly the calls the admin
      pages make. Bryan is admin, so — as in the real database — he sees
      every row. */
-  var TABLES = { jobs: 'jobs', job_events: 'events', job_notes: 'notes', blackouts: 'blackouts', devices: 'devices', profiles: 'profiles' };
+  var TABLES = { jobs: 'jobs', job_events: 'events', job_notes: 'notes', blackouts: 'blackouts', devices: 'devices',
+                 profiles: 'profiles', reviews: 'reviews', admin_grants: 'grants', admin_audit: 'audit' };
   var KEYS   = { job_notes: 'job_id', blackouts: 'day' };
 
   function Query(table) { this.table = table; this.op = 'select'; this.where = []; this.sort = null; this.mode = 'many'; this.payload = null; }
@@ -299,6 +300,7 @@
   Query.prototype.lte = function (c, v) { this.where.push(function (r) { return r[c] != null && r[c] <= v; }); return this; };
   Query.prototype.in  = function (c, a) { this.where.push(function (r) { return a.indexOf(r[c]) !== -1; }); return this; };
   Query.prototype.not = function (c, op, v) { this.where.push(function (r) { return op === 'is' && v === null ? r[c] != null : r[c] !== v; }); return this; };
+  Query.prototype.limit = function (n) { this.cap = n; return this; };
   Query.prototype.order = function (c, o) { this.sort = { c: c, asc: !o || o.ascending !== false }; return this; };
   Query.prototype.maybeSingle = function () { this.mode = 'maybe'; return this; };
   Query.prototype.single = function () { this.mode = 'one'; return this; };
@@ -330,6 +332,7 @@
         var s = this.sort;
         out.sort(function (a, b) { var x = a[s.c], y = b[s.c]; return (x === y ? 0 : (x < y ? -1 : 1)) * (s.asc ? 1 : -1); });
       }
+      if (this.cap != null) out = out.slice(0, this.cap);
       out = clone(out);
       if (this.mode === 'many') return ok(out);
       if (!out.length && this.mode === 'one') return no('Not found.');
@@ -394,6 +397,28 @@
         var db = load(), who = db.profiles[(args || {}).p_customer];
         if (who) { who.deletion_requested_at = null; who.deletion_note = null; save(db); }
         return ok();
+      }
+      if (fn === 'grant_admin' || fn === 'revoke_admin') {
+        var d2 = load(), addr = String((args || {}).p_email || '').trim().toLowerCase();
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(addr)) return no('That does not look like an email address.');
+        d2.grants = d2.grants || []; d2.audit = d2.audit || [];
+        var who = Object.keys(d2.profiles).map(function (k) { return d2.profiles[k]; })
+          .filter(function (r) { return (r.email || '').toLowerCase() === addr; })[0];
+        if (fn === 'revoke_admin') {
+          var admins = Object.keys(d2.profiles).filter(function (k) { return d2.profiles[k].is_admin; });
+          if (who && who.is_admin && admins.length < 2) return no('That is the only admin left. Make someone else an admin first.');
+          if (who) who.is_admin = false;
+          d2.grants = d2.grants.filter(function (g) { return g.email !== addr; });
+          d2.audit.push({ id: uid(), at: new Date().toISOString(), actor_email: 'bryan@example.com', action: 'revoked', target_email: addr });
+          save(d2); return ok();
+        }
+        if (who) who.is_admin = true;
+        if (!d2.grants.some(function (g) { return g.email === addr; })) {
+          d2.grants.push({ email: addr, created_at: new Date().toISOString() });
+        }
+        d2.audit.push({ id: uid(), at: new Date().toISOString(), actor_email: 'bryan@example.com', action: 'granted', target_email: addr });
+        save(d2);
+        return ok(who ? 'now an admin' : 'approved — they become an admin when they sign up and confirm their email');
       }
       if (fn !== 'create_pairing_code') return no('Not in the demo.');
       var hex = '0123456789ABCDEF', c = '';

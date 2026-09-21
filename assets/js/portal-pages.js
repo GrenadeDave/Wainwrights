@@ -59,6 +59,15 @@
   async function dashboard() {
     var session = await begin('jobs'); if (!session) return;
     var pr = await P.api.profile(), res = await P.api.jobs();
+
+    /* Bryan signing in should see his job board, not his own empty customer
+       view. "?customer=1" is the way back, for when he wants to look at what
+       a customer sees. */
+    if (pr.data && pr.data.is_admin && !P.demo &&
+        new URLSearchParams(w.location.search).get('customer') !== '1') {
+      w.location.replace('../admin/index.html');
+      return;
+    }
     if (res.error) return problem('Could not load your jobs', res.error.message);
 
     var jobs = res.data || [], me = pr.data || {};

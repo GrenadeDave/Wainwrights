@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Who can get in — Wainwrights admin</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css?v=ca0fdb37">
+<link rel="stylesheet" href="../assets/css/portal.css?v=c9ab9649">
+</head>
+<body class="portal-body">
+
+<header class="site-header portal-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <img class="brand-mark" src="../assets/img/logo-wide-light.png" width="260" height="176" alt="">
+      <span class="brand-text"><span class="brand-name">Wainwrights</span><span class="brand-sub">Who can get in</span></span>
+    </a>
+    <div class="who">
+      <a class="plain" href="index.html">Job board</a>
+      <a class="plain" href="schedule.html">Schedule</a>
+      <a class="plain" href="mydid.html">MyDiD</a>
+      <a class="plain" href="reviews.html">Reviews</a>
+      <a class="plain" href="#" id="signout">Sign out</a>
+    </div>
+  </div>
+</header>
+
+<main class="portal-main">
+  <div class="wrap wrap--portal" id="root">
+    <p style="color:var(--muted)">Loading&hellip;</p>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
+<script src="../assets/js/config.js?v=cdeaaa6e"></script>
+<script src="../assets/js/rates.js?v=bc51df83"></script>
+<script src="../assets/js/schedule.js?v=d47c8300"></script>
+<script src="../assets/js/supabase-config.js?v=ddcf7815"></script>
+<script src="../assets/js/portal.js?v=6065b5b3"></script>
+<script src="../assets/js/portal-demo.js?v=e1d736ce"></script>
+<script src="../assets/js/site.js?v=a4fc789f"></script>
+<script>
+(function () {
+  'use strict';
+  var P = window.WPortal;
+  var root  = document.getElementById('root');
+  var toast = document.getElementById('toast');
+  var me = null;
+
+  if (!P.ready()) { root.innerHTML = P.notConfiguredHtml(); return; }
+
+  document.getElementById('signout').addEventListener('click', async function (e) {
+    e.preventDefault();
+    await P.signOut();
+    window.location.replace('../portal/login.html');
+  });
+
+  function flash(m) {
+    toast.textContent = m; toast.classList.add('is-up');
+    setTimeout(function () { toast.classList.remove('is-up'); }, 3200);
+  }
+
+  function personRow(p, pending) {
+    var isMe = me && p.email && p.email.toLowerCase() === (me.email || '').toLowerCase();
+    return '<li class="device">' +
+      '<div><b>' + P.esc(p.email) + '</b>' +
+        '<span>' + (pending
+          ? 'Approved — becomes an admin when they sign up and confirm their email'
+          : 'Full access to the job board, the schedule and customers') + '</span>' +
+        (isMe ? '<span class="device-ok">This is you</span>' : '') +
+      '</div>' +
+      '<button class="btn btn-outline" type="button" data-remove="' + P.esc(p.email) + '">Remove</button>' +
+    '</li>';
+  }
+
+  async function paint() {
+    var admins  = await P.client().from('profiles').select('email, created_at').eq('is_admin', true).order('created_at');
+    var grants  = await P.client().from('admin_grants').select('email, created_at').order('created_at');
+    var audit   = await P.client().from('admin_audit').select('*').order('id', { ascending: false }).limit(12);
+    if (admins.error) {
+      root.innerHTML = '<div class="portal-empty"><h2>Could not load</h2><p>' + P.esc(admins.error.message) + '</p></div>';
+      return;
+    }
+    var live = admins.data || [];
+    var liveEmails = live.map(function (p) { return (p.email || '').toLowerCase(); });
+    var waiting = (grants.data || []).filter(function (g) { return liveEmails.indexOf(g.email) === -1; });
+
+    root.innerHTML =
+      '<div class="portal-title"><h1>Who can get in</h1>' +
+        '<p>Everyone here can see every customer, every job and every price, and can change them. ' +
+        'Keep the list to the people who run the business.</p></div>' +
+
+      '<div class="panel-card">' +
+        '<h2>Add someone</h2>' +
+        '<p>Put in the email address they use to sign in. If they have not signed up yet, the address is ' +
+        'approved and they become an admin the moment they confirm their email &mdash; never before.</p>' +
+        '<form id="add-form" class="composer" novalidate>' +
+          '<div class="field"><label for="new-email">Email address</label>' +
+          '<input type="email" id="new-email" autocomplete="off" placeholder="name@example.com"></div>' +
+          '<button class="btn btn-primary" type="submit">Make them an admin</button>' +
+        '</form>' +
+      '</div>' +
+
+      '<h2 class="p-h2">Admins (' + live.length + ')</h2>' +
+      '<ul class="device-list">' + live.map(function (p) { return personRow(p, false); }).join('') + '</ul>' +
+
+      (waiting.length ? '<h2 class="p-h2">Waiting to sign up</h2><ul class="device-list">' +
+        waiting.map(function (g) { return personRow(g, true); }).join('') + '</ul>' : '') +
+
+      (audit.data && audit.data.length
+        ? '<h2 class="p-h2">Recent changes</h2><div class="panel-card"><ul class="timeline">' +
+          audit.data.map(function (a) {
+            return '<li><div class="t-when">' + P.esc(P.dateTime(a.at) || '') + '</div>' +
+              '<div class="t-what">' + (a.action === 'granted' ? 'Made an admin' : 'Removed') + '</div>' +
+              '<div class="t-note">' + P.esc(a.target_email) + ' &mdash; by ' + P.esc(a.actor_email) + '</div></li>';
+          }).join('') + '</ul></div>'
+        : '');
+
+    document.getElementById('add-form').addEventListener('submit', add);
+    root.querySelectorAll('[data-remove]').forEach(function (b) {
+      b.addEventListener('click', function () { remove(b.dataset.remove); });
+    });
+  }
+
+  async function add(e) {
+    e.preventDefault();
+    var box = document.getElementById('new-email');
+    var addr = box.value.trim();
+    if (!addr) return flash('Put in an email address first');
+    var yes = await P.confirm({
+      title: 'Make ' + addr + ' an admin?',
+      body: 'They will see every customer, every job and every price, and be able to change them. ' +
+            'They will also be able to add and remove other admins.',
+      ok: 'Yes, make them an admin', cancel: 'Not yet'
+    });
+    if (!yes) return;
+    var r = await P.client().rpc('grant_admin', { p_email: addr });
+    if (r.error) return flash('Could not do that: ' + r.error.message);
+    box.value = '';
+    flash(addr + ' — ' + r.data);
+    paint();
+  }
+
+  async function remove(addr) {
+    var mine = me && addr.toLowerCase() === (me.email || '').toLowerCase();
+    var yes = await P.confirm({
+      title: 'Remove ' + addr + '?',
+      body: mine
+        ? 'This is your own account. You will lose the job board straight away and will need another admin to let you back in.'
+        : 'They keep their customer account and their own jobs, but lose the job board and everything on it.',
+      ok: 'Remove', cancel: 'Keep them', danger: true
+    });
+    if (!yes) return;
+    var r = await P.client().rpc('revoke_admin', { p_email: addr });
+    if (r.error) return flash('Could not do that: ' + r.error.message);
+    flash(addr + ' removed');
+    if (mine) { window.location.replace('../portal/index.html'); return; }
+    paint();
+  }
+
+  (async function () {
+    var session = await P.requireSession('../portal/login.html');
+    if (!session) return;
+    me = await P.profile();
+    if (!me || !me.is_admin) {
+      root.innerHTML = '<div class="portal-empty"><h2>This page is Bryan’s</h2>' +
+        '<p>Your account does not have admin access.</p>' +
+        '<a class="btn btn-outline" href="../portal/index.html">Your own jobs</a></div>';
+      return;
+    }
+    paint();
+  })();
+})();
+</script>
+</body>
+</html>
