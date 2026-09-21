@@ -426,7 +426,12 @@
   P.requireSession = async function (loginUrl) {
     var s = await P.api.session();
     if (!s) {
-      var back = encodeURIComponent(w.location.pathname.split('/').pop() || '');
+      /* Keep the folder. Bryan's pages live in /admin, the customer's in
+         /portal, and sending him back to portal/mydid.html is a 404 — which
+         is exactly what happened the first time he signed in from there. */
+      var file = w.location.pathname.split('/').pop() || '';
+      var inAdmin = /\/admin(\/|$)/.test(w.location.pathname);
+      var back = encodeURIComponent((inAdmin ? '../admin/' : '') + file);
       w.location.replace((loginUrl || 'login.html') + (back ? '?next=' + back : ''));
       return null;
     }

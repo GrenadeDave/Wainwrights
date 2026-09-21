@@ -1523,3 +1523,9 @@ body.header-hidden .dst-panel { top: 20px; }
 .rule-cite { font-size: .8125rem; color: var(--muted); }
 .section--sand .rule { background: var(--white); }
 .section--sand .rule--trade { background: var(--amber-050); }
+
+/* The sticky call button says the number, so a tap that opens a chooser
+   still tells you what it is about — and it can be read out or dialled by
+   hand if a phone does something odd with tel: links. */
+.call-bar .btn-moss { font-size: .95rem; letter-spacing: -.01em; }
+@media (max-width: 360px) { .call-bar .call-lbl { display: none; } }
