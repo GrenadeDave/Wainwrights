@@ -206,7 +206,10 @@
           '<button class="chip" id="today" type="button">This week</button>' +
           '<button class="chip" id="next" type="button" aria-label="The week after">&rarr;</button>' +
         '</div>' +
-        '<button class="chip chip--go" id="export" type="button">Export for MyDiD</button>' +
+        /* The tour is public. Handing Bryan's week to MyDiD is his to do, not
+           something to leave on screen for whoever wanders in. */
+        (P.demo ? '' :
+          '<button class="chip chip--go" id="export" type="button">Export for MyDiD</button>') +
       '</div>' +
 
       grid +
@@ -219,7 +222,8 @@
     document.getElementById('prev').addEventListener('click', function(){ weekStart.setDate(weekStart.getDate()-7); load(); });
     document.getElementById('next').addEventListener('click', function(){ weekStart.setDate(weekStart.getDate()+7); load(); });
     document.getElementById('today').addEventListener('click', function(){ weekStart = thisWorkWeek(); load(); });
-    document.getElementById('export').addEventListener('click', exportMydid);
+    var exportBtn = document.getElementById('export');
+    if (exportBtn) exportBtn.addEventListener('click', exportMydid);
 
     root.querySelectorAll('.wk-block').forEach(function (b) {
       b.addEventListener('click', async function () {
