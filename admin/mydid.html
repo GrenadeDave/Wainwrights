@@ -43,7 +43,7 @@
 <script src="../assets/js/rates.js?v=bc51df83"></script>
 <script src="../assets/js/schedule.js?v=d47c8300"></script>
 <script src="../assets/js/supabase-config.js?v=ddcf7815"></script>
-<script src="../assets/js/portal.js?v=01f5ff23"></script>
+<script src="../assets/js/portal.js?v=5b16ae3f"></script>
 <script src="../assets/js/portal-demo.js?v=c41072c6"></script>
 <script src="../assets/js/site.js?v=a4fc789f"></script>
 <script>
@@ -101,7 +101,10 @@
           '<li>Type the code in. It works once, for 10 minutes.</li>' +
         '</ol>' +
         '<div id="code-box"></div>' +
-        '<button class="btn btn-primary" type="button" id="get-code">Get a pairing code</button>' +
+        '<div class="btn-row">' +
+          '<button class="btn btn-primary" type="button" id="get-code">Get a pairing code</button>' +
+          '<button class="btn btn-outline" type="button" id="email-code">Email it to Bryan</button>' +
+        '</div>' +
       '</div>' +
 
       '<div class="panel-card">' +
@@ -114,6 +117,7 @@
       '</div>';
 
     document.getElementById('get-code').addEventListener('click', getCode);
+    document.getElementById('email-code').addEventListener('click', emailCode);
     root.querySelectorAll('[data-drop]').forEach(function (b) {
       b.addEventListener('click', async function () {
         var ok = await P.confirm({
@@ -129,6 +133,28 @@
     });
   }
 
+  /* Send the code to Bryan's inbox with the steps beside it — easier than
+     reading eight characters down the phone, and he can do it on his own. */
+  async function emailCode() {
+    var btn = document.getElementById('email-code');
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      var cfg = window.WAINWRIGHTS_SUPABASE;
+      var session = (await P.client().auth.getSession()).data.session;
+      var res = await fetch(cfg.url + '/functions/v1/mydid/email-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token }
+      });
+      var j = await res.json();
+      if (!res.ok || j.error) throw new Error(j.error || 'That did not send.');
+      showCode(j.code);
+      flash(j.emailed ? 'Sent — the code is in the inbox' : 'Made a code, but the email did not send');
+    } catch (e) {
+      flash('Could not send that: ' + e.message);
+    }
+    btn.disabled = false; btn.textContent = 'Email it to Bryan';
+  }
+
   async function getCode() {
     var btn = document.getElementById('get-code');
     btn.disabled = true;
@@ -136,12 +162,22 @@
     btn.disabled = false;
     if (r.error) return flash('Could not make a code: ' + r.error.message);
 
-    var box = document.getElementById('code-box');
-    var until = Date.now() + 10 * 60 * 1000;
-    box.innerHTML = '<div class="pair-code" aria-live="polite"><span class="pair-code-value">' + P.esc(r.data) + '</span>' +
-                    '<span class="pair-code-left" id="code-left"></span></div>';
+    showCode(r.data);
     btn.textContent = 'Get a new code';
 
+    countdown();
+  }
+
+  function showCode(code) {
+    var box = document.getElementById('code-box');
+    box.innerHTML = '<div class="pair-code" aria-live="polite"><span class="pair-code-value">' + P.esc(code) + '</span>' +
+                    '<span class="pair-code-left" id="code-left"></span></div>';
+    countdown();
+  }
+
+  function countdown() {
+    var box = document.getElementById('code-box');
+    var until = Date.now() + 10 * 60 * 1000;
     clearInterval(timer);
     var tick = function () {
       var left = Math.max(0, Math.round((until - Date.now()) / 1000));

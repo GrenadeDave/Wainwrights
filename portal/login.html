@@ -126,7 +126,7 @@
 <script src="../assets/js/rates.js?v=bc51df83"></script>
 <script src="../assets/js/supabase-config.js?v=ddcf7815"></script>
 <script src="../assets/js/schedule.js?v=d47c8300"></script>
-<script src="../assets/js/portal.js?v=01f5ff23"></script>
+<script src="../assets/js/portal.js?v=5b16ae3f"></script>
 <script src="../assets/js/portal-demo.js?v=c41072c6"></script>
 <script src="../assets/js/site.js?v=a4fc789f"></script>
 <script>
@@ -329,6 +329,16 @@
   /* Start in the mode the link asked for: login.html#create, #forgot. */
   var start = (window.location.hash || '').replace('#', '');
   mode(forms[start] ? start : 'signin', false);
+
+  /* Last, because setting up the tabs clears this panel: if a sign-in came
+     back broken, portal.js kept the reason — say it plainly. */
+  try {
+    var why = window.sessionStorage.getItem('w-auth-error');
+    if (why) {
+      window.sessionStorage.removeItem('w-auth-error');
+      say(why, false);
+    }
+  } catch (e) {}
 })();
 </script>
 </body>

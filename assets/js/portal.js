@@ -46,6 +46,41 @@
   ];
 
   /* ----------------------------------------------------------------------
+     A sign-in that came back broken
+     ----------------------------------------------------------------------
+     Google hands the customer back to us with an error in the address bar —
+     most often "OAuth state not found or expired", which means the sign-in
+     finished in a different browser than it started in (tapping the link
+     inside another app's browser does it). Left alone they land on the
+     sign-in page with no idea why, which reads as "the page failed". Catch
+     it, keep the reason, and let the sign-in page explain. */
+  (function () {
+    var raw = (w.location.hash || '').replace(/^#/, '') + '&' + (w.location.search || '').replace(/^\?/, '');
+    if (raw.indexOf('error') === -1) return;
+    var q = new URLSearchParams(raw);
+    var code = q.get('error_code') || '';
+    var desc = (q.get('error_description') || q.get('error') || '').replace(/\+/g, ' ');
+    if (!desc) return;
+
+    var msg;
+    if (/state not found|expired/i.test(desc)) {
+      msg = '<strong>That sign-in did not finish.</strong><br>It usually means the Google window opened in a ' +
+            'different browser than the one you started in. Try <b>Continue with Google</b> again here, or use ' +
+            'your email and password below.';
+    } else if (/access_denied|cancel/i.test(desc + code)) {
+      msg = '<strong>Sign-in was cancelled.</strong><br>Nothing has changed. Try again whenever you like.';
+    } else {
+      msg = '<strong>That sign-in did not go through.</strong><br>' + P.esc(desc) +
+            '<br>Try again, or call Bryan on <a href="tel:+12094561846">(209) 456-1846</a>.';
+    }
+    try { w.sessionStorage.setItem('w-auth-error', msg); } catch (e) {}
+    /* Take the error out of the address bar so a refresh does not repeat it. */
+    if (w.history && w.history.replaceState) {
+      w.history.replaceState(null, '', w.location.pathname + w.location.search.replace(/[?&]error[^&]*/g, ''));
+    }
+  })();
+
+  /* ----------------------------------------------------------------------
      Mode
      ---------------------------------------------------------------------- */
   /* Accepts ?demo=1 or #demo. The hash form matters: some static servers
