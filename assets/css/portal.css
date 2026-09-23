@@ -642,3 +642,15 @@ a.hero-card-p--act:hover { color: rgba(17,27,21,.8); }
   background: var(--sky-050); border-left: 4px solid var(--pine-600);
   border-radius: 0 var(--r) var(--r) 0; color: var(--ink);
 }
+
+
+/* Junk hauling interest, on the job board */
+.haul-tally {
+  display: grid; gap: 6px; margin: 0 0 20px; padding: 14px 18px;
+  background: var(--amber-050); border: 1px solid #F3D48F; border-left: 4px solid var(--amber);
+  border-radius: var(--r);
+}
+.haul-tally p { margin: 0; font-size: .875rem; color: var(--muted); }
+.haul-nums { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+.haul-nums span { color: var(--body); }
+.haul-nums b { font-family: var(--f-head); font-size: 1.5rem; color: var(--ink); margin-right: 4px; }

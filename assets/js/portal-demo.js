@@ -24,7 +24,7 @@
   var AREA = /\/(admin|demo)(\/|$)/.test(path) ? 'admin' : (/\/portal(\/|$)/.test(path) ? 'portal' : '');
   if (!AREA) return;
 
-  var KEY = 'w-portal-demo-v2';
+  var KEY = 'w-portal-demo-v3';
   var ME = 'demo-user';
   var S = w.WAINWRIGHTS_SCHEDULE;
 
@@ -80,12 +80,12 @@
         scheduled_for: workday(-24), slot_start: 1, created_at: iso(-45), updated_at: iso(-32) })),
 
       /* --- other (invented) customers, so Bryan's board looks like a real week --- */
-      job({ id: 'demo-o1', service: 'Handyman repairs', status: 'requested',
+      job({ wants_hauling: 'yes', id: 'demo-o1', service: 'Handyman repairs', status: 'requested',
         contact_name: 'Margaret Ellis', contact_phone: '(209) 555-0118', contact_email: 'm.ellis@example.com',
         contact_time: 'Mornings', address: '48 Sample Court, Pine Mountain Lake',
         details: 'Screen door will not latch and two kitchen cabinet doors are hanging off their hinges.',
         requested_day: workday(4), requested_slot: 0, created_at: iso(0, 7), updated_at: iso(0, 7) }),
-      job({ id: 'demo-o2', service: 'Junk and debris hauling', status: 'quoted',
+      job({ wants_hauling: 'maybe', id: 'demo-o2', service: 'Junk and debris hauling', status: 'quoted',
         contact_name: 'Don Reyes', contact_phone: '(209) 555-0177', contact_email: 'don.reyes@example.com',
         address: '9 Placeholder Drive, Pine Mountain Lake',
         details: 'Clearing out the garage before we sell — an old sofa, a treadmill and about a dozen boxes.',
@@ -97,13 +97,13 @@
         details: 'We are away until November. Monthly check: run the taps, check for leaks and mice, clear the porch.',
         quote_cents: 12000, quote_accepted_at: iso(-20), scheduled_for: workday(1), slot_start: 1, slots_needed: 1,
         created_at: iso(-25), updated_at: iso(-19) }),
-      job({ id: 'demo-o4', service: 'Interior or exterior painting', status: 'scheduled',
+      job({ wants_hauling: 'yes', id: 'demo-o4', service: 'Interior or exterior painting', status: 'scheduled',
         contact_name: 'Jim Hartley', contact_phone: '(209) 555-0190', contact_email: 'jim.hartley@example.com',
         address: '77 Example Way, Pine Mountain Lake',
         details: 'Guest bedroom and hallway, walls only. Paint is already bought — it is in the garage.',
         quote_cents: 52000, quote_accepted_at: iso(-7), scheduled_for: workday(2), slot_start: 0, slots_needed: 2,
         created_at: iso(-11), updated_at: iso(-6) }),
-      job({ id: 'demo-o5', service: 'Yard waste removal', status: 'scheduled',
+      job({ wants_hauling: 'no', id: 'demo-o5', service: 'Yard waste removal', status: 'scheduled',
         contact_name: 'Ruth Castillo', contact_phone: '(209) 555-0105', contact_email: '',
         address: '15 Sample Ridge, Pine Mountain Lake',
         details: 'Pine needles and cones along the fence line, about a truckload.',

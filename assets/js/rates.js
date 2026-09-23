@@ -65,6 +65,8 @@ window.WAINWRIGHTS_RATES = {
       note:  'Depends on volume and how close the truck can get.'
     },
     junk: {
+      /* Not offered until Bryan has a proper trailer. Shown as coming soon. */
+      comingSoon: true,
       label: 'Junk & Debris Hauling',
       from:  35,
       to:    45,

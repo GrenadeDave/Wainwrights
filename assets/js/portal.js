@@ -41,7 +41,7 @@
 
   P.SERVICES = [
     'Handyman repairs', 'Interior or exterior painting', 'Defensible space / fire clearing',
-    'Yard waste removal', 'Junk and debris hauling', 'Ongoing property watch and upkeep',
+    'Yard waste removal', 'Ongoing property watch and upkeep',
     'Tech help (apps, computers, IT)',
     'Several of these', 'Not sure yet'
   ];

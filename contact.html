@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>document.documentElement.classList.add('js');</script>
-<link rel="stylesheet" href="assets/css/site.css?v=07480f56">
+<link rel="stylesheet" href="assets/css/site.css?v=d36aecac">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -127,12 +127,26 @@
               <option value="Interior or exterior painting">Interior or exterior painting</option>
               <option value="Defensible space / fire clearing">Defensible space / fire clearing</option>
               <option value="Yard waste removal">Yard waste removal</option>
-              <option value="Junk and debris hauling">Junk and debris hauling</option>
               <option value="Ongoing property watch and upkeep">Ongoing property watch and upkeep</option>
               <option value="Tech help (apps, computers, IT)">Tech help (apps, computers, IT)</option>
               <option value="Several of these">Several of these</option>
             </select>
           </div>
+
+          <!-- Hauling interest. Bryan is not taking hauling jobs until he has a
+               proper trailer; this is how he counts whether it is worth it.
+               Optional, and stored on the request as wants_hauling. -->
+          <fieldset class="field hauling-q" id="hauling">
+            <legend>One quick question <span class="hint">(optional)</span></legend>
+            <p class="form-note" style="text-align:left;margin:0 0 12px">Bryan is thinking about adding
+            <b>junk hauling</b> &mdash; old furniture, appliances, garage clear-outs &mdash; once he has a proper
+            trailer. Would you ever use it?</p>
+            <div class="choice-row">
+              <label class="choice"><input type="radio" name="hauling" value="yes"><span>Yes</span></label>
+              <label class="choice"><input type="radio" name="hauling" value="maybe"><span>Maybe some day</span></label>
+              <label class="choice"><input type="radio" name="hauling" value="no"><span>No</span></label>
+            </div>
+          </fieldset>
 
           <!-- Slot picker. Filled in from real availability when the portal is
                connected; hidden entirely when it is not, so the form still
@@ -150,7 +164,7 @@
 
           <div class="field">
             <label for="f-details">Describe the job</label>
-            <textarea id="f-details" name="details" placeholder="A few sentences is plenty. For example: the back deck railing is loose, the gutters are full of needles, and there's an old fridge in the garage that needs to go."></textarea>
+            <textarea id="f-details" name="details" placeholder="A few sentences is plenty. For example: the back deck railing is loose, the gutters are full of needles, and the back gate will not latch."></textarea>
           </div>
 
           <!-- Honeypot. Hidden from people and from screen readers; only a bot
@@ -266,7 +280,7 @@
           <img class="brand-mark" src="assets/img/logo-wide-light.png" width="260" height="176" alt="">
           <span class="brand-text"><span class="brand-name">Wainwrights</span><span class="brand-sub">Handyman &amp; Land Management</span></span>
         </div>
-        <p class="footer-about">Repairs, painting, land care and hauling for Pine Mountain Lake, Groveland and the surrounding Tuolumne County communities.</p>
+        <p class="footer-about">Repairs, painting, land care and tech help for Pine Mountain Lake, Groveland and the surrounding Tuolumne County communities.</p>
       </div>
       <div>
         <h3 class="h4">Services</h3>
@@ -275,7 +289,7 @@
           <li><a href="services.html#painting">Painting</a></li>
           <li><a href="defensible-space.html">Defensible Space</a></li>
           <li><a href="services.html#yard-waste">Yard Waste Removal</a></li>
-          <li><a href="services.html#junk">Junk Hauling</a></li>
+          <li><a href="services.html#junk">Junk Hauling &mdash; coming soon</a></li>
           <li><a href="services.html#watch">Property Watch</a></li>
         </ul>
       </div>
@@ -318,11 +332,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script src="assets/js/config.js?v=0e322cd3"></script>
-<script src="assets/js/rates.js?v=38419b9c"></script>
+<script src="assets/js/rates.js?v=01106791"></script>
 <script src="assets/js/schedule.js?v=cd38d691"></script>
 <script src="assets/js/supabase-config.js?v=ddcf7815"></script>
-<script src="assets/js/portal.js?v=ba70ecec"></script>
-<script src="assets/js/site.js?v=baff5a32"></script>
+<script src="assets/js/portal.js?v=af8ca68e"></script>
+<script src="assets/js/site.js?v=837788fe"></script>
 <script src="assets/js/fx.js?v=b89af073"></script>
 <script src="assets/js/slot-picker.js?v=5f1867bd"></script>
 </body>

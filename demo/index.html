@@ -12,8 +12,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/site.css?v=07480f56">
-<link rel="stylesheet" href="../assets/css/portal.css?v=719b3099">
+<link rel="stylesheet" href="../assets/css/site.css?v=d36aecac">
+<link rel="stylesheet" href="../assets/css/portal.css?v=ee15f637">
 </head>
 <body class="portal-body">
 
@@ -45,12 +45,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script src="../assets/js/config.js?v=0e322cd3"></script>
-<script src="../assets/js/rates.js?v=38419b9c"></script>
+<script src="../assets/js/rates.js?v=01106791"></script>
 <script src="../assets/js/schedule.js?v=cd38d691"></script>
 <script src="../assets/js/supabase-config.js?v=ddcf7815"></script>
-<script src="../assets/js/portal.js?v=ba70ecec"></script>
-<script src="../assets/js/portal-demo.js?v=8db549cb"></script>
-<script src="../assets/js/site.js?v=baff5a32"></script>
+<script src="../assets/js/portal.js?v=af8ca68e"></script>
+<script src="../assets/js/portal-demo.js?v=2306444c"></script>
+<script src="../assets/js/site.js?v=837788fe"></script>
 <script>
 (function () {
   'use strict';
@@ -142,6 +142,32 @@
       '</a>';
   }
 
+  /* Would people use junk hauling? The estimate form asks, and every answer
+     lands on the request. Counted per person, not per request, so someone who
+     asks for three jobs is not counted three times. */
+  function haulingTally() {
+    var seen = {}, n = { yes: 0, maybe: 0, no: 0 };
+    allJobs.forEach(function (j) {
+      if (!j.wants_hauling) return;
+      var who = String(j.contact_email || j.contact_phone || j.contact_name || j.id).toLowerCase();
+      if (seen[who]) return;
+      seen[who] = true;
+      if (n[j.wants_hauling] != null) n[j.wants_hauling]++;
+    });
+    var total = n.yes + n.maybe + n.no;
+    return '<div class="haul-tally">' +
+      '<span class="mini-label">Junk hauling &mdash; would they use it?</span>' +
+      (total
+        ? '<div class="haul-nums">' +
+            '<span><b>' + n.yes + '</b> yes</span>' +
+            '<span><b>' + n.maybe + '</b> maybe</span>' +
+            '<span><b>' + n.no + '</b> no</span>' +
+          '</div>' +
+          '<p>From ' + total + (total === 1 ? ' person' : ' people') + ' who answered on the estimate form.</p>'
+        : '<p>Nobody has answered yet. The question is on the estimate form.</p>') +
+    '</div>';
+  }
+
   function paint() {
     var shown = allJobs.filter(matches);
     var newCount = allJobs.filter(function (j) { return j.status === 'requested'; }).length;
@@ -159,7 +185,8 @@
                  (f.key === filter) + '">' + f.label + '</button>';
         }).join('') +
         '<span class="count">' + shown.length + ' shown</span>' +
-      '</div>';
+      '</div>' +
+      haulingTally();
 
     html += shown.length
       ? '<div class="job-list">' + shown.map(row).join('') + '</div>'

@@ -171,6 +171,8 @@
       /* Chosen slot, when the picker was shown. Empty means 'no preference'. */
       requestedDay:  String(data.get('requestedDay') || '').trim(),
       requestedSlot: String(data.get('requestedSlot') || '').trim(),
+      /* Would they use junk hauling one day? yes / maybe / no, or blank. */
+      wantsHauling: String(data.get('hauling') || '').trim(),
       source:   'website'
     };
   }
@@ -218,6 +220,7 @@
     }
     lines.push('');
     lines.push('Service needed: ' + lead.service);
+    if (lead.wantsHauling) lines.push('Would use junk hauling: ' + lead.wantsHauling);
     lines.push('');
     lines.push('Details:');
     lines.push(lead.details || '(none given)');
@@ -270,6 +273,7 @@
       company:  lead.company,
       requestedDay:  lead.requestedDay || null,
       requestedSlot: lead.requestedSlot === '' ? null : Number(lead.requestedSlot),
+      wantsHauling:  lead.wantsHauling || null,
       source:   lead.source,
       sentAt:   new Date().toISOString(),
       /* Same CSV row as the email carries, so whatever receives this can be

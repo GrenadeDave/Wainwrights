@@ -1582,3 +1582,37 @@ sup.ast { font-size: .55em; vertical-align: super; margin-left: 1px; color: var(
 .tech-remote { max-width: 760px; margin: 26px auto 0; text-align: center; color: var(--body); }
 
 .from-price .amount sup.ast { color: var(--amber); }
+
+
+/* Coming soon — junk hauling, until Bryan has a proper trailer. */
+.soon-tag {
+  display: inline-block; vertical-align: middle; margin-left: 6px;
+  font-family: var(--f-body); font-size: .6875rem; font-weight: 800; letter-spacing: .08em;
+  text-transform: uppercase; line-height: 1; padding: 6px 10px; border-radius: var(--r-pill);
+  background: var(--amber); color: var(--ink); white-space: nowrap;
+}
+h2 .soon-tag { font-size: .75rem; position: relative; top: -4px; }
+.svc-card--soon { background: var(--paper-2); }
+.svc-card--soon .svc-icon, .svc-card--soon h3 { opacity: .7; }
+.svc-card--soon .soon-tag { margin: 2px 0 10px; }
+.soon-card {
+  margin: 14px 0 22px; padding: 18px 20px; border-radius: var(--r);
+  background: var(--amber-050); border: 1px solid #F3D48F; border-left: 4px solid var(--amber);
+}
+.soon-card p { margin: 0 0 14px; color: var(--body); line-height: 1.6; }
+.soon-inline { margin: 0 0 16px; padding: 10px 14px; border-radius: var(--r);
+  background: var(--amber-050); border-left: 3px solid var(--amber); color: var(--body); font-size: .9375rem; }
+
+/* The hauling question on the estimate form */
+.hauling-q { border: 1px solid var(--line); border-radius: var(--r); padding: 16px 18px 18px; background: var(--paper); }
+.hauling-q legend { font-weight: 700; color: var(--ink); padding: 0 6px; margin-left: -6px; }
+.choice-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.choice { position: relative; cursor: pointer; }
+.choice input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.choice span {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px;
+  border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--white);
+  font-weight: 600; color: var(--body); transition: background-color .15s var(--ease), border-color .15s var(--ease);
+}
+.choice input:checked + span { background: var(--pine-700); border-color: var(--pine-700); color: var(--white); }
+.choice input:focus-visible + span { outline: 3px solid var(--amber); outline-offset: 2px; }
