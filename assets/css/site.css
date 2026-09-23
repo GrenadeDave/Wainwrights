@@ -1557,3 +1557,28 @@ body.header-hidden .dst-panel { top: 20px; }
 }
 .page-hero .fine-print a { color: var(--amber); text-decoration: underline; text-underline-offset: 3px; }
 .page-hero .fine-print a:hover { color: var(--white); }
+
+
+/* Prices: the asterisk that means "negotiable", and the facts under the cards. */
+sup.ast { font-size: .55em; vertical-align: super; margin-left: 1px; color: var(--amber-ink); font-weight: 700; }
+.svc-from sup.ast { color: inherit; }
+.from-note--ast { font-weight: 600; }
+.price-facts {
+  list-style: none; margin: 34px auto 0; padding: 22px 26px; max-width: 860px;
+  display: grid; gap: 12px;
+  background: rgba(250,247,240,.055); border: 1px solid rgba(250,247,240,.13); border-radius: var(--r);
+}
+.price-facts li { color: rgba(250,247,240,.78); line-height: 1.6; }
+.price-facts b { color: var(--cream); }
+.svc-footnote { text-align: center; margin: 22px 0 0; font-size: .9375rem; color: var(--muted); }
+
+/* Tech help */
+.tech-rate { display: flex; justify-content: center; margin-top: 18px; }
+.tech-card h3 { margin: 12px 0 8px; }
+.tech-ic {
+  display: inline-grid; place-items: center; width: 50px; height: 50px; border-radius: 14px;
+  background: var(--sky-050); border: 1px solid var(--sky-line); color: var(--pine-700);
+}
+.tech-remote { max-width: 760px; margin: 26px auto 0; text-align: center; color: var(--body); }
+
+.from-price .amount sup.ast { color: var(--amber); }

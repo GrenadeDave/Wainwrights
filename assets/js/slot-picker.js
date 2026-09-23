@@ -32,8 +32,7 @@
 
   /* ---------------------------------------------------------------------- */
   async function load() {
-    var from = new Date();
-    from.setDate(from.getDate() + S.leadTimeDays);
+    var from = S.earliest();
     var to = new Date(from);
     to.setDate(to.getDate() + S.horizonDays);
 

@@ -24,7 +24,7 @@
   function problem(title, msg) {
     root().innerHTML = '<div class="portal-empty"><h2>' + esc(title) + '</h2><p>' + esc(msg) + '</p>' +
       '<div class="btn-row" style="justify-content:center"><a class="btn btn-outline" href="index.html">Back to your jobs</a>' +
-      '<a class="btn btn-moss" href="tel:+12094561846">' + ICON.phone + ' Call Now</a></div></div>';
+      '<a class="btn btn-moss" href="tel:+12094591846">' + ICON.phone + ' Call Now</a></div></div>';
   }
 
   /* Shared start: right mode, signed in, chrome mounted. Returns the session. */
@@ -118,7 +118,7 @@
 
     html += '<div class="btn-row" style="margin-top:30px">' +
       '<a class="btn btn-primary" href="new.html">Request more work ' + ICON.arrow + '</a>' +
-      '<a class="btn btn-outline" href="tel:+12094561846">' + ICON.phone + ' (209) 456-1846</a></div>';
+      '<a class="btn btn-outline" href="tel:+12094591846">' + ICON.phone + ' (209) 459-1846</a></div>';
 
     root().innerHTML = html;
   }
@@ -186,7 +186,7 @@
             ? '<p style="margin:18px 0 0">Nothing is owed and nothing is booked. If you want to talk it ' +
               'through, or there is something else, Bryan answers his own phone.</p>' +
               '<div class="btn-row" style="margin-top:18px">' +
-                '<a class="btn btn-primary" href="tel:+12094561846">' + ICON.phone + ' Call Bryan</a>' +
+                '<a class="btn btn-primary" href="tel:+12094591846">' + ICON.phone + ' Call Bryan</a>' +
                 '<a class="btn btn-outline" href="new.html">Ask about something else</a>' +
               '</div>'
             : '<div class="btn-row" style="margin-top:16px">' +
@@ -217,7 +217,7 @@
         html += '<div class="hero-card-p"><span class="hcp-label">' + ICON.cal + ' ' + (j.status === 'in_progress' ? 'Under way' : 'Booked in') + '</span>' +
           '<span class="hcp-main"><b>' + esc(when || 'Date to be confirmed') + '</b>' + (win ? '<br>' + esc(win) : '') + '</span>' +
           '<span class="btn-row">' + (ics ? '<a class="btn btn-light" href="' + ics + '" download="bryan-visit.ics">Add to my calendar</a>' : '') +
-          '<a class="btn btn-light" href="tel:+12094561846">' + ICON.phone + ' Need to change it? Call</a></span></div>';
+          '<a class="btn btn-light" href="tel:+12094591846">' + ICON.phone + ' Need to change it? Call</a></span></div>';
       } else if (j.status === 'completed') {
         html += '<div class="panel-card panel-card--ok"><h2>' + ICON.check + ' All finished</h2>' +
           '<p>Thanks for the work. If anything is not right, tell Bryan below or give him a call.</p>' +

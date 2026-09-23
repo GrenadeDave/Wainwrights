@@ -1,81 +1,108 @@
 /* ==========================================================================
    Wainwrights — service rates
    --------------------------------------------------------------------------
-   The figures below are not confirmed yet, so `showPrices` is false and the
-   site says "Free estimate" wherever a price would go. When Bryan confirms
-   the numbers, put them in and set showPrices to true.
+   Bryan's own figures, from the questionnaire he filled in (September 2026).
+   He charges by the hour. Where he gave a range, the range is shown.
 
-   These are "starting from" prices. The site says so everywhere it shows one,
-   because a steep lot, poor access or thirty years of needle build-up can
-   multiply the labour on a clearing job — and a published fixed price would
-   commit Bryan to losing money on exactly those.
+   Every price carries an asterisk, and the asterisk says "Prices negotiable" —
+   his words. The written figure still comes from the free visit.
    ========================================================================== */
 /* ⚠️ THE $1,000 LIMIT IS THE LAW, NOT A PREFERENCE.
    Bryan is not a licensed contractor. California Business & Professions Code
    §7027.2 lets him advertise only work whose TOTAL — labour, materials and
    everything else — comes to less than $1,000, and §7048 only exempts jobs
-   that need no building permit. So no figure here, and no "starting from"
-   price, may imply a job at or above $1,000. Splitting a bigger job into
-   smaller ones to stay under the line is illegal too.                       */
+   that need no building permit. Hourly rates are fine; a job that would add up
+   to $1,000 or more is not one he can take. Splitting a bigger job into
+   smaller ones to stay under the line is illegal too.
+
+   The tech services are not construction work, so the contractor rules do not
+   apply to them.                                                            */
 window.WAINWRIGHTS_RATES = {
 
   /* false = show "Free estimate" instead of any figure. */
-  showPrices: false,
+  showPrices: true,
 
   currency: 'USD',
   symbol:   '$',
 
-  /* Shown under every price on the public site. */
-  disclaimer: 'Starting price. The real figure comes from the free on-site visit.',
+  /* Shown under every price on the public site, keyed to the asterisk. */
+  disclaimer: '*Prices negotiable.',
+  asterisk: '*',
 
-  /* from  = the "starting from" figure, in whole dollars
-     unit  = how it is charged, in Bryan's own words
-     note  = optional line shown under the price                              */
+  /* The smallest bill, whatever the job. */
+  minimum: 30,
+
+  /* Past this much driving, the time on the road is charged. */
+  travel: { minutes: 25, perHour: 30 },
+
+  /* from  = the rate, in whole dollars   to = top of the range, if he gave one
+     unit  = how it is charged            note = optional line under the price  */
   services: {
     repairs: {
       label: 'Handyman Repairs',
-      from:  85,
-      unit:  'per job',
+      from:  30,
+      unit:  'per hour',
       note:  'Small jobs grouped into one visit work out cheaper than separate call-outs.'
     },
     painting: {
       label: 'Interior & Exterior Painting',
-      from:  250,
-      unit:  'per job',
-      note:  'Depends on area, prep needed and how many coats.'
+      from:  40,
+      unit:  'per hour',
+      note:  'Paint and materials are on top, and you see them in the written price.'
     },
     defensible: {
       label: 'Defensible Space & Fire Clearing',
-      from:  400,
-      unit:  'per job',
-      note:  'Priced by zone, so you can do all of it or start at the house and work out.'
+      from:  35,
+      to:    45,
+      unit:  'per hour',
+      note:  'Steeper, thicker or harder to reach sits at the top of the range.'
     },
     yardwaste: {
       label: 'Yard Waste Removal',
-      from:  150,
-      unit:  'per job',
+      from:  40,
+      to:    50,
+      unit:  'per hour',
       note:  'Depends on volume and how close the truck can get.'
     },
     junk: {
       label: 'Junk & Debris Hauling',
-      from:  175,
-      unit:  'per load',
-      /* Junk removal carries the extra because of what it involves — dump fees,
-         weight, and items that need special handling. Shown separately rather
-         than buried in the base price. */
+      from:  35,
+      to:    45,
+      unit:  'per hour',
+      /* Junk removal carries the extra because of the dump fees. Shown
+         separately rather than buried in the rate. */
       surcharge: {
-        amount: 60,
-        label:  'Disposal & handling fee',
-        note:   'Covers the dump fees and the weight. Added per load.'
+        amount: 20,
+        label:  'Disposal fee',
+        note:   'Covers the dump fees.'
       },
-      note: 'Single items cost less — ask.'
+      note: 'Billed for the time it takes to load up and haul away.'
     },
     watch: {
       label: 'Property Watch & Upkeep',
-      from:  120,
-      unit:  'per visit',
+      from:  30,
+      unit:  'per hour',
       note:  'Set to suit the property. Monthly suits most second homes.'
     }
+  },
+
+  /* Side work: computers and software. Not construction, so none of the
+     contractor limits above apply. */
+  tech: {
+    label: 'Tech Help',
+    from:  50,
+    unit:  'per hour'
+  },
+
+  /* "$35–45" or "$30". The dash is an en dash, as a range should be. */
+  range: function (s) {
+    var low = this.from(s.from);
+    return s.to ? low + '\u2013' + Number(s.to).toLocaleString('en-US') : low;
+  },
+
+  /* "per hour" -> "/hr", for the tight spots like the home page tiles. */
+  shortUnit: function (s) {
+    return ({ 'per hour': '/hr', 'per job': '/job', 'per visit': '/visit', 'per load': '/load' })[s.unit] || '';
   },
 
   /* Format cents as money. The portal stores money as integer cents. */

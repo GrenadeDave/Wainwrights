@@ -151,7 +151,7 @@
     return {
       profiles: {
         'demo-user':  { id: ME, email: 'pat.sample@example.com', name: 'Pat Sample', phone: '(209) 555-0142', address: ADDR, is_admin: false },
-        'demo-bryan': { id: 'demo-bryan', email: 'bryan@example.com', name: 'Bryan Wainwright', phone: '(209) 456-1846', address: '', is_admin: true }
+        'demo-bryan': { id: 'demo-bryan', email: 'bryan@example.com', name: 'Bryan Wainwright', phone: '(209) 459-1846', address: '', is_admin: true }
       },
       jobs: jobs,
       events: events,

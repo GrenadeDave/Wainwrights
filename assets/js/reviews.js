@@ -134,7 +134,7 @@
       var body = f.elements.body.value.trim();
       if (name.length < 2) return say('Please put your name.', false);
       if (body.length < 15) return say('Please write a sentence or two about the work.', false);
-      if (!ready()) return say('This is not connected yet. Please call Bryan on <a href="tel:+12094561846">(209) 456-1846</a>.', false);
+      if (!ready()) return say('This is not connected yet. Please call Bryan on <a href="tel:+12094591846">(209) 459-1846</a>.', false);
 
       btn.disabled = true; btn.textContent = 'Sending…';
       var res, j = {};
@@ -149,7 +149,7 @@
         j = await res.json();
       } catch (err) {
         btn.disabled = false; btn.textContent = 'Send my review';
-        return say('That did not send. Check your connection, or call Bryan on <a href="tel:+12094561846">(209) 456-1846</a>.', false);
+        return say('That did not send. Check your connection, or call Bryan on <a href="tel:+12094591846">(209) 459-1846</a>.', false);
       }
       btn.disabled = false; btn.textContent = 'Send my review';
       if (!res.ok || j.error) return say(esc(j.error || 'That did not send.'), false);

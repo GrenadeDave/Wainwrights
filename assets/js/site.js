@@ -7,8 +7,8 @@
 
   var CFG = window.WAINWRIGHTS_CONFIG || {};
   var BIZ = {
-    phone:        CFG.phone        || '(209) 456-1846',
-    phoneHref:    CFG.phoneHref    || 'tel:+12094561846',
+    phone:        CFG.phone        || '(209) 459-1846',
+    phoneHref:    CFG.phoneHref    || 'tel:+12094591846',
     email:        CFG.email        || 'Bwain94Work@gmail.com',
     leadEndpoint: CFG.leadEndpoint || '',
     leadApiKey:   CFG.leadApiKey   || ''

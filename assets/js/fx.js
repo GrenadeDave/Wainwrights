@@ -315,7 +315,7 @@
     document.addEventListener('click', function (e) {
       var a = e.target.closest && e.target.closest('a[href^="tel:"]');
       if (!a) return;
-      var num = '(209) 456-1846';
+      var num = '(209) 459-1846';
       navigator.clipboard.writeText(num).then(function () {
         toast('Number copied — ' + num);
       }, function () { /* clipboard refused; the tel: link still fires */ });

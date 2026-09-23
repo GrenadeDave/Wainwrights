@@ -26,8 +26,8 @@ window.WAINWRIGHTS_SCHEDULE = {
   workingDays: [1, 2, 3, 4, 5],
 
   /* How far ahead a customer may book, and the earliest they may pick.
-     Two days' notice keeps tomorrow free for Bryan to plan. */
-  leadTimeDays: 2,
+     Three WORKING days' notice — Bryan's own rule (questionnaire, Sep 2026). */
+  leadTimeDays: 3,          // BUSINESS days — Bryan's minimum notice
   horizonDays: 42,
 
   /* ---------------------------------------------------------------------
@@ -44,6 +44,7 @@ window.WAINWRIGHTS_SCHEDULE = {
     'Yard waste removal':                1,
     'Junk and debris hauling':           1,
     'Ongoing property watch and upkeep': 1,
+    'Tech help (apps, computers, IT)':   1,
     'Several of these':                  2,
     'Not sure yet':                      1
   },
@@ -101,11 +102,24 @@ window.WAINWRIGHTS_SCHEDULE = {
   /* ---------------------------------------------------------------------
      Which days can be offered at all, before considering bookings.
      --------------------------------------------------------------------- */
-  candidateDays: function (fromDate) {
-    var days = [];
+  /* The first day that can be offered: `leadTimeDays` WORKING days after
+     today. Asked on a Wednesday, that is the following Monday — Thursday,
+     Friday, Monday make three. The database applies the same rule
+     (earliest_booking_day in schema.sql), so the two cannot disagree. */
+  earliest: function (fromDate) {
     var d = new Date(fromDate || new Date());
     d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() + this.leadTimeDays);
+    var n = 0;
+    while (n < this.leadTimeDays) {
+      d.setDate(d.getDate() + 1);
+      if (this.isWorkingDay(d)) n++;
+    }
+    return d;
+  },
+
+  candidateDays: function (fromDate) {
+    var days = [];
+    var d = this.earliest(fromDate);
     for (var i = 0; i < this.horizonDays; i++) {
       if (this.isWorkingDay(d)) days.push(this.ymd(d));
       d.setDate(d.getDate() + 1);

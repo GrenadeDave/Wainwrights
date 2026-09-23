@@ -42,6 +42,7 @@
   P.SERVICES = [
     'Handyman repairs', 'Interior or exterior painting', 'Defensible space / fire clearing',
     'Yard waste removal', 'Junk and debris hauling', 'Ongoing property watch and upkeep',
+    'Tech help (apps, computers, IT)',
     'Several of these', 'Not sure yet'
   ];
 
@@ -71,7 +72,7 @@
       msg = '<strong>Sign-in was cancelled.</strong><br>Nothing has changed. Try again whenever you like.';
     } else {
       msg = '<strong>That sign-in did not go through.</strong><br>' + P.esc(desc) +
-            '<br>Try again, or call Bryan on <a href="tel:+12094561846">(209) 456-1846</a>.';
+            '<br>Try again, or call Bryan on <a href="tel:+12094591846">(209) 459-1846</a>.';
     }
     try { w.sessionStorage.setItem('w-auth-error', msg); } catch (e) {}
     /* Take the error out of the address bar so a refresh does not repeat it. */
@@ -290,7 +291,7 @@
       'DTSTART:' + t(startH), 'DTEND:' + t(endH),
       'SUMMARY:Bryan Wainwright — ' + job.service,
       'LOCATION:' + String(job.address || '').replace(/[,;\\]/g, ' '),
-      'DESCRIPTION:Wainwrights Handyman & Land Management. Questions: (209) 456-1846',
+      'DESCRIPTION:Wainwrights Handyman & Land Management. Questions: (209) 459-1846',
       'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
     return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
   };
@@ -302,7 +303,7 @@
     if (!S) { container.innerHTML = ''; return; }
     container.innerHTML = '<p class="form-note" style="text-align:left">Checking Bryan’s diary…</p>';
 
-    var from = new Date(); from.setDate(from.getDate() + S.leadTimeDays);
+    var from = S.earliest();
     var to = new Date(from); to.setDate(to.getDate() + S.horizonDays);
     var av = await P.api.availability(S.ymd(from), S.ymd(to));
     if (av.error) {
@@ -419,7 +420,7 @@
           '<a href="profile.html"><b>My details</b><small>Change your name, phone or address</small></a>' +
           '<a href="mydata.html"><b>My information</b><small>Everything Bryan holds about you</small></a>' +
           '<a href="../resources.html"><b>Local rules</b><small>Pine Mountain Lake, in plain English</small></a>' +
-          '<a href="tel:+12094561846"><b>Call Bryan</b><small>(209) 456-1846 · Mon–Fri 8–5</small></a>' +
+          '<a href="tel:+12094591846"><b>Call Bryan</b><small>(209) 459-1846 · Mon–Fri 8–5</small></a>' +
           '<a href="mailto:Bwain94Work@gmail.com"><b>Email Bryan</b><small>Bwain94Work@gmail.com</small></a>' +
           '<button type="button" id="acct-delete"><b>Delete my account</b><small>Ask Bryan to remove your details</small></button>' +
           '<button type="button" id="acct-signout"><b>Sign out</b><small>On this device</small></button>' +
