@@ -59,8 +59,8 @@ window.WAINWRIGHTS_RATES = {
     },
     yardwaste: {
       label: 'Yard Waste Removal',
-      from:  40,
-      to:    50,
+      from:  30,
+      to:    40,
       unit:  'per hour',
       note:  'Depends on volume and how close the truck can get.'
     },
