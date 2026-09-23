@@ -1529,3 +1529,31 @@ body.header-hidden .dst-panel { top: 20px; }
    hand if a phone does something odd with tel: links. */
 .call-bar .btn-moss { font-size: .95rem; letter-spacing: -.01em; }
 @media (max-width: 360px) { .call-bar .call-lbl { display: none; } }
+
+/* A notice that has to be read, not skimmed past — used on Our Work to say the
+   pictures are drawings, and to ask people for real photographs of their own. */
+.notice-card {
+  margin-top: 28px; padding: 26px 28px; text-align: left;
+  background: var(--sky-050); border: 1px solid var(--sky-line);
+  border-left: 4px solid var(--amber); border-radius: var(--r);
+}
+.notice-card h3 {
+  font-family: var(--f-head); font-size: 1.25rem; line-height: 1.25;
+  color: var(--ink); margin: 0 0 12px; letter-spacing: -.01em;
+}
+.notice-card p { margin: 0 0 14px; color: var(--body); line-height: 1.65; }
+.notice-card p:last-of-type { margin-bottom: 20px; }
+.notice-card .btn-row { margin: 0; }
+@media (max-width: 560px) {
+  .notice-card { padding: 20px 18px; }
+  .notice-card h3 { font-size: 1.125rem; }
+  .notice-card .btn-row .btn { width: 100%; }
+}
+
+/* A quiet line under a hero — used to say the pictures are drawings. */
+.page-hero .fine-print {
+  margin: 14px 0 0; font-size: .9375rem; line-height: 1.6;
+  color: rgba(255, 255, 255, .72);
+}
+.page-hero .fine-print a { color: var(--amber); text-decoration: underline; text-underline-offset: 3px; }
+.page-hero .fine-print a:hover { color: var(--white); }
