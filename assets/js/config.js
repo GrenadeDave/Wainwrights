@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Wainwrights — site configuration
+   Wainwright’s — site configuration
    --------------------------------------------------------------------------
    This is the only file you need to edit to change how leads are delivered.
    Everything else on the site reads from here.

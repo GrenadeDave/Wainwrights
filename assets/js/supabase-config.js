@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Wainwrights — customer portal connection
+   Wainwright’s — customer portal connection
    --------------------------------------------------------------------------
    Fill these two in from your Supabase project:
        Dashboard → Project Settings → API

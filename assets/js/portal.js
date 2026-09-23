@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Wainwrights — portal engine
+   Wainwright’s — portal engine
    Shared by the customer portal (portal/) and Bryan's admin (admin/).
 
    The customer pages never talk to the database directly. They call P.api,
@@ -291,7 +291,7 @@
       'DTSTART:' + t(startH), 'DTEND:' + t(endH),
       'SUMMARY:Bryan Wainwright — ' + job.service,
       'LOCATION:' + String(job.address || '').replace(/[,;\\]/g, ' '),
-      'DESCRIPTION:Wainwrights Handyman & Land Management. Questions: (209) 459-1846',
+      'DESCRIPTION:Wainwright’s Handyman & Land Management. Questions: (209) 459-1846',
       'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
     return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
   };

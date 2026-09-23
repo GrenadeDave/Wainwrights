@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Wainwrights — reviews on the public site
+   Wainwright’s — reviews on the public site
 
    Two jobs:
      1. Show the reviews Bryan has published, with a thumbs up on each.

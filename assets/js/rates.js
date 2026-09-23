@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Wainwrights — service rates
+   Wainwright’s — service rates
    --------------------------------------------------------------------------
    Bryan's own figures, from the questionnaire he filled in (September 2026).
    He charges by the hour. Where he gave a range, the range is shown.

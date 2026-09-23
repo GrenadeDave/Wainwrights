@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Wainwrights — portal demo mode
+   Wainwright’s — portal demo mode
 
    A stand-in for the database so both sides of the portal can be seen and
    clicked through before Supabase is set up (and afterwards, as a safe way to

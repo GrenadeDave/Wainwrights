@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Wainwrights Handyman & Land Management — site behaviour
+   Wainwright’s Handyman & Land Management — site behaviour
    No dependencies. Works from the file system or any static host.
    ========================================================================== */
 (function () {
@@ -226,7 +226,7 @@
     lines.push(lead.details || '(none given)');
     lines.push('');
     lines.push('--');
-    lines.push('Sent from the Wainwrights website');
+    lines.push('Sent from the Wainwright’s website');
     lines.push('');
     lines.push(mydidBlock(lead));
 

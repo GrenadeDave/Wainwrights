@@ -32,28 +32,30 @@
   --body:       #35414F;
   --muted:      #566276;   /* 5.7 on paper, 5.2 on paper-2, 6.3 on white */
 
-  /* Denim — the same blues as Bryan's MyDiD app. The token names stay
+  /* Navy — built around the logo's own #012550. The token names stay
      --pine-* so every file that already uses them keeps working. */
-  --pine-950:   #0C1C33;
-  --pine-900:   #102544;
-  --pine-800:   #163356;
-  --pine-700:   #1D4577;
-  --pine-600:   #234B80;
-  --pine-500:   #2D5A93;
-  --pine-400:   #4A79B6;
-  --pine-300:   #8FB0D6;
-  --pine-200:   #C3D5EA;
-  --pine-100:   #DEE8F4;
+  --pine-950:   #00132B;
+  --pine-900:   #011B3B;
+  --pine-800:   #012550;
+  --pine-700:   #0B3468;
+  --pine-600:   #154483;
+  --pine-500:   #25589E;
+  --pine-400:   #4C7BBE;
+  --pine-300:   #8FB0DB;
+  --pine-200:   #C4D5EC;
+  --pine-100:   #DFE8F5;
   --pine-050:   #EFF4FA;
 
-  /* Hi-vis amber. Dark ink on amber is 9.6:1 — it carries text happily.
-     Amber itself never carries light text. On light grounds, text accents
-     use --amber-ink instead (6.2:1 on paper). */
-  --amber:      #FAA90D;   /* sampled from the logo */
-  --amber-600:  #F09C00;
-  --amber-700:  #D98200;
-  --amber-ink:  #8A4A00;
-  --amber-050:  #FFF3D9;
+  /* Orange, from the logo's ring (#DA4300). The token names stay --amber-*.
+     --amber      #EE6424 accents, and orange text on navy (4.7:1)
+     --amber-600  #C23B00 anything filled orange carries WHITE text (5.4:1)
+     --amber-ink  #A33200 orange text on light grounds (6.3:1 on paper)
+     Dark ink on orange fails contrast, so it is never used. */
+  --amber:      #EE6424;   /* sampled from the logo */
+  --amber-600:  #C23B00;
+  --amber-700:  #A33200;
+  --amber-ink:  #A33200;
+  --amber-050:  #FDEEE6;
 
   /* Pastel sky — the service tiles, so they lift off the page */
   --sky-050:    #E9F1FB;
@@ -90,7 +92,7 @@
   --sh-md: 0 8px 20px rgba(11,22,16,.08), 0 16px 40px rgba(11,22,16,.08);
   --sh-lg: 0 20px 44px rgba(11,22,16,.14), 0 6px 14px rgba(11,22,16,.06);
   --sh-xl: 0 36px 80px rgba(0,0,0,.4);
-  --sh-amber: 0 10px 26px rgba(255,176,32,.38);
+  --sh-amber: 0 10px 26px rgba(238,100,36,.38);
 
   /* Geometry — squarer than before. Sturdy, not soft. */
   --r-sm: 8px;
@@ -169,7 +171,7 @@ li { margin-bottom: .4em; }
 strong { color: var(--ink); font-weight: 700; }
 code { font-size: .9em; background: var(--paper-2); padding: 2px 6px; border-radius: 5px; }
 
-::selection { background: var(--amber); color: var(--ink); }
+::selection { background: var(--amber-600); color: var(--white); }
 
 :focus-visible {
   outline: 3px solid var(--amber);
@@ -184,7 +186,7 @@ code { font-size: .9em; background: var(--paper-2); padding: 2px 6px; border-rad
 
 .skip-link {
   position: absolute; left: 50%; top: -100px; transform: translateX(-50%);
-  background: var(--amber); color: var(--ink); padding: 12px 22px;
+  background: var(--amber-600); color: var(--white); padding: 12px 22px;
   border-radius: 0 0 var(--r) var(--r); z-index: 300; font-weight: 700;
   text-decoration: none; transition: top .2s var(--ease);
 }
@@ -278,8 +280,8 @@ code { font-size: .9em; background: var(--paper-2); padding: 2px 6px; border-rad
 .btn:hover .btn-arrow { transform: translateX(4px); }
 .btn:disabled { opacity: .7; cursor: default; transform: none; }
 
-.btn-primary { background: var(--amber); color: var(--ink); box-shadow: var(--sh-amber), inset 0 1px 0 rgba(255,255,255,.45); }
-.btn-primary:hover { background: var(--amber-600); color: var(--ink); box-shadow: 0 16px 34px rgba(255,176,32,.46), inset 0 1px 0 rgba(255,255,255,.45); }
+.btn-primary { background: var(--amber-600); color: var(--white); box-shadow: var(--sh-amber), inset 0 1px 0 rgba(255,255,255,.45); }
+.btn-primary:hover { background: var(--amber-700); color: var(--white); box-shadow: 0 16px 34px rgba(238,100,36,.46), inset 0 1px 0 rgba(255,255,255,.45); }
 
 .btn-moss { background: var(--pine-700); color: var(--white); box-shadow: 0 8px 20px rgba(28,59,44,.3); }
 .btn-moss:hover { background: var(--pine-800); color: var(--white); box-shadow: 0 14px 30px rgba(28,59,44,.38); }
@@ -346,7 +348,7 @@ code { font-size: .9em; background: var(--paper-2); padding: 2px 6px; border-rad
 .header-inner { height: var(--header-h); display: flex; align-items: center; gap: 16px; }
 
 .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; margin-right: auto; flex: none; }
-.brand-mark { height: 42px; width: auto; flex: none; transition: transform .35s var(--spring); }
+.brand-mark { height: 56px; width: 56px; flex: none; transition: transform .35s var(--spring); }
 .brand:hover .brand-mark { transform: scale(1.07) rotate(-3deg); }
 .brand-text { display: flex; flex-direction: column; line-height: 1.05; }
 .brand-name {
@@ -405,7 +407,7 @@ code { font-size: .9em; background: var(--paper-2); padding: 2px 6px; border-rad
 }
 .nav-toggle span::before { top: -7px; }
 .nav-toggle span::after  { top: 7px; }
-.nav-toggle[aria-expanded="true"] { background: var(--amber); color: var(--ink); }
+.nav-toggle[aria-expanded="true"] { background: var(--amber-600); color: var(--white); }
 .nav-toggle[aria-expanded="true"] span { background: transparent; }
 .nav-toggle[aria-expanded="true"] span::before { top: 0; transform: rotate(45deg); }
 .nav-toggle[aria-expanded="true"] span::after  { top: 0; transform: rotate(-45deg); }
@@ -451,7 +453,7 @@ code { font-size: .9em; background: var(--paper-2); padding: 2px 6px; border-rad
   background: var(--pine-050); color: var(--pine-600);
   transition: background-color .15s var(--ease), color .15s var(--ease);
 }
-.m-link:hover .m-ic { background: var(--amber); color: var(--ink); }
+.m-link:hover .m-ic { background: var(--amber-600); color: var(--white); }
 .m-text { display: flex; flex-direction: column; line-height: 1.25; }
 .m-text small { font-size: .8125rem; font-weight: 500; color: var(--muted); margin-top: 1px; }
 
@@ -474,7 +476,7 @@ code { font-size: .9em; background: var(--paper-2); padding: 2px 6px; border-rad
   content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background:
     radial-gradient(900px 560px at 84% -8%, rgba(47,106,78,.55), transparent 62%),
-    radial-gradient(700px 460px at -6% 108%, rgba(255,176,32,.13), transparent 60%);
+    radial-gradient(700px 460px at -6% 108%, rgba(238,100,36,.13), transparent 60%);
 }
 .hero-inner {
   position: relative; z-index: 2;
@@ -562,7 +564,7 @@ code { font-size: .9em; background: var(--paper-2); padding: 2px 6px; border-rad
 .hero-badge .hb-role { font-size: .8125rem; color: var(--muted); line-height: 1.4; margin: 0; }
 .hero-badge .hb-avatar {
   width: 42px; height: 42px; border-radius: 12px; flex: none;
-  background: var(--amber); color: var(--ink); display: grid; place-items: center;
+  background: var(--amber-600); color: var(--white); display: grid; place-items: center;
   font-family: var(--f-head); font-weight: 800; font-size: 1rem;
 }
 
@@ -570,20 +572,20 @@ code { font-size: .9em; background: var(--paper-2); padding: 2px 6px; border-rad
 .stamp {
   position: absolute; top: -34px; right: -26px; z-index: 4;
   width: 128px; height: 128px; border-radius: 50%;
-  background: var(--amber); color: var(--ink);
+  background: var(--amber-600); color: var(--white);
   display: grid; place-items: center;
   box-shadow: 0 14px 34px rgba(0,0,0,.35);
 }
 .stamp svg.ring { position: absolute; inset: 0; width: 100%; height: 100%; animation: spin 22s linear infinite; }
-.stamp svg.ring text { font-family: var(--f-cond); font-weight: 700; font-size: 11.5px; letter-spacing: .2em; fill: var(--ink); }
+.stamp svg.ring text { font-family: var(--f-cond); font-weight: 700; font-size: 11.5px; letter-spacing: .2em; fill: var(--white); }
 .stamp .stamp-core { font-family: var(--f-head); font-weight: 900; font-size: 1.5rem; line-height: .9; text-align: center; letter-spacing: -.03em; }
 .stamp .stamp-core small { display: block; font-family: var(--f-cond); font-weight: 700; font-size: .7rem; letter-spacing: .16em; margin-top: 4px; }
 
 /* Caution tape. Sits across the hero's bottom edge, on a slight tilt. */
 .tape-wrap { overflow: hidden; margin-top: -58px; padding: 22px 0 26px; position: relative; z-index: 5; }
 .tape {
-  background: var(--amber); color: var(--ink);
-  border-block: 3px solid var(--ink);
+  background: var(--amber-600); color: var(--white);
+  border-block: 3px solid var(--pine-900);
   transform: rotate(-1.4deg) scale(1.03);
   box-shadow: 0 10px 30px rgba(11,22,16,.22);
 }
@@ -691,7 +693,7 @@ body.header-hidden .jumpbar { top: 0; }
 /* Spotlight that follows the pointer (position set from fx.js). */
 .card::after {
   content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 0%), rgba(255,176,32,.13), transparent 65%);
+  background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 0%), rgba(238,100,36,.13), transparent 65%);
   opacity: 0; transition: opacity .35s var(--ease);
 }
 .card:hover::after { opacity: 1; }
@@ -710,7 +712,7 @@ a.card { color: inherit; }
   background: var(--pine-050); color: var(--pine-600);
   transition: background-color .3s var(--ease), color .3s var(--ease), transform .45s var(--spring);
 }
-.card:hover .svc-icon { background: var(--amber); color: var(--ink); transform: rotate(-7deg) scale(1.08); }
+.card:hover .svc-icon { background: var(--amber-600); color: var(--white); transform: rotate(-7deg) scale(1.08); }
 .svc-card h3 { margin-bottom: 10px; }
 .svc-from { display: inline-block; align-self: flex-start; margin: -2px 0 12px; padding: 4px 10px; border-radius: 7px;
   background: var(--ink); color: rgba(240,246,242,.8); font-size: .8125rem; font-weight: 600; }
@@ -765,8 +767,8 @@ a.card { color: inherit; }
 .checks li { position: relative; padding-left: 38px; margin-bottom: 13px; font-size: 1.0625rem; }
 .checks li::before {
   content: ''; position: absolute; left: 0; top: 3px; width: 24px; height: 24px;
-  border-radius: 7px; background-color: var(--amber);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23111B15' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  border-radius: 7px; background-color: var(--amber-600);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: center;
 }
 
@@ -796,11 +798,11 @@ a.card { color: inherit; }
   position: absolute; left: 0; top: 0; width: 56px; height: 56px; border-radius: 16px;
   display: grid; place-items: center;
   font-family: var(--f-cond); font-weight: 700; font-size: 1.35rem; letter-spacing: .04em;
-  background: var(--amber-050); color: var(--amber-ink); border: 1.5px solid #F4D79A;
+  background: var(--amber-050); color: var(--amber-ink); border: 1.5px solid #F3C3AB;
 }
 .step h4, .step h3.h4 { margin-bottom: 6px; }
 .step p { color: var(--muted); font-size: 1rem; }
-.section--moss .step::before { background: rgba(255,176,32,.12); border-color: rgba(255,176,32,.35); color: var(--amber); }
+.section--moss .step::before { background: rgba(238,100,36,.12); border-color: rgba(238,100,36,.35); color: var(--amber); }
 .section--moss .step p { color: rgba(240,246,242,.7); }
 
 /* Flow — the four-step process, with a line that draws itself. */
@@ -855,7 +857,7 @@ a.card { color: inherit; }
 .shot.is-zoomable::after {
   content: ''; position: absolute; top: 14px; right: 14px; z-index: 3;
   width: 40px; height: 40px; border-radius: 12px;
-  background: var(--amber) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23111B15' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7'/%3E%3C/svg%3E") no-repeat center;
+  background: var(--amber-600) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7'/%3E%3C/svg%3E") no-repeat center;
   opacity: 0; transform: scale(.7) rotate(-10deg);
   transition: opacity .25s var(--ease), transform .35s var(--spring);
 }
@@ -881,7 +883,7 @@ a.card { color: inherit; }
   background: rgba(255,255,255,.1); color: var(--white); display: grid; place-items: center;
   transition: background-color .2s var(--ease), transform .2s var(--ease), color .2s;
 }
-.lb-btn:hover { background: var(--amber); color: var(--ink); transform: scale(1.06); }
+.lb-btn:hover { background: var(--amber-600); color: var(--white); transform: scale(1.06); }
 .lb-btn:active { transform: scale(.94); }
 .lb-close { top: 14px; right: 14px; }
 .lb-prev { left: 14px; top: 50%; margin-top: -27px; }
@@ -929,7 +931,7 @@ a.card { color: inherit; }
 .surcharge-note {
   display: flex; gap: 10px; align-items: flex-start; margin: 0 0 18px;
   padding: 12px 16px; border-radius: var(--r);
-  background: var(--amber-050); border: 1px solid #F4D79A; font-size: .9375rem; color: var(--ink);
+  background: var(--amber-050); border: 1px solid #F3C3AB; font-size: .9375rem; color: var(--ink);
 }
 
 /* --------------------------------------------------------------------------
@@ -937,7 +939,7 @@ a.card { color: inherit; }
    -------------------------------------------------------------------------- */
 .cta-band {
   position: relative; overflow: hidden; isolation: isolate;
-  background: var(--amber); color: var(--ink);
+  background: var(--amber-600); color: var(--white);
   padding: clamp(60px, 8vw, 100px) 0; text-align: center;
 }
 /* Hazard stripes fading in from the corners. */
@@ -947,15 +949,15 @@ a.card { color: inherit; }
 }
 .cta-band::before { left: 0;  -webkit-mask-image: linear-gradient(90deg, #000, transparent);  mask-image: linear-gradient(90deg, #000, transparent); }
 .cta-band::after  { right: 0; -webkit-mask-image: linear-gradient(-90deg, #000, transparent); mask-image: linear-gradient(-90deg, #000, transparent); }
-.cta-band h2 { color: var(--ink); font-size: clamp(2.1rem, 4.8vw, 3.4rem); }
-.cta-band .lede { color: rgba(17,27,21,.78); margin-inline: auto; margin-bottom: 32px; font-weight: 500; }
+.cta-band h2 { color: var(--white); font-size: clamp(2.1rem, 4.8vw, 3.4rem); }
+.cta-band .lede { color: rgba(255,255,255,.9); margin-inline: auto; margin-bottom: 32px; font-weight: 500; }
 .cta-band strong { color: var(--ink); }
 .cta-band a:not(.btn) { color: var(--ink); }
 .cta-band .btn-row { justify-content: center; }
-.cta-band .btn-primary { background: var(--ink); color: var(--white); box-shadow: 0 12px 28px rgba(17,27,21,.3); }
+.cta-band .btn-primary { background: var(--pine-900); color: var(--white); box-shadow: 0 12px 28px rgba(17,27,21,.3); }
 .cta-band .btn-primary:hover { background: var(--pine-800); color: var(--white); }
-.cta-band .btn-light { background: transparent; color: var(--ink); border-color: var(--ink); backdrop-filter: none; }
-.cta-band .btn-light:hover { background: var(--ink); color: var(--white); }
+.cta-band .btn-light { background: transparent; color: var(--white); border-color: rgba(255,255,255,.85); backdrop-filter: none; }
+.cta-band .btn-light:hover { background: var(--white); color: var(--amber-700); }
 .cta-sub { margin-top: 24px; font-size: .9375rem; color: rgba(17,27,21,.7); font-weight: 500; }
 
 /* --------------------------------------------------------------------------
@@ -982,7 +984,7 @@ a.card { color: inherit; }
 .field input:hover, .field select:hover, .field textarea:hover { border-color: var(--pine-300); }
 .field input:focus, .field select:focus, .field textarea:focus {
   outline: none; border-color: var(--pine-600); background-color: var(--white);
-  box-shadow: 0 0 0 4px rgba(255,176,32,.35);
+  box-shadow: 0 0 0 4px rgba(238,100,36,.35);
 }
 .field-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
@@ -1041,7 +1043,7 @@ a.card { color: inherit; }
 .contact-list li { display: flex; gap: 16px; align-items: flex-start; margin: 0; }
 .contact-list .ci {
   width: 50px; height: 50px; border-radius: 14px; flex: none; display: grid; place-items: center;
-  background: var(--amber); color: var(--ink);
+  background: var(--amber-600); color: var(--white);
 }
 .contact-list b { display: block; font-family: var(--f-cond); font-size: .9rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; font-weight: 700; }
 .contact-list a, .contact-list span { font-size: 1.0625rem; color: var(--ink); text-decoration: none; font-weight: 600; word-break: break-word; }
@@ -1300,7 +1302,7 @@ body.header-hidden .dst-panel { top: 20px; }
   .fx-toast { bottom: 96px; }
   .header-phone { display: none; }
   .header-cta .btn { display: none; }
-  .brand-mark { height: 36px; width: auto; }
+  .brand-mark { height: 46px; width: 46px; }
   .brand-name { font-size: 1.15rem; }
   .brand-sub { font-size: .7rem; letter-spacing: .1em; }
   .hero-badge { position: relative; left: auto; right: auto; bottom: auto; margin: -34px 12px 0; max-width: none; animation: none; }
@@ -1399,7 +1401,7 @@ body.header-hidden .dst-panel { top: 20px; }
 }
 /* On the tinted tile the icon needs the white to read as a chip. */
 .svc-grid .svc-icon { background: var(--white); color: var(--pine-600); box-shadow: 0 1px 2px rgba(10,27,51,.06); }
-.svc-grid .card:hover .svc-icon { background: var(--amber); color: var(--ink); }
+.svc-grid .card:hover .svc-icon { background: var(--amber-600); color: var(--white); }
 .svc-grid .svc-num { color: var(--sky-line); }
 .svc-grid .svc-tags li { background: var(--white); border-color: var(--sky-line); }
 
@@ -1463,7 +1465,7 @@ body.header-hidden .dst-panel { top: 20px; }
 }
 .thumb:hover { background: var(--amber-050); border-color: var(--amber); color: var(--ink); }
 .thumb:active { transform: scale(.94); }
-.thumb.is-done { background: var(--amber); border-color: var(--amber); color: var(--ink); cursor: default; }
+.thumb.is-done { background: var(--amber-600); border-color: var(--amber-600); color: var(--white); cursor: default; }
 .thumb:disabled { opacity: 1; }
 
 .review-empty {
@@ -1496,7 +1498,7 @@ body.header-hidden .dst-panel { top: 20px; }
    his head off, and let the drawing's own dark ground fill the rest. */
 .media-frame .figure-tile {
   object-fit: contain;
-  background: #0C1C33;
+  background: #00132B;
 }
 
 /* --------------------------------------------------------------------------
@@ -1589,15 +1591,15 @@ sup.ast { font-size: .55em; vertical-align: super; margin-left: 1px; color: var(
   display: inline-block; vertical-align: middle; margin-left: 6px;
   font-family: var(--f-body); font-size: .6875rem; font-weight: 800; letter-spacing: .08em;
   text-transform: uppercase; line-height: 1; padding: 6px 10px; border-radius: var(--r-pill);
-  background: var(--amber); color: var(--ink); white-space: nowrap;
+  background: var(--amber-600); color: var(--white); white-space: nowrap;
 }
 h2 .soon-tag { font-size: .75rem; position: relative; top: -4px; }
 .svc-card--soon { background: var(--paper-2); }
 .svc-card--soon .svc-icon, .svc-card--soon h3 { opacity: .7; }
-.svc-card--soon .soon-tag { margin: 2px 0 10px; }
+.svc-card--soon .soon-tag { margin: 2px 0 10px; align-self: flex-start; justify-self: start; width: max-content; }
 .soon-card {
   margin: 14px 0 22px; padding: 18px 20px; border-radius: var(--r);
-  background: var(--amber-050); border: 1px solid #F3D48F; border-left: 4px solid var(--amber);
+  background: var(--amber-050); border: 1px solid #F3C3AB; border-left: 4px solid var(--amber);
 }
 .soon-card p { margin: 0 0 14px; color: var(--body); line-height: 1.6; }
 .soon-inline { margin: 0 0 16px; padding: 10px 14px; border-radius: var(--r);
@@ -1616,3 +1618,6 @@ h2 .soon-tag { font-size: .75rem; position: relative; top: -4px; }
 }
 .choice input:checked + span { background: var(--pine-700); border-color: var(--pine-700); color: var(--white); }
 .choice input:focus-visible + span { outline: 3px solid var(--amber); outline-offset: 2px; }
+
+/* The round badge reads better a size up in the footer. */
+.footer-brand .brand-mark { height: 72px; width: 72px; }

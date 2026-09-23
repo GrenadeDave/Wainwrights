@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Wainwrights — the quote form's "when would suit you?" picker
+   Wainwright’s — the quote form's "when would suit you?" picker
    --------------------------------------------------------------------------
    Reads real availability from the database (which slots are already taken,
    which days Bryan is out) and offers only what is genuinely free.

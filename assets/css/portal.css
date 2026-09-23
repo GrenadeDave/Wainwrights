@@ -357,7 +357,7 @@ a.job-card:hover { transform: translateY(-3px); box-shadow: var(--sh-md); border
 .wrap--portal { max-width: 860px; }
 
 .demo-banner {
-  background: var(--amber); color: var(--ink); text-align: center;
+  background: var(--amber-600); color: var(--white); text-align: center;
   padding: 9px 16px; font-size: .9375rem; font-weight: 500;
   border-bottom: 2px solid var(--ink);
 }
@@ -414,7 +414,7 @@ a.hero-card-p:hover .btn-arrow { transform: translateX(4px); }
 .hero-card-p .btn { min-height: 50px; padding: 13px 20px; font-size: 1rem; }
 
 /* "Waiting on you" is amber — the one thing on the page that wants action. */
-.hero-card-p--act { background: var(--amber); color: rgba(17,27,21,.8); }
+.hero-card-p--act { background: var(--amber-600); color: rgba(255,255,255,.92); }
 .hero-card-p--act::before { background: repeating-linear-gradient(-45deg, rgba(17,27,21,.07) 0 18px, transparent 18px 36px); }
 .hero-card-p--act .hcp-label, .hero-card-p--act .hcp-main, .hero-card-p--act .hcp-main b, .hero-card-p--act .hcp-cta { color: var(--ink); }
 a.hero-card-p--act:hover { color: rgba(17,27,21,.8); }
@@ -439,7 +439,7 @@ a.hero-card-p--act:hover { color: rgba(17,27,21,.8); }
   padding: 14px 16px; background: var(--paper); border: 2px solid var(--line); border-radius: var(--r);
   transition: border-color .2s var(--ease), box-shadow .2s var(--ease), background-color .2s var(--ease);
 }
-.composer textarea:focus { outline: none; border-color: var(--pine-600); background: var(--white); box-shadow: 0 0 0 4px rgba(250,169,13,.35); }
+.composer textarea:focus { outline: none; border-color: var(--pine-600); background: var(--white); box-shadow: 0 0 0 4px rgba(238,100,36,.35); }
 .composer-foot { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
 .composer-foot .btn { min-height: 50px; padding: 13px 26px; }
 
@@ -647,7 +647,7 @@ a.hero-card-p--act:hover { color: rgba(17,27,21,.8); }
 /* Junk hauling interest, on the job board */
 .haul-tally {
   display: grid; gap: 6px; margin: 0 0 20px; padding: 14px 18px;
-  background: var(--amber-050); border: 1px solid #F3D48F; border-left: 4px solid var(--amber);
+  background: var(--amber-050); border: 1px solid #F3C3AB; border-left: 4px solid var(--amber);
   border-radius: var(--r);
 }
 .haul-tally p { margin: 0; font-size: .875rem; color: var(--muted); }
