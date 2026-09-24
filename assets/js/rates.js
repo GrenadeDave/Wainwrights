@@ -41,6 +41,7 @@ window.WAINWRIGHTS_RATES = {
     repairs: {
       label: 'Handyman Repairs',
       from:  30,
+      to:    40,
       unit:  'per hour',
       note:  'Small jobs grouped into one visit work out cheaper than separate call-outs.'
     },
