@@ -958,7 +958,7 @@ a.card { color: inherit; }
 .cta-band .btn-primary:hover { background: var(--pine-800); color: var(--white); }
 .cta-band .btn-light { background: transparent; color: var(--white); border-color: rgba(255,255,255,.85); backdrop-filter: none; }
 .cta-band .btn-light:hover { background: var(--white); color: var(--amber-700); }
-.cta-sub { margin-top: 24px; font-size: .9375rem; color: rgba(17,27,21,.7); font-weight: 500; }
+.cta-sub { margin-top: 24px; font-size: .9375rem; color: rgba(255,255,255,.92); font-weight: 500; }
 
 /* --------------------------------------------------------------------------
    12. Forms — every field tells you how it is going

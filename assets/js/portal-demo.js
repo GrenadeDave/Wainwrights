@@ -24,7 +24,7 @@
   var AREA = /\/(admin|demo)(\/|$)/.test(path) ? 'admin' : (/\/portal(\/|$)/.test(path) ? 'portal' : '');
   if (!AREA) return;
 
-  var KEY = 'w-portal-demo-v3';
+  var KEY = 'w-portal-demo-v4';
   var ME = 'demo-user';
   var S = w.WAINWRIGHTS_SCHEDULE;
 
@@ -66,7 +66,7 @@
       /* --- the sample customer, Pat --- */
       job(Object.assign({}, pat, { id: 'demo-deck', service: 'Interior or exterior painting', status: 'quoted',
         details: 'Back deck is peeling badly and the railing on the lake side is loose. About 300 square feet. Would like it stained the same redwood colour.',
-        quote_cents: 185000, slots_needed: 2, created_at: iso(-6), updated_at: iso(-1) })),
+        quote_cents: 76000, slots_needed: 2, created_at: iso(-6), updated_at: iso(-1) })),
       job(Object.assign({}, pat, { id: 'demo-clear', service: 'Defensible space / fire clearing', status: 'scheduled',
         details: 'Zone 0 and Zone 1 around the house. Gutters are full of needles and the low limbs on the two pines by the driveway need raising.',
         quote_cents: 64000, quote_accepted_at: iso(-9), scheduled_for: visit, slot_start: 0, slots_needed: 3,

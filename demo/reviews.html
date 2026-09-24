@@ -12,8 +12,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/site.css?v=6a7fc184">
-<link rel="stylesheet" href="../assets/css/portal.css?v=b3e96d35">
+<link rel="stylesheet" href="../assets/css/site.css?v=b3b26403">
+<link rel="stylesheet" href="../assets/css/portal.css?v=2fb15646">
 </head>
 <body class="portal-body">
 
@@ -47,7 +47,7 @@
 <script src="../assets/js/schedule.js?v=4da46a2e"></script>
 <script src="../assets/js/supabase-config.js?v=f549751b"></script>
 <script src="../assets/js/portal.js?v=cd74eae6"></script>
-<script src="../assets/js/portal-demo.js?v=53340b32"></script>
+<script src="../assets/js/portal-demo.js?v=335f18d3"></script>
 <script src="../assets/js/site.js?v=a5ec3b12"></script>
 <script>
 (function () {
@@ -115,7 +115,8 @@
 
     root.innerHTML =
       '<div class="portal-title"><h1>Reviews</h1>' +
-        '<p>Nothing goes on the website until you say so. Take one down again any time.</p></div>' +
+        '<p>Nothing goes on the website until you say so. Take one down again any time.</p>' +
+        '<p class="form-note" style="text-align:left;margin-top:8px"><b>The rule:</b> put up every genuine review, good or bad. Only hold one back if it is spam or fake, abusive, threatening, obscene or discriminatory, has someone else\u2019s private details, or is not about your work. Hiding a review because it is critical breaks the FTC\u2019s review rule, and the review page promises customers you will not.</p></div>' +
       (waiting.length ? '<h2 class="p-h2">Waiting for you</h2>' + waiting.map(card).join('') : '') +
       (live.length ? '<h2 class="p-h2">On the website</h2>' + live.map(card).join('') : '') +
       (hidden.length ? '<h2 class="p-h2">Taken down</h2>' + hidden.map(card).join('') : '') +

@@ -362,7 +362,7 @@ a.job-card:hover { transform: translateY(-3px); box-shadow: var(--sh-md); border
   border-bottom: 2px solid var(--ink);
 }
 .demo-banner b { font-family: var(--f-cond); letter-spacing: .14em; text-transform: uppercase; font-size: 1rem; }
-.demo-banner a { color: var(--ink); font-weight: 700; margin-left: 12px; white-space: nowrap; }
+.demo-banner a { color: var(--white); font-weight: 700; margin-left: 12px; white-space: nowrap; }
 
 /* Tabs under the header */
 .ptabs { background: var(--white); border-bottom: 1px solid var(--line); position: sticky; top: 70px; z-index: 50; }
@@ -416,8 +416,8 @@ a.hero-card-p:hover .btn-arrow { transform: translateX(4px); }
 /* "Waiting on you" is amber — the one thing on the page that wants action. */
 .hero-card-p--act { background: var(--amber-600); color: rgba(255,255,255,.92); }
 .hero-card-p--act::before { background: repeating-linear-gradient(-45deg, rgba(17,27,21,.07) 0 18px, transparent 18px 36px); }
-.hero-card-p--act .hcp-label, .hero-card-p--act .hcp-main, .hero-card-p--act .hcp-main b, .hero-card-p--act .hcp-cta { color: var(--ink); }
-a.hero-card-p--act:hover { color: rgba(17,27,21,.8); }
+.hero-card-p--act .hcp-label, .hero-card-p--act .hcp-main, .hero-card-p--act .hcp-main b, .hero-card-p--act .hcp-cta { color: var(--white); }
+a.hero-card-p--act:hover { color: var(--white); }
 
 .panel-card--act { border: 2px solid var(--amber); box-shadow: 0 0 0 5px var(--amber-050), var(--sh-sm); }
 .panel-card--act .hcp-label { color: var(--amber-ink); margin-bottom: 8px; }
