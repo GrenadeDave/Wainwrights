@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Wainwright’s Handyman & Land Management — site behaviour
+   Wainwright’s Handyman & Land Maintenance — site behaviour
    No dependencies. Works from the file system or any static host.
    ========================================================================== */
 (function () {

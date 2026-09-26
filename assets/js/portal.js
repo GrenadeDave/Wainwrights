@@ -291,7 +291,7 @@
       'DTSTART:' + t(startH), 'DTEND:' + t(endH),
       'SUMMARY:Bryan Wainwright — ' + job.service,
       'LOCATION:' + String(job.address || '').replace(/[,;\\]/g, ' '),
-      'DESCRIPTION:Wainwright’s Handyman & Land Management. Questions: (209) 459-1846',
+      'DESCRIPTION:Wainwright’s Handyman & Land Maintenance. Questions: (209) 459-1846',
       'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
     return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
   };
