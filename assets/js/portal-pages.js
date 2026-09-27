@@ -87,7 +87,7 @@
         '<p>Once Bryan has a request from you it shows up here, with its price and where it has got to.</p>' +
         '<p class="portal-empty-note">Already asked for a quote? It may have been sent from a different email address. ' +
         'Give Bryan a ring and he will sort it.</p>' +
-        '<a class="btn btn-primary" href="new.html">Request a free estimate ' + ICON.arrow + '</a></div>';
+        '<a class="btn btn-primary" href="new.html">Request a free rough estimate ' + ICON.arrow + '</a></div>';
       root().innerHTML = html; return;
     }
 
@@ -231,8 +231,8 @@
           (j.surcharge_cents ? '<div class="price-row"><span class="label">Disposal &amp; handling</span><span class="amount">' + P.money(j.surcharge_cents) + '</span></div>' : '') +
           '<div class="price-row total"><span class="label">Total</span><span class="amount">' + P.money(total) + '</span></div></div>';
       } else if (total == null && j.status !== 'cancelled') {
-        html += '<div class="panel-card"><h2>Price</h2><p style="color:var(--muted);margin:0">No price yet. Bryan gives you a figure ' +
-          'after he has been out and seen the property — that visit is free.</p></div>';
+        html += '<div class="panel-card"><h2>Price</h2><p style="color:var(--muted);margin:0">No price yet. Text photos of the job to <a href="sms:+12094591846">(209) 459-1846</a> and Bryan will give you a ' +
+          'free rough estimate. The final price is agreed once the scope is confirmed.</p></div>';
       }
 
       /* ---- preferred time ---- */
@@ -343,7 +343,8 @@
     var picked = { day: null, slot: null };
 
     root().innerHTML =
-      '<div class="portal-title"><h1>Request more work</h1><p>Tell Bryan what you need. He already has your details, so this is the short version.</p></div>' +
+      '<div class="portal-title"><h1>Request more work</h1><p>Send a short description and photos for a free rough estimate. He already has your details, so this is the short version.</p></div>' +
+      '<div class="photo-note"><b>Photos help most.</b> Text them to <a href="sms:+12094591846">(209) 459-1846</a> or email them to <a href="mailto:Bwain94Work@gmail.com">Bwain94Work@gmail.com</a> after you send this.</div>' +
       '<form class="form-card" id="req" novalidate>' +
         '<div class="field"><label for="r-service">What do you need?</label><select id="r-service">' +
           P.SERVICES.map(function (s) { return '<option>' + esc(s) + '</option>'; }).join('') + '</select></div>' +

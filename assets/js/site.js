@@ -231,7 +231,7 @@
     lines.push(mydidBlock(lead));
 
     return 'mailto:' + BIZ.email +
-      '?subject=' + encodeURIComponent('Free estimate request - ' + (lead.name || 'Website')) +
+      '?subject=' + encodeURIComponent('Free rough estimate request - ' + (lead.name || 'Website')) +
       '&body=' + encodeURIComponent(lines.join('\n'));
   }
 
@@ -317,6 +317,7 @@
           if (submit) submit.textContent = 'Sent';
           say(form,
             '<strong>Thank you — that is with Bryan now.</strong><br>' +
+            'Photos help most: text them to <a href="sms:+12094591846">' + BIZ.phone + '</a> or email them to Bwain94Work@gmail.com, with your name. ' +
             'He will get back to you, usually the same day. If it is urgent, ' +
             'call <a href="' + BIZ.phoneHref + '">' + BIZ.phone + '</a>.');
           form.reset();
@@ -466,7 +467,7 @@
       if (lines[lines.length - 1] === '') lines.push('  (nothing — the list is complete)');
 
       lines.push('');
-      lines.push('Could you take a look and give me a free estimate?');
+      lines.push('Could you give me a free rough estimate? I can send photos.');
       lines.push('');
       lines.push('My name:    ');
       lines.push('My address: ');

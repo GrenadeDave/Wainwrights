@@ -5,7 +5,7 @@
    He charges by the hour. Where he gave a range, the range is shown.
 
    Every price carries an asterisk, and the asterisk says "Prices negotiable" —
-   his words. The written figure still comes from the free visit.
+   his words. A free rough estimate comes from the customer's photos; the final price is agreed once the scope is confirmed.
    ========================================================================== */
 /* ⚠️ THE $1,000 LIMIT IS THE LAW, NOT A PREFERENCE.
    Bryan is not a licensed contractor. California Business & Professions Code
@@ -19,7 +19,7 @@
    apply to them.                                                            */
 window.WAINWRIGHTS_RATES = {
 
-  /* false = show "Free estimate" instead of any figure. */
+  /* false = show "Free rough estimate" instead of any figure. */
   showPrices: true,
 
   currency: 'USD',
@@ -49,7 +49,7 @@ window.WAINWRIGHTS_RATES = {
       label: 'Interior & Exterior Painting',
       from:  40,
       unit:  'per hour',
-      note:  'Paint and materials are on top, and you see them in the written price.'
+      note:  'Paint and materials are on top, and you see them in the final price.'
     },
     defensible: {
       label: 'Defensible Space & Fire Clearing',

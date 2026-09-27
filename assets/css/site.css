@@ -1650,3 +1650,18 @@ h2 .soon-tag { font-size: .75rem; position: relative; top: -4px; }
 .story-sign img { width: 76px; height: 76px; flex: none; }
 .story-sign b { display: block; font-family: var(--f-head); font-size: 1.125rem; color: var(--ink); }
 .story-sign span { display: block; margin-top: 3px; font-family: var(--f-cond); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--amber-ink); font-size: .9rem; }
+
+/* The estimate form's photo instructions — the form can't take uploads yet. */
+.photo-note {
+  margin: 0 0 22px; padding: 14px 16px; border-radius: var(--r);
+  background: var(--sky-050); border: 1px solid var(--sky-line); border-left: 4px solid var(--pine-600);
+  font-size: .9375rem; line-height: 1.6; color: var(--body);
+}
+.photo-note b { color: var(--ink); }
+.photo-note a { font-weight: 700; }
+
+/* "Free Rough Estimate" is longer than the old label: on medium desktops the
+   Customer Login link drops to its lock icon (it keeps its aria-label). */
+@media (max-width: 1400px) and (min-width: 1241px) {
+  .header-login .hp-label { display: none; }
+}
