@@ -654,3 +654,18 @@ a.hero-card-p--act:hover { color: var(--white); }
 .haul-nums { display: flex; flex-wrap: wrap; gap: 8px 22px; }
 .haul-nums span { color: var(--body); }
 .haul-nums b { font-family: var(--f-head); font-size: 1.5rem; color: var(--ink); margin-right: 4px; }
+
+/* Admin header on phones and tablets (2026-09-30): six or seven buttons cannot share a row with
+   the logo, and they pushed every admin page sideways. They get their own row under the logo,
+   which swipes sideways by itself, so the page never does and the sticky header stays short. */
+@media (max-width: 1000px) {
+  .portal-header .header-inner:has(.who--admin) { height: auto; flex-wrap: wrap; row-gap: 8px; padding-block: 10px; }
+  .portal-header .who--admin {
+    order: 3; flex: 1 0 100%; width: 100%; margin-left: 0; gap: 8px;
+    overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+  .portal-header .who--admin::-webkit-scrollbar { display: none; }
+  .portal-header .who--admin a.plain { padding: 7px 12px; font-size: .875rem; flex: none; }
+  .portal-header .who--admin a[href$="../index.html"] { display: inline-block; }
+}
