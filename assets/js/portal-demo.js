@@ -291,7 +291,7 @@
      pages make. Bryan is admin, so — as in the real database — he sees
      every row. */
   var TABLES = { jobs: 'jobs', job_events: 'events', job_notes: 'notes', blackouts: 'blackouts', devices: 'devices',
-                 profiles: 'profiles', reviews: 'reviews', admin_grants: 'grants', admin_audit: 'audit' };
+                 profiles: 'profiles', reviews: 'reviews', review_removals: 'removals', admin_grants: 'grants', admin_audit: 'audit' };
   var KEYS   = { job_notes: 'job_id', blackouts: 'day' };
 
   function Query(table) { this.table = table; this.op = 'select'; this.where = []; this.sort = null; this.mode = 'many'; this.payload = null; }
@@ -381,6 +381,7 @@
     targets.forEach(function (r) {
       var before = r.status;
       Object.assign(r, p2);
+      if (name === 'reviews' && p2.status === 'published') { r.removal_reason = null; r.removal_note = null; }
       if (name === 'jobs') {
         r.updated_at = now;
         if (p2.status && p2.status !== before) addEvent(db, r.id, 'system', '', p2.status);
@@ -414,6 +415,25 @@
         addEvent(dc, which, 'bryan', reason, 'cancelled');
         save(dc);
         return ok({ id: which, reason: reason, contact_email: jc.contact_email, has_account: true });
+      }
+      if (fn === 'admin_remove_review') {
+        /* The same checks as the database: a listed reason and a note, or nothing happens. */
+        var REASONS = ['fake', 'unrelated', 'abusive', 'discriminatory', 'private_info', 'confidential', 'false', 'test', 'reviewer_request'];
+        var dr = load(), a = args || {}, note = String(a.p_note || '').trim();
+        var rv = (dr.reviews || []).filter(function (x) { return x.id === a.p_review; })[0];
+        if (REASONS.indexOf(a.p_reason) === -1) return no('Pick one of the listed reasons. A review cannot be taken down for being critical.');
+        if (note.length < 5) return no('Add a short note saying what makes it fit that reason.');
+        if (!rv) return no('That review is already gone.');
+        if (a.p_action === 'hide' && rv.status === 'hidden') return no('That review is already taken down.');
+        dr.removals = dr.removals || [];
+        dr.removals.push({ id: uid(), review_id: rv.id, action: a.p_action === 'hide' ? 'hidden' : 'deleted', reason: a.p_reason, note: note,
+                           was_status: rv.status, name: rv.name, town: rv.town, rating: rv.rating,
+                           body: (a.p_reason === 'private_info' || a.p_reason === 'reviewer_request') ? null : rv.body,
+                           removed_by_email: 'bryan@example.com', removed_at: new Date().toISOString() });
+        if (a.p_action === 'hide') { rv.status = 'hidden'; rv.removal_reason = a.p_reason; rv.removal_note = note; }
+        else dr.reviews = dr.reviews.filter(function (x) { return x.id !== rv.id; });
+        save(dr);
+        return ok(a.p_action === 'hide' ? 'hidden' : 'deleted');
       }
       if (fn === 'grant_admin' || fn === 'revoke_admin') {
         var d2 = load(), addr = String((args || {}).p_email || '').trim().toLowerCase();

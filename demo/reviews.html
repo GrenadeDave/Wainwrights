@@ -47,7 +47,7 @@
 <script src="../assets/js/schedule.js?v=3041262f"></script>
 <script src="../assets/js/supabase-config.js?v=79cace19"></script>
 <script src="../assets/js/portal.js?v=d592444e"></script>
-<script src="../assets/js/portal-demo.js?v=798b4c1d"></script>
+<script src="../assets/js/portal-demo.js?v=1f93f340"></script>
 <script src="../assets/js/site.js?v=31d48d51"></script>
 <script>
 (function () {
@@ -79,9 +79,26 @@
     return s;
   }
 
+  /* The only reasons a review may come down. Taken from the FTC's Consumer
+     Review rule, 16 CFR 465.7(b) (checked at ecfr.gov, 2026-09-30), plus two
+     that are not suppression at all. The database refuses anything else.
+     The same codes live in admin_remove_review() — change both together. */
+  var REASONS = [
+    ['fake',             'Fake, spam or written by a bot',                         'You have a real reason to believe no genuine customer wrote it.'],
+    ['unrelated',        'Not about Bryan\u2019s work or services',               'An advert, a rant about something else, a wrong business.'],
+    ['abusive',          'Defamatory, harassing, abusive, obscene, vulgar or sexually explicit', ''],
+    ['discriminatory',   'Discriminatory about race, gender, sexuality, ethnicity or another intrinsic characteristic', ''],
+    ['private_info',     'Has someone else\u2019s personal information or picture', 'A phone number, address or name of another person. The text is not kept in the log.'],
+    ['confidential',     'Has trade secrets or confidential business or money details', ''],
+    ['false',            'Clearly false or misleading',                             'Only a plain falsehood (a job that never happened, the wrong company). Not a fair complaint you disagree with.'],
+    ['test',             'A test we made \u2014 not from a customer',              ''],
+    ['reviewer_request', 'The person who wrote it asked for it to be removed',     'Say when and how they asked. The text is not kept in the log.']
+  ];
+  var LABEL = {}; REASONS.forEach(function (r) { LABEL[r[0]] = r[1]; });
+
   function card(r) {
     var live = r.status === 'published';
-    return '<div class="panel-card' + (r.status === 'pending' ? ' panel-card--act' : '') + '" style="margin-bottom:16px">' +
+    return '<div class="panel-card' + (r.status === 'pending' ? ' panel-card--act' : '') + '" style="margin-bottom:16px" id="rv-' + r.id + '">' +
       '<div class="status-line">' +
         (r.status === 'pending' ? '<span class="pill pill--act">Waiting for you</span>'
          : live ? '<span class="pill pill--ok">On the website</span>'
@@ -93,13 +110,47 @@
       '<p style="white-space:pre-wrap;font-size:1.0625rem">' + P.esc(r.body) + '</p>' +
       '<p style="color:var(--muted);margin-bottom:16px"><b style="color:var(--ink)">' + P.esc(r.name) + '</b>' +
         (r.town ? ' &middot; ' + P.esc(r.town) : '') + '</p>' +
+      (r.status === 'hidden' && r.removal_reason
+        ? '<p class="form-note" style="text-align:left;margin:0 0 16px"><b>Taken down because:</b> ' + P.esc(LABEL[r.removal_reason] || r.removal_reason) +
+          (r.removal_note ? ' &mdash; ' + P.esc(r.removal_note) : '') + '</p>' : '') +
       '<div class="btn-row">' +
-        (live
-          ? '<button class="btn btn-outline" type="button" data-hide="' + r.id + '">Take it down</button>'
-          : '<button class="btn btn-primary" type="button" data-show="' + r.id + '">Put it on the website</button>') +
-        '<button class="btn btn-dark" type="button" data-del="' + r.id + '">Delete</button>' +
+        (r.status !== 'published'
+          ? '<button class="btn btn-primary" type="button" data-show="' + r.id + '">Put it on the website</button>' : '') +
+        (r.status !== 'hidden'
+          ? '<button class="btn btn-outline" type="button" data-remove="hide" data-id="' + r.id + '">Take it down&hellip;</button>' : '') +
+        '<button class="btn btn-dark" type="button" data-remove="delete" data-id="' + r.id + '">Delete&hellip;</button>' +
       '</div>' +
+      '<div class="rv-why" hidden></div>' +
     '</div>';
+  }
+
+  /* The reason form opens inside the card, so Bryan sees the review he is judging. */
+  function reasonForm(action) {
+    return '<form class="rv-form" style="margin-top:18px;padding-top:18px;border-top:1px solid var(--line)">' +
+      '<p style="font-weight:700;margin:0 0 6px">' + (action === 'hide' ? 'Why is it coming down?' : 'Why is it being deleted?') + '</p>' +
+      '<p class="form-note" style="text-align:left;margin:0 0 12px">Pick the one that fits. Being critical, a low star rating or an unfair-feeling complaint is <b>not</b> a reason &mdash; those stay up.</p>' +
+      REASONS.map(function (x) {
+        return '<label style="display:flex;gap:10px;align-items:flex-start;margin:0 0 10px;cursor:pointer">' +
+          '<input type="radio" name="reason" value="' + x[0] + '" required style="margin-top:4px">' +
+          '<span><b style="font-weight:600">' + x[1] + '</b>' + (x[2] ? '<br><small style="color:var(--muted)">' + x[2] + '</small>' : '') + '</span></label>';
+      }).join('') +
+      '<label style="display:block;margin:14px 0 6px;font-weight:600" for="rv-note">What makes it fit? <small style="color:var(--muted);font-weight:400">(kept in the log)</small></label>' +
+      '<textarea name="note" id="rv-note" maxlength="500" required rows="3" style="width:100%;font:inherit" placeholder="For example: the same text was sent five times from different names."></textarea>' +
+      '<div class="btn-row" style="margin-top:14px">' +
+        '<button class="btn ' + (action === 'hide' ? 'btn-outline' : 'btn-dark') + '" type="submit">' + (action === 'hide' ? 'Take it down' : 'Delete for good') + '</button>' +
+        '<button class="btn btn-outline" type="button" data-cancel>Keep it</button>' +
+      '</div>' +
+      '<p class="form-note rv-err" style="text-align:left;color:var(--danger,#b42318)" hidden></p>' +
+    '</form>';
+  }
+
+  function logRow(x) {
+    return '<li style="margin:0 0 14px">' +
+      '<b>' + P.esc(x.name || 'Unnamed') + '</b>' + (x.rating ? ' &middot; ' + x.rating + '&#9733;' : '') +
+      ' &middot; ' + (x.action === 'deleted' ? 'deleted' : 'taken down') + ' ' + P.esc(P.dateTime(x.removed_at) || '') +
+      (x.removed_by_email ? ' by ' + P.esc(x.removed_by_email) : '') +
+      '<br><span>' + P.esc(LABEL[x.reason] || x.reason) + '</span>' +
+      '<br><small style="color:var(--muted)">' + P.esc(x.note) + '</small></li>';
   }
 
   async function paint() {
@@ -108,6 +159,8 @@
       root.innerHTML = '<div class="portal-empty"><h2>Could not load</h2><p>' + P.esc(res.error.message) + '</p></div>';
       return;
     }
+    var logRes = await P.client().from('review_removals').select('*').order('removed_at', { ascending: false });
+    var log = (logRes && logRes.data) || [];
     var all = res.data || [];
     var waiting = all.filter(function (r) { return r.status === 'pending'; });
     var live    = all.filter(function (r) { return r.status === 'published'; });
@@ -115,14 +168,16 @@
 
     root.innerHTML =
       '<div class="portal-title"><h1>Reviews</h1>' +
-        '<p>Nothing goes on the website until you say so. Take one down again any time.</p>' +
-        '<p class="form-note" style="text-align:left;margin-top:8px"><b>The rule:</b> put up every genuine review, good or bad. Only hold one back if it is spam or fake, abusive, threatening, obscene or discriminatory, has someone else\u2019s private details, or is not about your work. Hiding a review because it is critical breaks the FTC\u2019s review rule, and the review page promises customers you will not.</p></div>' +
+        '<p>Nothing goes on the website until you say so.</p>' +
+        '<p class="form-note" style="text-align:left;margin-top:8px"><b>The rule:</b> put up every genuine review, good or bad. Taking one down or deleting it needs one of the reasons the FTC\u2019s review rule allows, and a note. Every one is written to the removal log below, which nobody can edit. Hiding a review because it is critical breaks the FTC\u2019s rule, and the review page promises customers you will not.</p></div>' +
       (waiting.length ? '<h2 class="p-h2">Waiting for you</h2>' + waiting.map(card).join('') : '') +
       (live.length ? '<h2 class="p-h2">On the website</h2>' + live.map(card).join('') : '') +
       (hidden.length ? '<h2 class="p-h2">Taken down</h2>' + hidden.map(card).join('') : '') +
       (all.length ? '' : '<div class="portal-empty"><h2>None yet</h2>' +
         '<p>When a customer leaves one it lands here, and you get an email. ' +
-        'The page they use is <b>wainwrightshandyman.com/review.html</b> &mdash; worth texting to anyone happy with a job.</p></div>');
+        'The page they use is <b>wainwrightshandyman.com/review.html</b> &mdash; worth texting to anyone happy with a job.</p></div>') +
+      (log.length ? '<h2 class="p-h2">Removal log</h2><div class="panel-card"><ul style="list-style:none;padding:0;margin:0">' +
+        log.map(logRow).join('') + '</ul></div>' : '');
 
     root.querySelectorAll('[data-show]').forEach(function (b) {
       b.addEventListener('click', async function () {
@@ -133,24 +188,27 @@
         paint();
       });
     });
-    root.querySelectorAll('[data-hide]').forEach(function (b) {
-      b.addEventListener('click', async function () {
-        var r = await P.client().from('reviews').update({ status: 'hidden' }).eq('id', b.dataset.hide);
-        flash(r.error ? 'Could not do that: ' + r.error.message : 'Taken down');
-        paint();
-      });
-    });
-    root.querySelectorAll('[data-del]').forEach(function (b) {
-      b.addEventListener('click', async function () {
-        var ok = await P.confirm({
-          title: 'Delete this review?',
-          body: 'It goes for good. If you only want it off the website, take it down instead.',
-          ok: 'Delete', cancel: 'Keep it', danger: true
+
+    root.querySelectorAll('[data-remove]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var action = b.dataset.remove, id = b.dataset.id;
+        var box = document.getElementById('rv-' + id).querySelector('.rv-why');
+        box.innerHTML = reasonForm(action); box.hidden = false;
+        var form = box.querySelector('form'), err = box.querySelector('.rv-err');
+        box.querySelector('[data-cancel]').addEventListener('click', function () { box.hidden = true; box.innerHTML = ''; });
+        form.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          var reason = (form.querySelector('input[name="reason"]:checked') || {}).value;
+          var note = form.note.value.trim();
+          if (!reason) { err.textContent = 'Pick a reason.'; err.hidden = false; return; }
+          if (note.length < 5) { err.textContent = 'Add a short note saying what makes it fit.'; err.hidden = false; return; }
+          var sub = form.querySelector('[type="submit"]'); sub.disabled = true;
+          var r = await P.client().rpc('admin_remove_review', { p_review: id, p_action: action, p_reason: reason, p_note: note });
+          sub.disabled = false;
+          if (r.error) { err.textContent = r.error.message; err.hidden = false; return; }
+          flash(action === 'hide' ? 'Taken down, and logged' : 'Deleted, and logged');
+          paint();
         });
-        if (!ok) return;
-        var r = await P.client().from('reviews').delete().eq('id', b.dataset.del);
-        flash(r.error ? 'Could not delete: ' + r.error.message : 'Deleted');
-        paint();
       });
     });
   }
