@@ -888,3 +888,12 @@ a.hero-card-p--act:hover { color: var(--white); }
   .mo-slot { grid-template-columns: 64px 1fr; }
 }
 @media (max-width: 700px) { .mo-legend .mo-load--key { width: 36px; flex: none; } }
+
+/* Job value on the month chips and the day planner (2026-09-30) */
+.mo-job { grid-template-columns: 7px minmax(0, 1fr) auto; }
+.mo-job .mo-who { grid-column: 2 / -1; }
+.mo-v { grid-column: 3; grid-row: 2; font-size: .6875rem; font-weight: 800; color: inherit; font-variant-numeric: tabular-nums; }
+.mo-job .mo-t { grid-column: 2; grid-row: 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mo-item-when { display: flex; justify-content: space-between; gap: 10px; }
+.mo-item-v { font-size: .875rem; color: var(--pine-800); }
+.mo-item.is-in_progress .mo-item-v { color: var(--ink); }

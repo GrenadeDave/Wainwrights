@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/site.css?v=d13960a6">
-<link rel="stylesheet" href="../assets/css/portal.css?v=e762eff8">
+<link rel="stylesheet" href="../assets/css/portal.css?v=e3a3e2a2">
 </head>
 <body class="portal-body">
 
@@ -201,6 +201,10 @@
       });
       return out;
     }
+    function value(j) {                             // the estimate total, whole dollars: "$640"
+      var c = P.total(j);
+      return c == null ? '' : '$' + Math.round(c / 100).toLocaleString('en-US');
+    }
     function shortName(n) {                         // "Carol Whitfield" -> "Carol W."
       var w = String(n || '').trim().split(/\s+/);
       return w.length > 1 ? w[0] + ' ' + w[w.length - 1].charAt(0) + '.' : w[0] || '';
@@ -233,8 +237,10 @@
                 (day < today ? ' is-past' : '');
       var chips = list.slice(0, 3).map(function (j) {
         return '<a class="mo-job is-' + P.esc(j.status) + '" href="job.html?id=' + encodeURIComponent(j.id) + '" title="' +
-          P.esc(j.contact_name + ' — ' + j.service + ', ' + span(j)) + '">' +
-          '<i class="mo-pip"></i><span class="mo-who">' + P.esc(shortName(j.contact_name)) + '</span><span class="mo-t">' + P.esc(shortSpan(j)) + '</span></a>';
+          P.esc(j.contact_name + ' — ' + j.service + ', ' + span(j) + (value(j) ? ', ' + value(j) : '')) + '">' +
+          '<i class="mo-pip"></i><span class="mo-who">' + P.esc(shortName(j.contact_name)) + '</span>' +
+          (value(j) ? '<b class="mo-v">' + P.esc(value(j)) + '</b>' : '') +
+          '<span class="mo-t">' + P.esc(shortSpan(j).split('–')[0]) + '</span></a>';
       }).join('');
       var more = list.length > 3 ? '<span class="mo-more">+' + (list.length - 3) + ' more</span>' : '';
       var load = off ? '' : '<div class="mo-load" aria-hidden="true">' + slotsOf(day).map(function (s) {
@@ -266,7 +272,7 @@
                 '<span class="mo-item-top"><b>' + P.esc(j.contact_name) + '</b><span class="mo-badge is-' + P.esc(j.status) + '">' + P.esc(STATUS[j.status] || j.status) + '</span></span>' +
                 '<span class="mo-item-what">' + P.esc(j.service) + '</span>' +
                 (j.address ? '<span class="mo-item-where">' + P.esc(String(j.address).split(',')[0]) + '</span>' : '') +
-                '<span class="mo-item-when">' + P.esc(span(j)) + '</span>' +
+                '<span class="mo-item-when">' + P.esc(span(j)) + (value(j) ? '<b class="mo-item-v">' + P.esc(value(j)) + '</b>' : '') + '</span>' +
               '</a>'
             : '<div class="mo-free">Free</div>') +
         '</div>';
