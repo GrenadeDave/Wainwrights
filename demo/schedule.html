@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/site.css?v=d13960a6">
-<link rel="stylesheet" href="../assets/css/portal.css?v=b775d32c">
+<link rel="stylesheet" href="../assets/css/portal.css?v=850b5e35">
 </head>
 <body class="portal-body">
 
@@ -77,6 +77,12 @@
   var weekStart = thisWorkWeek();
   var jobs = [], blackouts = [];
 
+  /* Week or month. Remembered on this device only. */
+  var view = 'week';
+  try { if (localStorage.getItem('w-schedule-view') === 'month') view = 'month'; } catch (e) {}
+  var monthStart = (function () { var d = new Date(); d.setHours(0,0,0,0); d.setDate(1); return d; })();
+  var picked = null;                       // the day open under the month grid
+
   function startOfWeek(d) {
     var x = new Date(d); x.setHours(0,0,0,0);
     x.setDate(x.getDate() - ((x.getDay() + 6) % 7));   // Monday
@@ -96,8 +102,18 @@
     return out;
   }
 
+  /* The month grid runs Monday to Sunday, so it starts before the 1st and ends after the last day. */
+  function monthDays() {
+    var first = startOfWeek(monthStart);
+    var last = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
+    last.setDate(last.getDate() + (7 - ((last.getDay() + 6) % 7) - 1));
+    var out = [];
+    for (var d = new Date(first); d <= last; d.setDate(d.getDate() + 1)) out.push(S.ymd(d));
+    return out;
+  }
+
   async function load() {
-    var days = weekDays();
+    var days = view === 'month' ? monthDays() : weekDays();
     if (!days.length) return;
     var res = await Promise.all([
       P.client().from('jobs').select('*')
@@ -108,7 +124,8 @@
         .gte('day', days[0]).lte('day', days[days.length-1])
     ]);
     if (res[0].error) { root.innerHTML = '<div class="portal-empty"><h2>Could not load</h2><p>'+P.esc(res[0].error.message)+'</p></div>'; return; }
-    jobs = res[0].data || [];
+    /* A cancelled job keeps its old date; it is not work, so it is not drawn. */
+    jobs = (res[0].data || []).filter(function (j) { return j.status !== 'cancelled'; });
     blackouts = (res[1].data || []).map(function(b){ return b.day; });
 
     /* Notes are in the admin-only job_notes table; fetch them for this week's
@@ -120,7 +137,140 @@
       (nr.data || []).forEach(function (n) { byId[n.job_id] = n.body; });
       jobs.forEach(function (j) { j.admin_notes = byId[j.id] || ''; });
     }
-    paint();
+    if (view === 'month') paintMonth(); else paint();
+  }
+
+  function switcher() {
+    return '<div class="seg" role="group" aria-label="Show">' +
+      '<button type="button" class="seg-b" data-view="week" aria-pressed="' + (view === 'week') + '">Week</button>' +
+      '<button type="button" class="seg-b" data-view="month" aria-pressed="' + (view === 'month') + '">Month</button>' +
+    '</div>';
+  }
+  function wireSwitcher() {
+    root.querySelectorAll('[data-view]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (b.dataset.view === view) return;
+        view = b.dataset.view;
+        try { localStorage.setItem('w-schedule-view', view); } catch (e) {}
+        if (view === 'month') { monthStart = new Date(weekStart); monthStart.setDate(1); picked = null; }
+        load();
+      });
+    });
+  }
+
+  async function toggleBlock(day) {
+    var off = blackouts.indexOf(day) !== -1;
+    var res = off
+      ? await P.client().from('blackouts').delete().eq('day', day)
+      : await P.client().from('blackouts').insert({ day: day });
+    if (res.error) return flash('Could not change that: ' + res.error.message);
+    flash(off ? 'Day opened back up' : 'Day blocked out');
+    load();
+  }
+
+  function span(j) {
+    var a = S.slots[j.slot_start] || S.slots[0];
+    var z = S.slots[Math.min(j.slot_start + (j.slots_needed || 1) - 1, S.slots.length - 1)] || a;
+    return a.time.split('\u2013')[0].trim() + ' \u2013 ' + z.time.split('\u2013')[1].trim();
+  }
+  var STATUS = { scheduled: 'Scheduled', in_progress: 'In progress', completed: 'Done', quoted: 'Estimate accepted' };
+
+  /* ----------------------------------------------------------------------
+     The month: every booked job at a glance, a day's detail underneath.
+     ---------------------------------------------------------------------- */
+  function paintMonth() {
+    var days = monthDays();
+    var today = S.ymd(new Date());
+    var month = monthStart.getMonth();
+    var inMonth = jobs.filter(function (j) { return S.parseYmd(j.scheduled_for).getMonth() === month; });
+    var byDay = {};
+    jobs.forEach(function (j) { (byDay[j.scheduled_for] = byDay[j.scheduled_for] || []).push(j); });
+    Object.keys(byDay).forEach(function (k) { byDay[k].sort(function (a, b) { return a.slot_start - b.slot_start; }); });
+
+    if (!picked || S.parseYmd(picked).getMonth() !== month) {
+      var firstJob = inMonth.map(function (j) { return j.scheduled_for; }).sort()[0];
+      picked = S.parseYmd(today).getMonth() === month && S.parseYmd(today).getFullYear() === monthStart.getFullYear()
+        ? today : (firstJob || S.ymd(monthStart));
+    }
+
+    var title = monthStart.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    var head = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(function (d) {
+      return '<div class="mo-dow">' + d + '</div>';
+    }).join('');
+
+    var cells = days.map(function (day) {
+      var d = S.parseYmd(day), list = byDay[day] || [];
+      var off = blackouts.indexOf(day) !== -1;
+      var cls = 'mo-day' + (d.getMonth() !== month ? ' is-other' : '') + (S.isWorkingDay(d) ? '' : ' is-weekend') +
+                (off ? ' is-off' : '') + (day === today ? ' is-today' : '') + (day === picked ? ' is-picked' : '');
+      var chips = list.slice(0, 3).map(function (j) {
+        return '<a class="mo-job is-' + P.esc(j.status) + '" href="job.html?id=' + encodeURIComponent(j.id) + '" title="' +
+          P.esc(j.contact_name + ' \u2014 ' + j.service + ', ' + span(j)) + '">' +
+          '<span class="mo-t">' + P.esc((S.slots[j.slot_start] || {}).label || '') + '</span> ' + P.esc(j.contact_name) + '</a>';
+      }).join('');
+      var more = list.length > 3 ? '<span class="mo-more">+' + (list.length - 3) + ' more</span>' : '';
+      var dots = list.map(function (j) { return '<i class="mo-dot is-' + P.esc(j.status) + '"></i>'; }).join('');
+      return '<div class="' + cls + '" data-day="' + day + '" role="button" tabindex="0" aria-label="' +
+          P.esc(d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })) + ', ' +
+          (off ? 'blocked out' : list.length + (list.length === 1 ? ' job' : ' jobs')) + '">' +
+        '<span class="mo-n">' + d.getDate() + '</span>' +
+        (off ? '<span class="mo-off">Off</span>' : '') +
+        '<div class="mo-chips">' + chips + more + '</div>' +
+        '<div class="mo-dots" aria-hidden="true">' + dots + '</div>' +
+      '</div>';
+    }).join('');
+
+    /* The picked day, in full. */
+    var pd = S.parseYmd(picked), plist = byDay[picked] || [], poff = blackouts.indexOf(picked) !== -1;
+    var detail = '<div class="mo-detail panel-card">' +
+      '<div class="mo-detail-head"><h2 class="p-h2" style="margin:0">' +
+        P.esc(pd.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })) + '</h2>' +
+        '<button class="wk-block" id="mo-block" type="button">' + (poff ? 'Open it up' : 'Block the day') + '</button></div>' +
+      (poff ? '<p style="color:var(--muted);margin:10px 0 0">Blocked out \u2014 not working.</p>' : '') +
+      (plist.length ? plist.map(function (j) {
+        return '<a class="mo-item is-' + P.esc(j.status) + '" href="job.html?id=' + encodeURIComponent(j.id) + '">' +
+          '<span class="mo-item-when">' + P.esc(span(j)) + '</span>' +
+          '<b>' + P.esc(j.contact_name) + '</b>' +
+          '<span>' + P.esc(j.service) + (j.address ? ' \u00b7 ' + P.esc(String(j.address).split(',')[0]) : '') + '</span>' +
+          '<span class="mo-item-status">' + P.esc(STATUS[j.status] || j.status) + '</span>' +
+        '</a>';
+      }).join('') : (poff ? '' : '<p style="color:var(--muted);margin:10px 0 0">Nothing booked.</p>')) +
+    '</div>';
+
+    root.innerHTML =
+      '<div class="portal-title"><h1>Schedule</h1><p>' + P.esc(title) + ' \u00b7 ' +
+        inMonth.length + (inMonth.length === 1 ? ' job booked' : ' jobs booked') + '</p></div>' +
+      '<div class="wk-bar">' + switcher() +
+        '<div class="wk-nav">' +
+          '<button class="chip" id="prev" type="button" aria-label="The month before">&larr;</button>' +
+          '<button class="chip" id="today" type="button">This month</button>' +
+          '<button class="chip" id="next" type="button" aria-label="The month after">&rarr;</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mo-legend" aria-hidden="true"><span><i class="mo-dot is-scheduled"></i>Scheduled</span>' +
+        '<span><i class="mo-dot is-in_progress"></i>In progress</span><span><i class="mo-dot is-completed"></i>Done</span>' +
+        '<span><i class="mo-key-off"></i>Blocked out</span></div>' +
+      '<div class="mo">' + head + cells + '</div>' +
+      detail;
+
+    wireSwitcher();
+    document.getElementById('prev').addEventListener('click', function () { monthStart.setMonth(monthStart.getMonth() - 1); load(); });
+    document.getElementById('next').addEventListener('click', function () { monthStart.setMonth(monthStart.getMonth() + 1); load(); });
+    document.getElementById('today').addEventListener('click', function () {
+      monthStart = new Date(); monthStart.setHours(0,0,0,0); monthStart.setDate(1); picked = null; load();
+    });
+    document.getElementById('mo-block').addEventListener('click', function () { toggleBlock(picked); });
+    root.querySelectorAll('.mo-day').forEach(function (c) {
+      function pick(e) {
+        if (e.target.closest('a')) return;                   // a job chip opens the job
+        var d = S.parseYmd(c.dataset.day);
+        if (d.getMonth() !== month) { monthStart = new Date(d.getFullYear(), d.getMonth(), 1); }
+        picked = c.dataset.day;
+        if (d.getMonth() !== month) load(); else paintMonth();
+      }
+      c.addEventListener('click', pick);
+      c.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(e); } });
+    });
   }
 
   /* A job occupies its start slot and the ones after it. */
@@ -202,7 +352,7 @@
       '<div class="portal-title"><h1>Schedule</h1><p>' + P.esc(label) + ' \u00b7 ' +
         booked + (booked === 1 ? ' job booked' : ' jobs booked') + '</p></div>' +
 
-      '<div class="wk-bar">' +
+      '<div class="wk-bar">' + switcher() +
         '<div class="wk-nav">' +
           '<button class="chip" id="prev" type="button" aria-label="The week before">&larr;</button>' +
           '<button class="chip" id="today" type="button">This week</button>' +
@@ -226,18 +376,10 @@
     document.getElementById('today').addEventListener('click', function(){ weekStart = thisWorkWeek(); load(); });
     var exportBtn = document.getElementById('export');
     if (exportBtn) exportBtn.addEventListener('click', exportMydid);
+    wireSwitcher();
 
     root.querySelectorAll('.wk-block').forEach(function (b) {
-      b.addEventListener('click', async function () {
-        var day = b.dataset.day;
-        var off = blackouts.indexOf(day) !== -1;
-        var res = off
-          ? await P.client().from('blackouts').delete().eq('day', day)
-          : await P.client().from('blackouts').insert({ day: day });
-        if (res.error) return flash('Could not change that: ' + res.error.message);
-        flash(off ? 'Day opened back up' : 'Day blocked out');
-        load();
-      });
+      b.addEventListener('click', function () { toggleBlock(b.dataset.day); });
     });
   }
 
