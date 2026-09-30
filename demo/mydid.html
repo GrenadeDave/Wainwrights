@@ -227,7 +227,7 @@
           ? '<ul class="device-list">' + phones.map(phoneRow).join('') + '</ul>'
           : '<p style="margin:0;color:var(--muted)">None yet.</p>') +
         '<p class="form-note" style="text-align:left;margin-top:14px">Lost or replaced a phone? Disconnect it here. ' +
-        'It stops getting alerts and can no longer see jobs, straight away.</p>' +
+        'It stops getting alerts and can no longer see or change jobs, straight away.</p>' +
       '</div>';
 
     document.getElementById('get-code').addEventListener('click', getCode);
@@ -236,7 +236,7 @@
       b.addEventListener('click', async function () {
         var ok = await P.confirm({
           title: 'Disconnect ' + b.dataset.name + '?',
-          body: 'It will stop getting alerts and can no longer see jobs. You can connect it again with a new code.',
+          body: 'It will stop getting alerts and can no longer see or change jobs. You can connect it again with a new code.',
           ok: 'Disconnect', cancel: 'Keep it', danger: true
         });
         if (!ok) return;
