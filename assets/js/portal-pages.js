@@ -84,8 +84,8 @@
 
     if (!jobs.length) {
       html += '<div class="portal-empty"><h2>Nothing here yet</h2>' +
-        '<p>Once Bryan has a request from you it shows up here, with its price and where it has got to.</p>' +
-        '<p class="portal-empty-note">Already asked for a quote? It may have been sent from a different email address. ' +
+        '<p>Once Bryan has a request from you it shows up here, with its estimate and where it has got to.</p>' +
+        '<p class="portal-empty-note">Already asked for an estimate? It may have been sent from a different email address. ' +
         'Give Bryan a ring and he will sort it.</p>' +
         '<a class="btn btn-primary" href="new.html">Request a free rough estimate ' + ICON.arrow + '</a></div>';
       root().innerHTML = html; return;
@@ -96,8 +96,8 @@
       html += waiting.map(function (j) {
         return '<a class="hero-card-p hero-card-p--act" href="job.html?id=' + encodeURIComponent(j.id) + '">' +
           '<span class="hcp-label">Waiting on you</span>' +
-          '<span class="hcp-main">Bryan has quoted <b>' + P.money(P.total(j)) + '</b> for ' + esc(j.service.toLowerCase()) + '</span>' +
-          '<span class="hcp-cta">Review the quote ' + ICON.arrow + '</span></a>';
+          '<span class="hcp-main">Final estimate of <b>' + P.money(P.total(j)) + '</b> for ' + esc(j.service.toLowerCase()) + '</span>' +
+          '<span class="hcp-cta">Review the estimate ' + ICON.arrow + '</span></a>';
       }).join('');
     }
 
@@ -200,17 +200,17 @@
       } else if (P.needsYou(j)) {
         html += '<div class="panel-card panel-card--act">' +
           '<span class="hcp-label">Waiting on you</span>' +
-          '<h2>Bryan has quoted ' + P.money(total) + '</h2>' +
+          '<h2>Final estimate: ' + P.money(total) + '</h2>' +
           '<div class="price-row"><span class="label">' + esc(j.service) + '</span><span class="amount">' + P.money(j.quote_cents) + '</span></div>' +
           (j.surcharge_cents ? '<div class="price-row"><span class="label">Disposal &amp; handling</span><span class="amount">' + P.money(j.surcharge_cents) + '</span></div>' : '') +
-          '<div class="price-row total"><span class="label">Total</span><span class="amount">' + P.money(total) + '</span></div>' +
-          '<p class="form-note" style="text-align:left;margin:14px 0 20px">This is the price for the work described below. ' +
+          '<div class="price-row total"><span class="label">Estimated total</span><span class="amount">' + P.money(total) + '</span></div>' +
+          '<p class="form-note" style="text-align:left;margin:14px 0 20px">This is Bryan\'s final estimate for the work described below. ' +
           'If anything changes once the job starts, Bryan speaks to you before doing it.</p>' +
-          '<div class="btn-row"><button class="btn btn-primary btn-lg" id="accept">' + ICON.check + ' Go ahead at this price</button>' +
+          '<div class="btn-row"><button class="btn btn-primary btn-lg" id="accept">' + ICON.check + ' Go ahead with this estimate</button>' +
           '<a class="btn btn-outline btn-lg" href="#ask">I have a question first</a></div></div>';
       } else if (j.status === 'quoted' && j.quote_accepted_at) {
         html += '<div class="panel-card panel-card--ok"><h2>' + ICON.check + ' You said go ahead</h2>' +
-          '<p>On ' + esc(P.dateTime(j.quote_accepted_at)) + ', at <b>' + P.money(total) + '</b>. ' +
+          '<p>On ' + esc(P.dateTime(j.quote_accepted_at)) + ', with an estimate of <b>' + P.money(total) + '</b>. ' +
           'Bryan will confirm a date with you next' + (j.requested_day ? '' : ' — pick a time that suits you below to speed things up') + '.</p></div>';
       } else if (j.status === 'scheduled' || j.status === 'in_progress') {
         var ics = P.icsHref(j);
@@ -231,8 +231,8 @@
           (j.surcharge_cents ? '<div class="price-row"><span class="label">Disposal &amp; handling</span><span class="amount">' + P.money(j.surcharge_cents) + '</span></div>' : '') +
           '<div class="price-row total"><span class="label">Total</span><span class="amount">' + P.money(total) + '</span></div></div>';
       } else if (total == null && j.status !== 'cancelled') {
-        html += '<div class="panel-card"><h2>Price</h2><p style="color:var(--muted);margin:0">No price yet. Text photos of the job to <a href="sms:+12094591846">(209) 459-1846</a> and Bryan will give you a ' +
-          'free rough estimate. The final price is agreed once the scope is confirmed.</p></div>';
+        html += '<div class="panel-card"><h2>Estimate</h2><p style="color:var(--muted);margin:0">No estimate yet. Text photos of the job to <a href="sms:+12094591846">(209) 459-1846</a> and Bryan will give you a ' +
+          'free rough estimate. A final estimate follows once the scope is confirmed.</p></div>';
       }
 
       /* ---- preferred time ---- */
@@ -277,7 +277,7 @@
       if (accept) accept.addEventListener('click', async function () {
         var yes = await P.confirm({
           title: 'Go ahead at ' + P.money(P.total(j)) + '?',
-          body: 'This tells Bryan you are happy with the price and he can book you in. Nothing is charged here — you pay Bryan directly when the work is done.',
+          body: 'This tells Bryan you are happy with the estimate and he can book you in. Nothing is charged here — you pay Bryan directly when the work is done.',
           ok: 'Yes, go ahead', cancel: 'Not yet'
         });
         if (!yes) return;
@@ -344,7 +344,7 @@
 
     root().innerHTML =
       '<div class="portal-title"><h1>Request more work</h1><p>Send a short description and photos for a free rough estimate. He already has your details, so this is the short version.</p></div>' +
-      '<div class="photo-note"><b>Photos help most.</b> Text them to <a href="sms:+12094591846">(209) 459-1846</a> or email them to <a href="mailto:Bwain94Work@gmail.com">Bwain94Work@gmail.com</a> after you send this.</div>' +
+      '<div class="photo-note"><b>Photos help most.</b> Text them to <a href="sms:+12094591846">(209) 459-1846</a> or email them to <a href="mailto:wainwrightshandyman@gmail.com">wainwrightshandyman@gmail.com</a> after you send this.</div>' +
       '<form class="form-card" id="req" novalidate>' +
         '<div class="field"><label for="r-service">What do you need?</label><select id="r-service">' +
           P.SERVICES.map(function (s) { return '<option>' + esc(s) + '</option>'; }).join('') + '</select></div>' +

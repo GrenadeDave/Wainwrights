@@ -9,7 +9,7 @@
   var BIZ = {
     phone:        CFG.phone        || '(209) 459-1846',
     phoneHref:    CFG.phoneHref    || 'tel:+12094591846',
-    email:        CFG.email        || 'Bwain94Work@gmail.com',
+    email:        CFG.email        || 'wainwrightshandyman@gmail.com',
     leadEndpoint: CFG.leadEndpoint || '',
     leadApiKey:   CFG.leadApiKey   || ''
   };
@@ -317,7 +317,7 @@
           if (submit) submit.textContent = 'Sent';
           say(form,
             '<strong>Thank you — that is with Bryan now.</strong><br>' +
-            'Photos help most: text them to <a href="sms:+12094591846">' + BIZ.phone + '</a> or email them to Bwain94Work@gmail.com, with your name. ' +
+            'Photos help most: text them to <a href="sms:+12094591846">' + BIZ.phone + '</a> or email them to wainwrightshandyman@gmail.com, with your name. ' +
             'He will get back to you, usually the same day. If it is urgent, ' +
             'call <a href="' + BIZ.phoneHref + '">' + BIZ.phone + '</a>.');
           form.reset();

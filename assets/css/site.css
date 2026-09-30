@@ -1665,3 +1665,8 @@ h2 .soon-tag { font-size: .75rem; position: relative; top: -4px; }
 @media (max-width: 1400px) and (min-width: 1241px) {
   .header-login .hp-label { display: none; }
 }
+
+/* Grid columns may shrink below their content's widest word, so a long email
+   address or button row never pushes a 360px phone sideways. */
+.contact-cols > *, .feature-row > * { min-width: 0; }
+a[href^="mailto:"] { overflow-wrap: anywhere; }

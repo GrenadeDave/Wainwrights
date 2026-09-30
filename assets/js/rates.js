@@ -1,11 +1,12 @@
 /* ==========================================================================
    Wainwright’s — service rates
    --------------------------------------------------------------------------
-   Bryan's own figures, from the questionnaire he filled in (September 2026).
+   Bryan's own figures, from the questionnaire he filled in (September 2026),
+   each raised $5 an hour on 2026-09-30 at the family's request.
    He charges by the hour. Where he gave a range, the range is shown.
 
    Every price carries an asterisk, and the asterisk says "Prices negotiable" —
-   his words. A free rough estimate comes from the customer's photos; the final price is agreed once the scope is confirmed.
+   his words. A free rough estimate comes from the customer's photos; a final estimate follows once the scope is confirmed.
    ========================================================================== */
 /* ⚠️ THE $1,000 LIMIT IS THE LAW, NOT A PREFERENCE.
    Bryan is not a licensed contractor. California Business & Professions Code
@@ -40,28 +41,28 @@ window.WAINWRIGHTS_RATES = {
   services: {
     repairs: {
       label: 'Handyman Repairs',
-      from:  30,
-      to:    40,
+      from:  35,
+      to:    45,
       unit:  'per hour',
       note:  'Small jobs grouped into one visit work out cheaper than separate call-outs.'
     },
     painting: {
       label: 'Interior & Exterior Painting',
-      from:  40,
+      from:  45,
       unit:  'per hour',
-      note:  'Paint and materials are on top, and you see them in the final price.'
+      note:  'Paint and materials are on top, and you see them in the estimate.'
     },
     defensible: {
       label: 'Defensible Space & Fire Clearing',
-      from:  35,
-      to:    45,
+      from:  40,
+      to:    50,
       unit:  'per hour',
       note:  'Steeper, thicker or harder to reach sits at the top of the range.'
     },
     yardwaste: {
       label: 'Yard Waste Removal',
-      from:  30,
-      to:    40,
+      from:  35,
+      to:    45,
       unit:  'per hour',
       note:  'Depends on volume and how close the truck can get.'
     },
@@ -69,8 +70,8 @@ window.WAINWRIGHTS_RATES = {
       /* Not offered until Bryan has a proper trailer. Shown as coming soon. */
       comingSoon: true,
       label: 'Junk & Debris Hauling',
-      from:  35,
-      to:    45,
+      from:  40,
+      to:    50,
       unit:  'per hour',
       /* Junk removal carries the extra because of the dump fees. Shown
          separately rather than buried in the rate. */
@@ -83,7 +84,7 @@ window.WAINWRIGHTS_RATES = {
     },
     watch: {
       label: 'Property Watch & Upkeep',
-      from:  30,
+      from:  35,
       unit:  'per hour',
       note:  'Set to suit the property. Monthly suits most second homes.'
     }
@@ -93,7 +94,7 @@ window.WAINWRIGHTS_RATES = {
      contractor limits above apply. */
   tech: {
     label: 'Tech Help',
-    from:  50,
+    from:  55,
     unit:  'per hour'
   },
 

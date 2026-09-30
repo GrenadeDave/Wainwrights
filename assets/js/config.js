@@ -9,7 +9,7 @@ window.WAINWRIGHTS_CONFIG = {
   /* Business contact details — used for click-to-call and the email route. */
   phone:     '(209) 459-1846',
   phoneHref: 'tel:+12094591846',
-  email:     'Bwain94Work@gmail.com',
+  email:     'wainwrightshandyman@gmail.com',
 
   /* Business hours. Kept in step with workingDays and the slot times in
      assets/js/schedule.js — change one, check the other. */

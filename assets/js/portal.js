@@ -25,9 +25,9 @@
      ---------------------------------------------------------------------- */
   P.STATUS = {
     requested:   { label: 'Request received', tone: 'wait',
-                   blurb: 'Bryan has your request and will be in touch to arrange a look.' },
-    quoted:      { label: 'Quoted',           tone: 'act',
-                   blurb: 'Bryan has been out and given you a price. Nothing happens until you say go ahead.' },
+                   blurb: 'Bryan has your request. He reviews your photos and description and follows up if he needs more details.' },
+    quoted:      { label: 'Estimate ready',   tone: 'act',
+                   blurb: 'Bryan has sent you a final estimate. Nothing happens until you say go ahead.' },
     scheduled:   { label: 'Scheduled',        tone: 'good',
                    blurb: 'Booked in. The date is below.' },
     in_progress: { label: 'In progress',      tone: 'good',
@@ -421,7 +421,7 @@
           '<a href="mydata.html"><b>My information</b><small>Everything Bryan holds about you</small></a>' +
           '<a href="../resources.html"><b>Local rules</b><small>Pine Mountain Lake, in plain English</small></a>' +
           '<a href="tel:+12094591846"><b>Call Bryan</b><small>(209) 459-1846 · Mon–Fri 8–5</small></a>' +
-          '<a href="mailto:Bwain94Work@gmail.com"><b>Email Bryan</b><small>Bwain94Work@gmail.com</small></a>' +
+          '<a href="mailto:wainwrightshandyman@gmail.com"><b>Email Bryan</b><small>wainwrightshandyman@gmail.com</small></a>' +
           '<button type="button" id="acct-delete"><b>Delete my account</b><small>Ask Bryan to remove your details</small></button>' +
           '<button type="button" id="acct-signout"><b>Sign out</b><small>On this device</small></button>' +
         '</div>';
