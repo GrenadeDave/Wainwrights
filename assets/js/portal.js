@@ -16,6 +16,21 @@
 (function (w) {
   'use strict';
 
+  /* Clickjacking guard (security audit, 2026-09-30). GitHub Pages cannot send
+     the header that forbids framing, so a page that finds itself inside
+     another site's frame breaks out — or, if it cannot, shows nothing to
+     click. Only these signed-in pages need it; the public pages hold nothing
+     a hidden frame could abuse. */
+  if (w.top !== w.self) {
+    var framedByUs = false;
+    try { framedByUs = w.top.location.origin === w.location.origin; } catch (e) { /* another site */ }
+    if (!framedByUs) {
+      try { w.top.location.replace(w.location.href); } catch (e) { /* sandboxed */ }
+      document.documentElement.style.display = 'none';
+      return;
+    }
+  }
+
   var CFG   = w.WAINWRIGHTS_SUPABASE || {};
   var RATES = w.WAINWRIGHTS_RATES || {};
   var P = {};
