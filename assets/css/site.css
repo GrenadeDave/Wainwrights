@@ -1670,3 +1670,7 @@ h2 .soon-tag { font-size: .75rem; position: relative; top: -4px; }
    address or button row never pushes a 360px phone sideways. */
 .contact-cols > *, .feature-row > * { min-width: 0; }
 a[href^="mailto:"] { overflow-wrap: anywhere; }
+
+/* Facebook link (2026-09-30): the mark sits beside the word, in the link's own colour. */
+.fb-link { display: inline-flex; align-items: center; gap: 8px; }
+.fb-link .fb-ico { flex: none; }
