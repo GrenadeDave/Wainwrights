@@ -44,10 +44,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script src="../assets/js/config.js?v=82fdb64d"></script>
 <script src="../assets/js/rates.js?v=4b364822"></script>
-<script src="../assets/js/schedule.js?v=3041262f"></script>
+<script src="../assets/js/schedule.js?v=4a64207c"></script>
 <script src="../assets/js/supabase-config.js?v=79cace19"></script>
-<script src="../assets/js/portal.js?v=1619102a"></script>
-<script src="../assets/js/portal-demo.js?v=1f93f340"></script>
+<script src="../assets/js/portal.js?v=78dd2855"></script>
+<script src="../assets/js/portal-demo.js?v=09c70830"></script>
 <script src="../assets/js/site.js?v=bb198635"></script>
 <script>
 (function () {
@@ -75,7 +75,7 @@
     return startOfWeek(d);
   }
   var weekStart = thisWorkWeek();
-  var jobs = [], blackouts = [];
+  var jobs = [], blackouts = [], occ = {};
 
   /* Week or month. Remembered on this device only. */
   var view = 'week';
@@ -117,7 +117,7 @@
     if (!days.length) return;
     var res = await Promise.all([
       P.client().from('jobs').select('*')
-        .gte('scheduled_for', days[0]).lte('scheduled_for', days[days.length-1])
+        .gte('scheduled_for', S.ymd(new Date(S.parseYmd(days[0]).getTime() - 14 * 864e5))).lte('scheduled_for', days[days.length-1])
         .not('slot_start', 'is', null)
         .order('slot_start'),
       P.client().from('blackouts').select('*')
@@ -125,7 +125,15 @@
     ]);
     if (res[0].error) { root.innerHTML = '<div class="portal-empty"><h2>Could not load</h2><p>'+P.esc(res[0].error.message)+'</p></div>'; return; }
     /* A cancelled job keeps its old date; it is not work, so it is not drawn. */
-    jobs = (res[0].data || []).filter(function (j) { return j.status !== 'cancelled'; });
+    jobs = (res[0].data || []).filter(function (j) {
+      return j.status !== 'cancelled' && (j.scheduled_through || j.scheduled_for) >= days[0];
+    });
+    /* Which job is in which slot of which day — one map for every view, so a
+       job over several days is drawn on each of its days. */
+    occ = {};
+    jobs.forEach(function (j) {
+      S.occupied(j).forEach(function (o) { (occ[o.day] = occ[o.day] || [])[o.slot] = j; });
+    });
     blackouts = (res[1].data || []).map(function(b){ return b.day; });
 
     /* Notes are in the admin-only job_notes table; fetch them for this week's
@@ -169,6 +177,7 @@
   }
 
   function span(j) {
+    if (S.isMultiDay(j)) return P.when(j);
     var a = S.slots[j.slot_start] || S.slots[0];
     var z = S.slots[Math.min(j.slot_start + (j.slots_needed || 1) - 1, S.slots.length - 1)] || a;
     return a.time.split('\u2013')[0].trim() + ' \u2013 ' + z.time.split('\u2013')[1].trim();
@@ -183,10 +192,11 @@
     var today = S.ymd(new Date());
     var month = monthStart.getMonth(), year = monthStart.getFullYear();
     var nSlots = S.slots.length;
-    var inMonth = jobs.filter(function (j) { return S.parseYmd(j.scheduled_for).getMonth() === month; });
+    var inMonth = jobs.filter(function (j) {                     // any of its days in this month
+      return S.occupied(j).some(function (o) { var d = S.parseYmd(o.day); return d.getMonth() === month && d.getFullYear() === monthStart.getFullYear(); });
+    });
     var byDay = {};
-    jobs.forEach(function (j) { (byDay[j.scheduled_for] = byDay[j.scheduled_for] || []).push(j); });
-    Object.keys(byDay).forEach(function (k) { byDay[k].sort(function (a, b) { return a.slot_start - b.slot_start; }); });
+    Object.keys(occ).forEach(function (d) { byDay[d] = jobsOn(d); });
 
     if (!picked || S.parseYmd(picked).getMonth() !== month) {
       var firstJob = inMonth.map(function (j) { return j.scheduled_for; }).sort()[0];
@@ -198,9 +208,8 @@
     function slotsOf(day) {
       var out = [];
       for (var i = 0; i < nSlots; i++) out.push(null);
-      (byDay[day] || []).forEach(function (j) {
-        for (var k = 0; k < (j.slots_needed || 1); k++) if (j.slot_start + k < nSlots) out[j.slot_start + k] = j.status;
-      });
+      var row = occ[day] || [];
+      for (var k = 0; k < nSlots; k++) if (row[k]) out[k] = row[k].status;
       return out;
     }
     function value(j) {                             // the estimate total, whole dollars: "$640"
@@ -220,7 +229,7 @@
 
     /* The month in numbers. */
     var busyDays = {}, offCount = 0;
-    inMonth.forEach(function (j) { busyDays[j.scheduled_for] = 1; });
+    Object.keys(occ).forEach(function (d) { if (S.parseYmd(d).getMonth() === month) busyDays[d] = 1; });
     days.forEach(function (d) { if (blackouts.indexOf(d) !== -1 && S.parseYmd(d).getMonth() === month) offCount++; });
     var upcoming = jobs.filter(function (j) { return j.scheduled_for >= today && j.status !== 'completed'; })
       .sort(function (a, b) { return a.scheduled_for === b.scheduled_for ? a.slot_start - b.slot_start : (a.scheduled_for < b.scheduled_for ? -1 : 1); })[0];
@@ -242,7 +251,8 @@
           P.esc(j.contact_name + ' — ' + j.service + ', ' + span(j) + (value(j) ? ', ' + value(j) : '')) + '">' +
           '<i class="mo-pip"></i><span class="mo-who">' + P.esc(shortName(j.contact_name)) + '</span>' +
           (value(j) ? '<b class="mo-v">' + P.esc(value(j)) + '</b>' : '') +
-          '<span class="mo-t">' + P.esc(shortSpan(j).split('–')[0]) + '</span></a>';
+          '<span class="mo-t">' + P.esc(S.isMultiDay(j) ? dayOf(day, j).replace('Day ', '').replace(' of ', '/')
+                                                     : shortSpan(j).split('–')[0]) + '</span></a>';
       }).join('');
       var more = list.length > 3 ? '<span class="mo-more">+' + (list.length - 3) + ' more</span>' : '';
       var load = off ? '' : '<div class="mo-load" aria-hidden="true">' + slotsOf(day).map(function (s) {
@@ -264,9 +274,9 @@
     if (!poff) {
       for (var n = 0; n < nSlots; n++) {
         var sl = S.slots[n];
-        var j = plist.filter(function (x) { return n >= x.slot_start && n < x.slot_start + (x.slots_needed || 1); })[0];
-        if (j && j.slot_start !== n) continue;              // drawn by the row above
-        var runs = j ? Math.min(j.slots_needed || 1, nSlots - n) : 1;
+        var j = jobAt(picked, n);
+        if (j && n > 0 && jobAt(picked, n - 1) === j) continue;   // drawn by the row above
+        var runs = j ? runOf(picked, n) : 1;
         rows += '<div class="mo-slot"' + (runs > 1 ? ' style="grid-row: span ' + runs + '"' : '') + '>' +
           '<div class="mo-slot-t"><b>' + P.esc(sl.label) + '</b><span>' + P.esc(sl.time.split('–')[0].trim()) + '</span></div>' +
           (j
@@ -274,6 +284,7 @@
                 '<span class="mo-item-top"><b>' + P.esc(j.contact_name) + '</b><span class="mo-badge is-' + P.esc(j.status) + '">' + P.esc(STATUS[j.status] || j.status) + '</span></span>' +
                 '<span class="mo-item-what">' + P.esc(j.service) + '</span>' +
                 (j.address ? '<span class="mo-item-where">' + P.esc(String(j.address).split(',')[0]) + '</span>' : '') +
+                (dayOf(picked, j) ? '<span class="mo-item-where">' + P.esc(dayOf(picked, j)) + '</span>' : '') +
                 '<span class="mo-item-when">' + P.esc(span(j)) + (value(j) ? '<b class="mo-item-v">' + P.esc(value(j)) + '</b>' : '') + '</span>' +
               '</a>'
             : '<div class="mo-free">Free</div>') +
@@ -354,12 +365,26 @@
     });
   }
 
-  /* A job occupies its start slot and the ones after it. */
-  function jobAt(day, slot) {
-    return jobs.filter(function (j) {
-      return j.scheduled_for === day &&
-             slot >= j.slot_start && slot < j.slot_start + j.slots_needed;
-    })[0];
+  /* The job in a slot, if any (single or several days). */
+  function jobAt(day, slot) { return (occ[day] || [])[slot]; }
+  /* How many slots in a row, from this one, the same job holds on this day. */
+  function runOf(day, slot) {
+    var j = jobAt(day, slot), n = 0;
+    while (j && jobAt(day, slot + n) === j) n++;
+    return n;
+  }
+  /* The jobs on a day, in the order they start that day. */
+  function jobsOn(day) {
+    var seen = [], row = occ[day] || [];
+    for (var s = 0; s < S.slots.length; s++) if (row[s] && seen.indexOf(row[s]) === -1) seen.push(row[s]);
+    return seen;
+  }
+  function firstSlotOn(day, j) { var row = occ[day] || []; for (var s = 0; s < S.slots.length; s++) if (row[s] === j) return s; return j.slot_start; }
+  /* "Day 2 of 3" for a job over several days. */
+  function dayOf(day, j) {
+    if (!S.isMultiDay(j)) return '';
+    var ds = []; S.occupied(j).forEach(function (o) { if (ds.indexOf(o.day) === -1) ds.push(o.day); });
+    return 'Day ' + (ds.indexOf(day) + 1) + ' of ' + ds.length;
   }
 
   function paint() {
@@ -401,8 +426,8 @@
                          '<span class="wk-when">' + P.esc(s.time) + '</span></div>';
                 continue;
               }
-              if (j.slot_start !== s.key) continue;          // drawn by the block above
-              var runs = Math.min(j.slots_needed || 1, S.slots.length - n);
+              if (n > 0 && jobAt(day, n - 1) === j) continue;   // drawn by the block above
+              var runs = runOf(day, n);
               var last = S.slots[n + runs - 1];
               var span = runs > 1 ? ' style="grid-row: span ' + runs + '"' : '';
               cells += '<a class="wk-cell is-job is-' + P.esc(j.status || 'scheduled') + '"' + span +
@@ -411,7 +436,7 @@
                 '<span class="wk-what">' + P.esc(j.service) + '</span>' +
                 (j.address ? '<span class="wk-where">' + P.esc(String(j.address).split(',')[0]) + '</span>' : '') +
                 '<span class="wk-when">' + P.esc(s.time.split('\u2013')[0].trim()) + ' \u2013 ' +
-                  P.esc(last.time.split('\u2013')[1].trim()) + '</span>' +
+                  P.esc(last.time.split('\u2013')[1].trim()) + (dayOf(day, j) ? ' \u00b7 ' + dayOf(day, j) : '') + '</span>' +
               '</a>';
             }
           }
@@ -487,7 +512,7 @@
 
     var out = ['name,phone,email,address,notes'];
     rows.forEach(function (j) {
-      var when = S.prettyDate(j.scheduled_for) + ', ' + S.slotLabel(j.slot_start) +
+      var when = S.isMultiDay(j) ? P.when(j) : S.prettyDate(j.scheduled_for) + ', ' + S.slotLabel(j.slot_start) +
                  (j.slots_needed > 1 ? ' (' + j.slots_needed + ' slots)' : '');
       var total = P.total(j);
       var notes = [

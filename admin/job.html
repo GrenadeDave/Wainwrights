@@ -42,10 +42,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script src="../assets/js/config.js?v=82fdb64d"></script>
 <script src="../assets/js/rates.js?v=4b364822"></script>
-<script src="../assets/js/schedule.js?v=3041262f"></script>
+<script src="../assets/js/schedule.js?v=4a64207c"></script>
 <script src="../assets/js/supabase-config.js?v=79cace19"></script>
-<script src="../assets/js/portal.js?v=1619102a"></script>
-<script src="../assets/js/portal-demo.js?v=1f93f340"></script>
+<script src="../assets/js/portal.js?v=78dd2855"></script>
+<script src="../assets/js/portal-demo.js?v=09c70830"></script>
 <script src="../assets/js/site.js?v=bb198635"></script>
 <script>
 (function () {
@@ -253,7 +253,32 @@
                 '</select>' +
               '</div>' +
             '</div>' +
-            '<p class="form-note" style="text-align:left;margin:-8px 0 20px" id="slot-echo"></p>' +
+            '<label class="check-row" style="display:flex;gap:10px;align-items:center;margin:0 0 12px;font-weight:600">' +
+              '<input type="checkbox" id="multi"' + (S.isMultiDay(job) ? ' checked' : '') + '> Runs over several days</label>' +
+            '<div id="multi-box"' + (S.isMultiDay(job) ? '' : ' hidden') + '>' +
+              '<div class="field-2">' +
+                '<div class="field" style="margin:0">' +
+                  '<label for="through">Last day</label>' +
+                  '<input type="date" id="through" value="' + P.esc(job.scheduled_through || '') + '">' +
+                '</div>' +
+                '<div class="field" style="margin:0">' +
+                  '<label for="through-slot">Finishes</label>' +
+                  '<select id="through-slot">' +
+                    S.slots.map(function (s) {
+                      var sel = (job.through_slot == null ? 2 : job.through_slot) === s.key;
+                      return '<option value="' + s.key + '"' + (sel ? ' selected' : '') + '>By ' +
+                             s.time.split('\u2013')[1].trim().replace(':00', '') + '</option>';
+                    }).join('') +
+                  '</select>' +
+                '</div>' +
+              '</div>' +
+              '<p class="form-note" style="text-align:left;margin:10px 0 0;padding:10px 12px;border-radius:10px;' +
+                'background:var(--amber-050);color:var(--ink)"><b>Check the limit.</b> A job over several days must still ' +
+                'total <b>less than $1,000</b> for labour, materials and everything else, and need no permit. ' +
+                'Bigger than that, it goes to a licensed contractor \u2014 the website will not save it. ' +
+                'Weekends and blocked days in between are not worked.</p>' +
+            '</div>' +
+            '<p class="form-note" style="text-align:left;margin:12px 0 20px" id="slot-echo"></p>' +
 
             '<div class="field">' +
               '<label for="note">Note for the customer <span class="hint">(optional)</span></label>' +
@@ -405,9 +430,21 @@
 
     /* Spell the booking back out in hours, because 'slot 1, 2 slots' is not
        something anyone should have to decode at 6am. */
+    var multiEl = document.getElementById('multi'), multiBox = document.getElementById('multi-box');
+    var throughEl = document.getElementById('through'), throughSlotEl = document.getElementById('through-slot');
     function echoSlots() {
       var st = slotStartEl.value;
+      slotsEl.disabled = multiEl.checked;
       if (st === '') { echo.textContent = 'No time set yet.'; return; }
+      if (multiEl.checked) {
+        var first = document.getElementById('scheduled').value, last = throughEl.value;
+        if (!first || !last) { echo.textContent = 'Pick the first and last day.'; return; }
+        if (last <= first) { echo.innerHTML = '<span style="color:var(--fire)"><b>The last day must be after the first.</b></span>'; return; }
+        var probe = { scheduled_for: first, slot_start: Number(st), scheduled_through: last, through_slot: Number(throughSlotEl.value) };
+        var days = {}; S.occupied(probe).forEach(function (o) { days[o.day] = 1; });
+        echo.innerHTML = 'On site <b>' + P.esc(P.when(probe)) + '</b> \u2014 ' + Object.keys(days).length + ' working days';
+        return;
+      }
       var n = Number(slotsEl.value) || 1;
       var start = Number(st);
       if (start + n > S.slots.length) {
@@ -422,6 +459,10 @@
     }
     slotStartEl.addEventListener('change', echoSlots);
     slotsEl.addEventListener('change', echoSlots);
+    multiEl.addEventListener('change', function () { multiBox.hidden = !multiEl.checked; echoSlots(); });
+    throughEl.addEventListener('change', echoSlots);
+    throughSlotEl.addEventListener('change', echoSlots);
+    document.getElementById('scheduled').addEventListener('change', echoSlots);
     echoSlots();
 
     var useReq = document.getElementById('use-requested');
@@ -550,7 +591,14 @@
         if (!theDate)           return bad('Set a date before marking this scheduled.');
         if (slotStart === null) return bad('Pick a start slot before marking this scheduled.');
       }
-      if (slotStart !== null && slotStart + slotsNeeded > S.slots.length) {
+      var multi = document.getElementById('multi').checked;
+      var through = multi ? (document.getElementById('through').value || null) : null;
+      var throughSlot = multi ? Number(document.getElementById('through-slot').value) : null;
+      if (multi) {
+        if (!theDate || slotStart === null) return bad('Pick the first day and a start slot before the last day.');
+        if (!through || through <= theDate) return bad('Pick a last day after the first day.');
+      }
+      if (!multi && slotStart !== null && slotStart + slotsNeeded > S.slots.length) {
         return bad('That does not fit in the day. ' + slotsNeeded +
                    ' slots cannot start at ' + S.slots[slotStart].label + '.');
       }
@@ -564,7 +612,9 @@
         surcharge_cents: s || 0,
         scheduled_for:   theDate,
         slot_start:      slotStart,
-        slots_needed:    slotsNeeded
+        slots_needed:    slotsNeeded,
+        scheduled_through: through,
+        through_slot:    throughSlot
       }).eq('id', id);
 
       /* A note is its own timeline entry. The status change writes one by

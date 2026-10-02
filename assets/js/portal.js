@@ -197,6 +197,19 @@
     return job.quote_cents + (job.surcharge_cents || 0);
   };
   /* Slot 1 for 2 slots -> "11:00am – 5:00pm": what a person needs to know. */
+  /* The whole booking in words. One day: "Tuesday, October 6, 8:00am – 11:00am".
+     Several: "Mon, Oct 6, 2:00pm – Wed, Oct 8, 2:00pm". */
+  P.when = function (job) {
+    var S = w.WAINWRIGHTS_SCHEDULE;
+    if (!job || !job.scheduled_for) return '';
+    if (S && S.isMultiDay(job) && job.slot_start != null) {
+      var a = S.slots[job.slot_start], z = S.slots[job.through_slot == null ? S.slots.length - 1 : job.through_slot];
+      function d(s) { return S.parseYmd(s).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); }
+      return d(job.scheduled_for) + ', ' + a.time.split('–')[0].trim() + ' – ' + d(job.scheduled_through) + ', ' + z.time.split('–')[1].trim();
+    }
+    var win = P.window(job);
+    return P.date(job.scheduled_for) + (win ? ', ' + win : '');
+  };
   P.window = function (job) {
     var S = w.WAINWRIGHTS_SCHEDULE;
     if (!S || job.slot_start == null) return null;
@@ -299,11 +312,15 @@
     var S = w.WAINWRIGHTS_SCHEDULE;
     if (!S || !job.scheduled_for || job.slot_start == null) return null;
     var startH = [8, 11, 14][job.slot_start], endH = startH + 3 * (job.slots_needed || 1);
-    var d = job.scheduled_for.replace(/-/g, '');
-    function t(h) { return d + 'T' + String(h).padStart(2, '0') + '0000'; }
+    var d = job.scheduled_for.replace(/-/g, ''), dEnd = d;
+    if (S.isMultiDay(job)) {                         // one event from the first start to the last finish
+      dEnd = job.scheduled_through.replace(/-/g, '');
+      endH = [11, 14, 17][job.through_slot == null ? 2 : job.through_slot];
+    }
+    function t(h, day) { return (day || d) + 'T' + String(h).padStart(2, '0') + '0000'; }
     var ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Wainwrights//Portal//EN', 'BEGIN:VEVENT',
       'UID:' + job.id + '@wainwrights', 'DTSTAMP:' + t(startH),
-      'DTSTART:' + t(startH), 'DTEND:' + t(endH),
+      'DTSTART:' + t(startH), 'DTEND:' + t(endH, dEnd),
       'SUMMARY:Bryan Wainwright — ' + job.service,
       'LOCATION:' + String(job.address || '').replace(/[,;\\]/g, ' '),
       'DESCRIPTION:Wainwright’s Handyman & Land Maintenance. Questions: (209) 459-1846',

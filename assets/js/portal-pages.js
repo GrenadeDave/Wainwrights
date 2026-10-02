@@ -45,6 +45,7 @@
      ====================================================================== */
   function jobCard(job) {
     var when = P.date(job.scheduled_for), win = P.window(job), total = P.total(job);
+    if (S.isMultiDay(job)) { when = P.when(job); win = null; }
     var flag = P.needsYou(job) ? '<span class="pill pill--act">Needs your OK</span>' : P.statusPill(job.status);
     return '<a class="job-card" href="job.html?id=' + encodeURIComponent(job.id) + '">' +
       '<div class="job-card-top"><h3>' + esc(job.service) + '</h3>' + flag + '</div>' +
@@ -102,10 +103,10 @@
     }
 
     if (next) {
-      var win = P.window(next), ics = P.icsHref(next);
+      var win = S.isMultiDay(next) ? null : P.window(next), ics = P.icsHref(next);
       html += '<div class="hero-card-p">' +
         '<span class="hcp-label">' + ICON.cal + ' Next visit</span>' +
-        '<span class="hcp-main"><b>' + esc(P.date(next.scheduled_for)) + '</b>' + (win ? '<br>' + esc(win) : '') + '</span>' +
+        '<span class="hcp-main"><b>' + esc(S.isMultiDay(next) ? P.when(next) : P.date(next.scheduled_for)) + '</b>' + (win ? '<br>' + esc(win) : '') + '</span>' +
         '<span class="hcp-sub">' + esc(next.service) + '</span>' +
         '<span class="btn-row">' +
           '<a class="btn btn-light" href="job.html?id=' + encodeURIComponent(next.id) + '">See the job</a>' +
@@ -156,6 +157,7 @@
     function paint(j, events) {
       var st = P.STATUS[j.status] || { label: j.status, blurb: '' };
       var total = P.total(j), when = P.date(j.scheduled_for), win = P.window(j);
+      if (S.isMultiDay(j)) { when = P.when(j); win = null; }
       var editable = j.status === 'requested' || j.status === 'quoted';
       var html = '';
 
@@ -470,7 +472,7 @@
                   ['Property', j.address],
                   ['Price', P.total(j) != null ? P.money(P.total(j)) : ''],
                   ['You said go ahead', P.dateTime(j.quote_accepted_at)],
-                  ['Booked for', j.scheduled_for ? (P.date(j.scheduled_for) + (P.window(j) ? ', ' + P.window(j) : '')) : '']]) +
+                  ['Booked for', j.scheduled_for ? P.when(j) : '']]) +
             (msgs.length ? '<p class="data-sub">Messages (' + msgs.length + ')</p><ul class="data-msgs">' +
               msgs.map(function (e) {
                 var who = e.author === 'customer' ? 'You' : (e.author === 'bryan' ? 'Bryan' : 'The website');

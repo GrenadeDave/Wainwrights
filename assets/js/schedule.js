@@ -75,6 +75,32 @@ window.WAINWRIGHTS_SCHEDULE = {
     return out;
   },
 
+  /* A job over several days (2026-10-01): scheduled_through is its last day and
+     through_slot the slot it finishes in. Days between are all day; weekends
+     are not worked. Mirrors job_slots() in the database. */
+  isMultiDay: function (job) {
+    return !!(job && job.scheduled_through && job.scheduled_for && job.scheduled_through > job.scheduled_for);
+  },
+  occupied: function (job) {
+    var out = [];
+    if (!job || !job.scheduled_for || job.slot_start == null) return out;
+    if (!this.isMultiDay(job)) {
+      for (var k = 0; k < (job.slots_needed || 1) && job.slot_start + k < this.slots.length; k++) {
+        out.push({ day: job.scheduled_for, slot: job.slot_start + k });
+      }
+      return out;
+    }
+    var last = this.slots.length - 1;
+    for (var d = this.parseYmd(job.scheduled_for); this.ymd(d) <= job.scheduled_through; d.setDate(d.getDate() + 1)) {
+      if (!this.isWorkingDay(d)) continue;
+      var day = this.ymd(d);
+      var from = day === job.scheduled_for ? job.slot_start : 0;
+      var to = day === job.scheduled_through ? (job.through_slot == null ? last : job.through_slot) : last;
+      for (var s = from; s <= to; s++) out.push({ day: day, slot: s });
+    }
+    return out;
+  },
+
   isWorkingDay: function (date) {
     return this.workingDays.indexOf(date.getDay()) !== -1;
   },

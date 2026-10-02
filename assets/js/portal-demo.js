@@ -24,7 +24,7 @@
   var AREA = /\/(admin|demo)(\/|$)/.test(path) ? 'admin' : (/\/portal(\/|$)/.test(path) ? 'portal' : '');
   if (!AREA) return;
 
-  var KEY = 'w-portal-demo-v4';
+  var KEY = 'w-portal-demo-v5';   // v5: sample data gains a job over two days
   var ME = 'demo-user';
   var S = w.WAINWRIGHTS_SCHEDULE;
 
@@ -114,7 +114,16 @@
         address: '3 Placeholder Point, Pine Mountain Lake',
         details: 'Grab bar in the shower and a new railing on the two front steps.',
         quote_cents: 26000, quote_accepted_at: iso(-12), scheduled_for: workday(-3), slot_start: 0, slots_needed: 1,
-        created_at: iso(-15), updated_at: iso(-4, 12) })
+        created_at: iso(-15), updated_at: iso(-4, 12) }),
+      /* A job over two days, to show how one looks. Under $1,000 like every
+         sample here (D24): two days of brush clearing at the hourly rate. */
+      job({ wants_hauling: 'no', id: 'demo-o7', service: 'Defensible space & fire clearing', status: 'scheduled',
+        contact_name: 'Dana Whitlock', contact_phone: '(209) 555-0177', contact_email: 'dana.w@example.com',
+        address: '41 Example Crest, Pine Mountain Lake',
+        details: 'Brush and needles cleared to 100 feet on the slope behind the house. Two days.',
+        quote_cents: 76000, quote_accepted_at: iso(-5), scheduled_for: workday(6), slot_start: 0, slots_needed: 3,
+        scheduled_through: workday(7), through_slot: 2,
+        created_at: iso(-9), updated_at: iso(-5) })
     ];
 
     function ev(job_id, author, note, status, at) { return { id: uid(), job_id: job_id, author: author, status: status || null, note: note, created_at: at }; }
@@ -187,7 +196,7 @@
     db.jobs.forEach(function (j) {
       if (j.id === exceptId || !j.scheduled_for || j.slot_start == null) return;
       if (j.status !== 'scheduled' && j.status !== 'in_progress') return;
-      for (var k = 0; k < (j.slots_needed || 1); k++) out.push({ day: j.scheduled_for, slot: j.slot_start + k });
+      S.occupied(j).forEach(function (o) { out.push(o); });   // single or several days, as the database counts them
     });
     return out;
   }
@@ -367,11 +376,11 @@
       for (var i = 0; i < targets.length; i++) {
         var next = Object.assign({}, targets[i], p2);
         if (next.scheduled_for && next.slot_start != null && (next.status === 'scheduled' || next.status === 'in_progress')) {
+          if (!next.scheduled_through) { next.through_slot = null; p2.through_slot = null; }
+          else if (next.scheduled_through <= next.scheduled_for) return no('The last day must be after the first day.');
           var taken = occupied(db, next.id);
-          for (var k = 0; k < (next.slots_needed || 1); k++) {
-            var clash = taken.some(function (t) { return t.day === next.scheduled_for && t.slot === next.slot_start + k; });
-            if (clash) return no('That time overlaps another booked job. Pick a different day or start time.');
-          }
+          var clash = S.occupied(next).some(function (o) { return taken.some(function (t) { return t.day === o.day && t.slot === o.slot; }); });
+          if (clash) return no('That time overlaps another booked job. Pick a different day or start time.');
           if (db.blackouts.some(function (b) { return b.day === next.scheduled_for; })) {
             return no('That day is blocked out on your schedule.');
           }
