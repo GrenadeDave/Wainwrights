@@ -339,6 +339,22 @@
      function as Bryan (which is what actually decides whether he may), then
      emails the customer. In the tour there is no server, so the demo client
      answers instead and nothing is sent anywhere. */
+  /* After a save, the other admins' phones hear about it (MyDiD shared schedule).
+     Best effort: a missed alert never undoes a save, and the tour sends nothing. */
+  async function tellPhones(jobId, verb) {
+    if (P.demo) return;
+    try {
+      var cfg = window.WAINWRIGHTS_SUPABASE;
+      var session = (await P.client().auth.getSession()).data.session;
+      if (!session) return;
+      fetch(cfg.url + '/functions/v1/mydid/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+        body: JSON.stringify({ id: jobId, verb: verb })
+      }).catch(function () {});
+    } catch (e) { /* never in the way of a save */ }
+  }
+
   async function cancelJob(jobId, reason) {
     if (P.demo) {
       var d = await P.client().rpc('admin_cancel_job', { p_job: jobId, p_reason: reason });
@@ -521,6 +537,7 @@
       if (isNaN(s)) return bad('The disposal fee needs to be a number, like 60 or 60.00');
 
       var newStatus = document.getElementById('status').value;
+      var before    = job && job.status;
       var note      = document.getElementById('note').value.trim();
 
       if (newStatus === 'quoted' && q == null) {
@@ -564,6 +581,7 @@
       if (res.error) return bad('Could not save: ' + res.error.message);
 
       flash('Saved');
+      tellPhones(id, newStatus === 'scheduled' && before !== 'scheduled' ? 'booked' : 'changed');
       if (await reload()) {
         var ev = await P.client().from('job_events').select('*')
           .eq('job_id', id).order('created_at', { ascending: false });
