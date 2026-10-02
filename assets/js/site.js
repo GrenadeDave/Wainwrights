@@ -89,6 +89,10 @@
       return;
     }
 
+    /* Fade in as soon as the top edge is on screen. A threshold measured as a
+       share of the element (it was 8%) left a block several screens tall — the
+       estimate form on a phone — blank for 300px+ of scrolling. Anything taller
+       than the screen is not faded at all: it is never "arriving" all at once. */
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
@@ -96,9 +100,12 @@
           io.unobserve(entry.target);
         }
       });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    }, { rootMargin: '0px 0px -40px 0px', threshold: 0 });
 
-    items.forEach(function (el) { io.observe(el); });
+    items.forEach(function (el) {
+      if (el.offsetHeight > window.innerHeight * 0.9) el.classList.add('is-in');
+      else io.observe(el);
+    });
   }
 
   /* ----------------------------------------------------------------------
