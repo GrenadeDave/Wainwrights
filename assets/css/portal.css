@@ -897,3 +897,8 @@ a.hero-card-p--act:hover { color: var(--white); }
 .mo-item-when { display: flex; justify-content: space-between; gap: 10px; }
 .mo-item-v { font-size: .875rem; color: var(--pine-800); }
 .mo-item.is-in_progress .mo-item-v { color: var(--ink); }
+
+/* "Work started" — set from Bryan's phone; the customer's only notice (2026-10-03) */
+.work-started { margin: 10px 0 0; padding: 8px 12px; border-radius: 10px; background: var(--amber-050);
+  border-left: 4px solid var(--amber); color: var(--ink); font-size: .9375rem; }
+.work-started b { color: var(--amber-ink); }

@@ -218,6 +218,16 @@
     if (!a || !b) return null;
     return a.time.split('–')[0].trim() + ' – ' + b.time.split('–')[1].trim();
   };
+  /* "Work started — Sat, Oct 3, 8:12 am": set when Bryan clocks in on his phone
+     (2026-10-03). The only notice the customer gets — no email, no push. */
+  P.started = function (job) {
+    if (!job || !job.started_at || job.status === 'cancelled' || job.status === 'completed') return '';
+    var d = new Date(job.started_at);
+    if (isNaN(d)) return '';
+    var day = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'America/Los_Angeles' });
+    var time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Los_Angeles' }).toLowerCase().replace(' ', ' ');
+    return '<p class="work-started"><b>Work started</b> \u2014 ' + P.esc(day + ', ' + time) + '</p>';
+  };
   P.statusPill = function (status) {
     var s = P.STATUS[status] || { label: status, tone: 'wait' };
     return '<span class="pill pill--' + s.tone + '">' + P.esc(s.label) + '</span>';

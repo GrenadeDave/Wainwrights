@@ -50,9 +50,10 @@
     return '<a class="job-card" href="job.html?id=' + encodeURIComponent(job.id) + '">' +
       '<div class="job-card-top"><h3>' + esc(job.service) + '</h3>' + flag + '</div>' +
       (job.status !== 'cancelled' && job.status !== 'completed' ? '<div class="job-card-track">' + P.track(job.status) + '</div>' : '') +
+      P.started(job) +
       '<div class="job-foot">' +
         (when ? '<span>' + esc(when) + (win ? ' · <b>' + esc(win) + '</b>' : '') + '</span>' : '<span>Asked ' + esc(P.ago(job.created_at)) + '</span>') +
-        (total != null ? '<span>Price: <b>' + P.money(total) + '</b></span>' : '') +
+        (total != null ? '<span>Estimate: <b>' + P.money(total) + '</b></span>' : '') +
         '<span class="link-arrow" style="margin-left:auto">Open</span>' +
       '</div></a>';
   }
@@ -169,7 +170,7 @@
          properly, instead of three times in a row. */
       if (j.status !== 'cancelled') {
         html += '<div class="panel-card"><div class="status-line">' + P.statusPill(j.status) +
-          '<span>' + esc(st.blurb) + '</span></div>' + P.track(j.status) + '</div>';
+          '<span>' + esc(st.blurb) + '</span></div>' + P.started(j) + P.track(j.status) + '</div>';
       }
 
       /* ---- turned down ----
@@ -228,7 +229,7 @@
 
       /* ---- price, once it is no longer the call to action ---- */
       if (total != null && !P.needsYou(j)) {
-        html += '<div class="panel-card"><h2>Price</h2>' +
+        html += '<div class="panel-card"><h2>Estimate</h2>' +
           '<div class="price-row"><span class="label">' + esc(j.service) + '</span><span class="amount">' + P.money(j.quote_cents) + '</span></div>' +
           (j.surcharge_cents ? '<div class="price-row"><span class="label">Disposal &amp; handling</span><span class="amount">' + P.money(j.surcharge_cents) + '</span></div>' : '') +
           '<div class="price-row total"><span class="label">Total</span><span class="amount">' + P.money(total) + '</span></div></div>';
@@ -470,7 +471,7 @@
             rows([['Where it got to', P.STATUS[j.status] ? P.STATUS[j.status].label : j.status],
                   ['What you told Bryan', j.details],
                   ['Property', j.address],
-                  ['Price', P.total(j) != null ? P.money(P.total(j)) : ''],
+                  ['Estimate', P.total(j) != null ? P.money(P.total(j)) : ''],
                   ['You said go ahead', P.dateTime(j.quote_accepted_at)],
                   ['Booked for', j.scheduled_for ? P.when(j) : '']]) +
             (msgs.length ? '<p class="data-sub">Messages (' + msgs.length + ')</p><ul class="data-msgs">' +
