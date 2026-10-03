@@ -902,3 +902,14 @@ a.hero-card-p--act:hover { color: var(--white); }
 .work-started { margin: 10px 0 0; padding: 8px 12px; border-radius: 10px; background: var(--amber-050);
   border-left: 4px solid var(--amber); color: var(--ink); font-size: .9375rem; }
 .work-started b { color: var(--amber-ink); }
+
+/* Documents (2026-10-03) */
+.doc-list { list-style: none; padding: 0; margin: 0 0 12px; display: grid; gap: 8px; }
+.doc-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--white); }
+.doc-list li.is-off { opacity: .75; background: var(--paper-2); }
+.doc-list li > span { color: var(--muted); font-size: .875rem; }
+.doc-list li > .linkish { margin-left: auto; }
+.doc-open { font: inherit; background: none; border: 0; padding: 0; cursor: pointer; color: var(--pine-700);
+  text-align: left; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.doc-open b { color: var(--ink); text-decoration: none; }

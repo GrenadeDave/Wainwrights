@@ -228,6 +228,15 @@
     var time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Los_Angeles' }).toLowerCase().replace(' ', ' ');
     return '<p class="work-started"><b>Work started</b> \u2014 ' + P.esc(day + ', ' + time) + '</p>';
   };
+  /* Documents (2026-10-03): private files, opened only through a link that
+     lasts five minutes. The database decides who may make one. */
+  P.DOC_KIND = { contract: 'Contract', estimate: 'Estimate', other: 'Document' };
+  P.size = function (n) { n = Number(n) || 0; return n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; };
+  P.openDocument = async function (path) {
+    var s = await P.client().storage.from('job-documents').createSignedUrl(path, 300);
+    if (s.error || !s.data) { P.toast('That document could not be opened. Try again.'); return; }
+    w.location.assign(s.data.signedUrl);
+  };
   P.statusPill = function (status) {
     var s = P.STATUS[status] || { label: status, tone: 'wait' };
     return '<span class="pill pill--' + s.tone + '">' + P.esc(s.label) + '</span>';

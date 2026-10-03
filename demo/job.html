@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/site.css?v=ad72f08a">
-<link rel="stylesheet" href="../assets/css/portal.css?v=9db9d924">
+<link rel="stylesheet" href="../assets/css/portal.css?v=87fc323f">
 </head>
 <body class="portal-body">
 
@@ -46,7 +46,7 @@
 <script src="../assets/js/rates.js?v=4b364822"></script>
 <script src="../assets/js/schedule.js?v=4a64207c"></script>
 <script src="../assets/js/supabase-config.js?v=79cace19"></script>
-<script src="../assets/js/portal.js?v=0fa966a1"></script>
+<script src="../assets/js/portal.js?v=d49f2560"></script>
 <script src="../assets/js/portal-demo.js?v=0393f0a7"></script>
 <script src="../assets/js/site.js?v=bb198635"></script>
 <script>
@@ -484,6 +484,89 @@
        reads, so it is quoted to them rather than summarised. The server does
        the same checks again — this is only about not wasting Bryan's time
        with a round trip he was always going to lose. */
+    /* Documents (2026-10-03): contracts, estimates and photos of a paper
+       agreement. Uploaded here or from either phone; private storage; the
+       customer sees them in their portal; removing one is soft and undoable. */
+    (function () {
+      var box = document.createElement('div');
+      box.className = 'panel-card';
+      box.style.marginTop = '22px';
+      box.innerHTML = '<h2 style="margin-top:0">Documents</h2><div id="doc-list"><p style="color:var(--muted)">Loading\u2026</p></div>' +
+        (job.deleted_at ? '' : P.demo ? '<p class="form-note" style="text-align:left;margin:0">In the tour no files are stored, so adding one is switched off.</p>' :
+        '<form id="doc-form" class="doc-form">' +
+          '<div class="field-2">' +
+            '<div class="field" style="margin:0"><label for="doc-kind">Kind</label><select id="doc-kind">' +
+              '<option value="estimate">Estimate</option><option value="contract">Contract</option><option value="other">Other</option></select></div>' +
+            '<div class="field" style="margin:0"><label for="doc-file">File <span class="hint">(PDF, JPEG or PNG, up to 15 MB)</span></label>' +
+              '<input type="file" id="doc-file" accept="application/pdf,image/jpeg,image/png"></div>' +
+          '</div>' +
+          '<div class="btn-row" style="margin-top:12px"><button class="btn btn-primary" type="submit" id="doc-up">Add document</button></div>' +
+          '<p class="form-note" style="text-align:left;margin:8px 0 0">The customer can see it in their account; Bryan\u2019s and his wife\u2019s phones get a copy.</p>' +
+        '</form>');
+      root.appendChild(box);
+      var list = box.querySelector('#doc-list');
+
+      async function draw() {
+        var r = await P.client().from('job_documents').select('*').eq('job_id', id).order('created_at', { ascending: true });
+        var docs = (r && r.data) || [];
+        if (!docs.length) { list.innerHTML = '<p style="color:var(--muted);margin:0 0 12px">None yet.</p>'; return; }
+        list.innerHTML = '<ul class="doc-list">' + docs.map(function (d) {
+          var off = !!d.deleted_at, pending = d.status !== 'ready';
+          return '<li' + (off ? ' class="is-off"' : '') + '>' +
+            (pending || off ? '<span><b>' + P.esc(P.DOC_KIND[d.kind] || 'Document') + '</b> ' + P.esc(d.name) + '</span>'
+                            : '<button type="button" class="doc-open" data-path="' + P.esc(d.storage_path) + '"><b>' +
+                              P.esc(P.DOC_KIND[d.kind] || 'Document') + '</b> ' + P.esc(d.name) + '</button>') +
+            '<span>' + P.esc(P.size(d.size)) + ' \u00b7 ' + P.esc(P.dateTime(d.created_at) || '') +
+              (pending ? ' \u00b7 upload not finished' : '') + (off ? ' \u00b7 removed' : '') + '</span>' +
+            (pending ? '' : '<button type="button" class="linkish" data-' + (off ? 'restore' : 'remove') + '="' + P.esc(d.id) + '">' +
+              (off ? 'Restore' : 'Remove') + '</button>') +
+          '</li>';
+        }).join('') + '</ul>';
+        list.querySelectorAll('[data-path]').forEach(function (b) { b.addEventListener('click', function () { P.openDocument(b.dataset.path); }); });
+        list.querySelectorAll('[data-remove],[data-restore]').forEach(function (b) {
+          b.addEventListener('click', async function () {
+            var restore = !!b.dataset.restore, docId = b.dataset.restore || b.dataset.remove;
+            if (!restore) {
+              var ok = await P.confirm({ title: 'Remove this document?',
+                body: 'The customer will no longer see it. Phones keep their copy, marked as removed. You can restore it.',
+                ok: 'Remove', cancel: 'Keep it', danger: true });
+              if (!ok) return;
+            }
+            var rr = await P.client().rpc('admin_document_delete', { p_id: docId, p_restore: restore });
+            if (rr.error) return flash('Could not do that: ' + rr.error.message);
+            tellPhones(id, 'document');
+            flash(restore ? 'Restored' : 'Removed'); draw();
+          });
+        });
+      }
+      draw();
+
+      var form = box.querySelector('#doc-form');
+      if (form) form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var file = box.querySelector('#doc-file').files[0], kind = box.querySelector('#doc-kind').value;
+        if (!file) return flash('Pick a file first.');
+        if (['application/pdf', 'image/jpeg', 'image/png'].indexOf(file.type) === -1) return flash('Only PDF, JPEG and PNG files can be added.');
+        if (file.size > 15 * 1024 * 1024) return flash('That file is too big. 15 MB at most.');
+        var btn = box.querySelector('#doc-up'); btn.disabled = true; btn.textContent = 'Uploading\u2026';
+        try {
+          var docId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now());
+          var st = await P.client().rpc('admin_document_start', { p_id: docId, p_job: id, p_kind: kind, p_name: file.name, p_mime: file.type, p_size: file.size });
+          if (st.error) throw st.error;
+          var up = await P.client().storage.from('job-documents').upload(st.data.storage_path, file, { contentType: file.type, upsert: true });
+          if (up.error) throw up.error;
+          var hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await file.arrayBuffer())))
+            .map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+          var rd = await P.client().rpc('admin_document_ready', { p_id: docId, p_sha256: hash });
+          if (rd.error) throw rd.error;
+          tellPhones(id, 'document');
+          flash('Document added'); form.reset(); draw();
+        } catch (err) {
+          flash('Could not add it: ' + (err && err.message ? err.message : 'try again'));
+        } finally { btn.disabled = false; btn.textContent = 'Add document'; }
+      });
+    })();
+
     /* Delete / Restore (2026-10-03). A soft delete: the job leaves every list,
        the calendar, the customer's portal and both phones, and nobody is
        emailed. Restore puts it back. A customer job that needs a reason sent

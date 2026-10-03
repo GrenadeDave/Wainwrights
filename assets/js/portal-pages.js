@@ -273,6 +273,30 @@
 
       root().innerHTML = html;
       wire(j);
+      showDocs(j);
+    }
+
+    /* The customer's documents on this job: contracts, estimates, photos of
+       a paper agreement. Only finished, undeleted files on their own job come
+       back (the database's rule); each opens through a five-minute link. */
+    async function showDocs(j) {
+      if (P.demo) return;
+      var r = await P.client().from('job_documents').select('id, kind, name, size, storage_path, created_at')
+        .eq('job_id', j.id).order('created_at', { ascending: true });
+      var docs = (r && r.data) || [];
+      if (!docs.length) return;
+      var box = document.createElement('div');
+      box.className = 'panel-card';
+      box.innerHTML = '<h2>Documents</h2><ul class="doc-list">' + docs.map(function (d) {
+        return '<li><button type="button" class="doc-open" data-path="' + esc(d.storage_path) + '">' +
+          '<b>' + esc(P.DOC_KIND[d.kind] || 'Document') + '</b> ' + esc(d.name) + '</button>' +
+          '<span>' + esc(P.size(d.size)) + ' \u00b7 ' + esc(P.date(String(d.created_at).slice(0, 10))) + '</span></li>';
+      }).join('') + '</ul>';
+      var ask = document.getElementById('ask');
+      if (ask) ask.parentNode.insertBefore(box, ask); else root().appendChild(box);
+      box.querySelectorAll('[data-path]').forEach(function (b) {
+        b.addEventListener('click', function () { P.openDocument(b.dataset.path); });
+      });
     }
 
     function wire(j) {
