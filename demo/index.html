@@ -49,7 +49,7 @@
 <script src="../assets/js/schedule.js?v=4a64207c"></script>
 <script src="../assets/js/supabase-config.js?v=79cace19"></script>
 <script src="../assets/js/portal.js?v=78dd2855"></script>
-<script src="../assets/js/portal-demo.js?v=09c70830"></script>
+<script src="../assets/js/portal-demo.js?v=0393f0a7"></script>
 <script src="../assets/js/site.js?v=bb198635"></script>
 <script>
 (function () {
@@ -75,7 +75,8 @@
     { key: 'scheduled',   label: 'Scheduled' },
     { key: 'in_progress', label: 'In progress' },
     { key: 'completed',   label: 'Completed' },
-    { key: 'all',         label: 'Everything' }
+    { key: 'all',         label: 'Everything' },
+    { key: 'deleted',     label: 'Deleted' }
   ];
   var filter = 'live';
   var allJobs = [];
@@ -113,6 +114,8 @@
   }
 
   function matches(job) {
+    if (filter === 'deleted') return !!job.deleted_at;      // restore from the job's own page
+    if (job.deleted_at) return false;
     if (filter === 'all')  return true;
     if (filter === 'live') return job.status !== 'completed' && job.status !== 'cancelled';
     return job.status === filter;

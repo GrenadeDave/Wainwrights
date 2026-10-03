@@ -194,7 +194,7 @@
   function occupied(db, exceptId) {
     var out = [];
     db.jobs.forEach(function (j) {
-      if (j.id === exceptId || !j.scheduled_for || j.slot_start == null) return;
+      if (j.id === exceptId || j.deleted_at || !j.scheduled_for || j.slot_start == null) return;
       if (j.status !== 'scheduled' && j.status !== 'in_progress') return;
       S.occupied(j).forEach(function (o) { out.push(o); });   // single or several days, as the database counts them
     });
@@ -424,6 +424,20 @@
         addEvent(dc, which, 'bryan', reason, 'cancelled');
         save(dc);
         return ok({ id: which, reason: reason, contact_email: jc.contact_email, has_account: true });
+      }
+      if (fn === 'admin_delete_job' || fn === 'admin_restore_job') {
+        var dj = load(), jid = (args || {}).p_job;
+        var jj = dj.jobs.filter(function (x) { return x.id === jid; })[0];
+        if (!jj) return no('That job no longer exists.');
+        if (fn === 'admin_delete_job') {
+          if (jj.deleted_at) return no('That job is already deleted.');
+          jj.deleted_at = new Date().toISOString(); addEvent(dj, jid, 'bryan', 'Deleted on the website.', jj.status);
+        } else {
+          if (!jj.deleted_at) return no('That job is not deleted.');
+          jj.deleted_at = null; addEvent(dj, jid, 'bryan', 'Restored on the website.', jj.status);
+        }
+        jj.updated_at = new Date().toISOString();
+        save(dj); return ok({ id: jid });
       }
       if (fn === 'admin_remove_review') {
         /* The same checks as the database: a listed reason and a note, or nothing happens. */

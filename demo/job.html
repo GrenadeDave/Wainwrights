@@ -47,7 +47,7 @@
 <script src="../assets/js/schedule.js?v=4a64207c"></script>
 <script src="../assets/js/supabase-config.js?v=79cace19"></script>
 <script src="../assets/js/portal.js?v=78dd2855"></script>
-<script src="../assets/js/portal-demo.js?v=09c70830"></script>
+<script src="../assets/js/portal-demo.js?v=0393f0a7"></script>
 <script src="../assets/js/site.js?v=bb198635"></script>
 <script>
 (function () {
@@ -483,6 +483,51 @@
        reads, so it is quoted to them rather than summarised. The server does
        the same checks again — this is only about not wasting Bryan's time
        with a round trip he was always going to lose. */
+    /* Delete / Restore (2026-10-03). A soft delete: the job leaves every list,
+       the calendar, the customer's portal and both phones, and nobody is
+       emailed. Restore puts it back. A customer job that needs a reason sent
+       is turned down instead (the box above). */
+    (function () {
+      var wrap = document.createElement('div');
+      wrap.className = 'panel-card' + (job.deleted_at ? ' panel-card--act' : '');
+      wrap.style.marginTop = '22px';
+      if (job.deleted_at) {
+        wrap.innerHTML = '<h2 style="margin-top:0">Deleted</h2>' +
+          '<p>Deleted ' + P.esc(P.dateTime(job.deleted_at) || '') + '. It is hidden from the job board, the schedule, ' +
+          'the customer\u2019s portal and both phones. Nothing was sent to the customer.</p>' +
+          '<div class="btn-row"><button class="btn btn-primary" type="button" id="restore-job">Restore this job</button></div>';
+      } else {
+        wrap.innerHTML = '<button type="button" class="linkish" id="delete-job" style="color:var(--fire)">Delete this job\u2026</button>' +
+          '<p class="form-note" style="text-align:left;margin:6px 0 0">For test jobs and mistakes. The customer is not told; ' +
+          'to turn a real request down with a reason, use the box above.</p>';
+      }
+      root.appendChild(wrap);
+      var delBtn = document.getElementById('delete-job'), resBtn = document.getElementById('restore-job');
+      if (delBtn) delBtn.addEventListener('click', async function () {
+        var ok = await P.confirm({
+          title: 'Delete this job?',
+          body: 'It will also disappear from Bryan\u2019s and his wife\u2019s MyDiD. The customer is not emailed. You can restore it afterwards.',
+          ok: 'Delete', cancel: 'Keep it', danger: true
+        });
+        if (!ok) return;
+        var r = await P.client().rpc('admin_delete_job', { p_job: id });
+        if (r.error) return flash('Could not delete: ' + r.error.message);
+        tellPhones(id, 'deleted');
+        flash('Deleted');
+        if (await reload()) paint([]);
+      });
+      if (resBtn) resBtn.addEventListener('click', async function () {
+        var r = await P.client().rpc('admin_restore_job', { p_job: id });
+        if (r.error) return flash('Could not restore: ' + r.error.message);
+        tellPhones(id, 'restored');
+        flash('Restored');
+        if (await reload()) {
+          var ev = await P.client().from('job_events').select('*').eq('job_id', id).order('created_at', { ascending: false });
+          paint(ev.data || []);
+        }
+      });
+    })();
+
     var cancelOpen = document.getElementById('cancel-open');
     if (cancelOpen) {
       var box   = document.getElementById('cancel-box');
