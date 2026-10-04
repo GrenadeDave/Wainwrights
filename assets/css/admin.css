@@ -1,0 +1,300 @@
+/* ==========================================================================
+   Wainwright's admin — dark navy glass (2026-10-04, D41)
+   --------------------------------------------------------------------------
+   Loaded only by pages under /admin/, after site.css and portal.css. Every
+   rule is scoped to body.admin (or to the shell's own .adm-* elements), so
+   the public site, the customer portal and the frozen demo tour never see it.
+   ========================================================================== */
+
+body.admin {
+  /* Shared tokens re-pointed for a dark page. The legacy names (--sand,
+     --moss-*, --clay-*) are set here too: on :root they were resolved to the
+     light values, so changing --paper alone would not reach them.
+     --white stays white: it is the text colour on filled buttons. */
+  --paper:      #0A1424;
+  --paper-2:    #08111F;
+  --paper-3:    #0E1A2E;
+  --line:       rgba(255,255,255,.14);
+  --line-soft:  rgba(255,255,255,.08);
+  --ink:        #F2F5FA;
+  --body:       #D3DBE7;
+  --muted:      #A3B1C4;
+  --amber-ink:  #FF9A5C;
+  --amber-050:  rgba(238,100,36,.16);
+  --fire:       #FF8A80;
+  --fire-050:   rgba(248,113,113,.14);
+  --pine-050:   rgba(143,176,219,.12);
+  --pine-100:   rgba(143,176,219,.18);
+  --pine-200:   rgba(143,176,219,.35);
+  --pine-600:   #8FB0DB;
+  --pine-700:   #BFD3EE;
+  --pine-800:   #DCE6F4;
+  --sky-050:    rgba(143,176,219,.10);
+  --sky-100:    rgba(143,176,219,.16);
+  --sky-line:   rgba(143,176,219,.30);
+  --sand:       #08111F;
+  --stone:      rgba(255,255,255,.14);
+  --moss-600:   #8FB0DB;
+  --moss-700:   #BFD3EE;
+  --clay-600:   #FF9A5C;
+  --clay-ink:   #FF9A5C;
+  --clay-050:   rgba(238,100,36,.16);
+  --sage-050:   rgba(143,176,219,.12);
+  --sage-200:   rgba(143,176,219,.35);
+
+  --adm-glass:    rgba(255,255,255,.055);
+  --adm-glass-2:  rgba(255,255,255,.09);
+  --adm-edge:     rgba(255,255,255,.10);
+  --adm-solid:    #0E1A2E;
+  --adm-orange:   #EE6424;
+  --adm-fill:     #C23B00;   /* filled orange that carries white text (5.4:1) */
+  --adm-blue:     #7FB2F0;
+  --adm-ease:     cubic-bezier(.16,1,.3,1);
+  --adm-spring:   linear(0, .7 18%, 1.05 38%, .98 60%, 1);
+
+  color: var(--body);
+  background-color: #050B16;
+  background-image:
+    radial-gradient(1200px 600px at 85% -10%, rgba(238,100,36,.16), transparent 60%),
+    radial-gradient(900px 500px at 0% 110%, rgba(37,88,158,.32), transparent 60%);
+  background-attachment: fixed;
+}
+body.admin .portal-header { display: none; }       /* replaced by the shell */
+body.admin .portal-main { background: transparent; }
+body.admin :is(h1, h2, h3) { color: var(--ink); }
+body.admin .toast { z-index: 500; }
+
+/* Screen-reader-only text */
+.adm-sr { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+          overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* Glass panel recipe */
+.adm-glass, body.admin .adm-side, body.admin .ov-card {
+  background: var(--adm-glass);
+  border: 1px solid var(--adm-edge);
+  border-radius: 16px;
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 10px 30px rgba(0,0,0,.35);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .adm-glass, body.admin .adm-side, body.admin .ov-card { background: var(--adm-solid); }
+}
+
+/* Loading spinner (feeds note #3) */
+.adm-spin { display: inline-block; width: 26px; height: 26px; border: 4px solid rgba(255,255,255,.12);
+            border-top-color: var(--adm-orange); border-right-color: var(--adm-orange); border-radius: 50%;
+            animation: adm-spin .9s linear infinite; vertical-align: middle; }
+@keyframes adm-spin { to { transform: rotate(360deg); } }
+
+/* ---- Side panel (desktop) and icon rail (tablet) ---------------------- */
+.adm-side, .adm-orb, .adm-sheet, .adm-dim { display: none; }
+.adm-ico { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9;
+           stroke-linecap: round; stroke-linejoin: round; }
+.adm-badge { font: 700 11px/1 Inter, system-ui, sans-serif; padding: 3px 7px; border-radius: 99px;
+             background: rgba(238,100,36,.22); color: #FFB48A; }
+
+@media (min-width: 768px) {
+  body.admin .adm-side { display: flex; flex-direction: column; gap: 2px; position: fixed; z-index: 300;
+                         top: 18px; bottom: 18px; left: 18px; width: 64px; padding: 12px 8px; overflow-y: auto; }
+  body.admin .portal-main { padding-left: 100px; }
+  .adm-brand { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 4px 0 12px;
+               margin-bottom: 8px; border-bottom: 1px solid var(--adm-edge); color: var(--ink); text-decoration: none; }
+  .adm-brand img { width: 36px; height: 36px; border-radius: 10px; }
+  .adm-brand span, .adm-group, .adm-me-name { display: none; }
+  .adm-link { position: relative; display: flex; align-items: center; justify-content: center; gap: 10px;
+              min-height: 44px; padding: 10px; border-radius: 12px; border: 0; background: none; width: 100%;
+              color: var(--body); text-decoration: none; font: 500 14px Inter, system-ui, sans-serif; cursor: pointer; }
+  .adm-link:hover { background: var(--adm-glass-2); color: #fff; }
+  .adm-link[aria-current="page"] { background: rgba(238,100,36,.16); box-shadow: inset 0 0 0 1px rgba(238,100,36,.4); color: #fff; }
+  .adm-link .adm-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .adm-link .adm-badge { position: absolute; top: 4px; right: 2px; padding: 2px 5px; font-size: 10px;
+                         background: var(--adm-fill); color: #fff; }
+  .adm-me { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--adm-edge); }
+}
+@media (min-width: 1100px) {
+  body.admin .adm-side { width: 230px; padding: 18px 14px; }
+  body.admin .portal-main { padding-left: 266px; }
+  .adm-brand { justify-content: flex-start; padding: 0 6px 16px; }
+  .adm-brand span { display: block; }
+  .adm-brand b { display: block; font: 800 15px Archivo, sans-serif; color: var(--ink); }
+  .adm-brand small { color: var(--muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+  .adm-group { display: block; color: var(--muted); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+               padding: 12px 10px 6px; }
+  .adm-link { justify-content: flex-start; padding: 9px 10px; }
+  .adm-link .adm-label { position: static; width: auto; height: auto; overflow: visible; clip: auto; flex: 1; text-align: left; }
+  .adm-link .adm-badge { position: static; padding: 3px 8px; font-size: 11px; background: rgba(238,100,36,.22); color: #FFB48A; }
+  .adm-me-name { display: block; padding: 6px 10px; color: var(--muted); font-size: 12.5px;
+                 overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+/* ---- The phone orb (layout C) ------------------------------------------ */
+@media (max-width: 767.98px) {
+  body.admin .portal-main { padding-bottom: 104px; }
+  body.admin .adm-orb { display: grid; place-items: center; position: fixed; z-index: 400; right: 16px;
+                        bottom: calc(16px + env(safe-area-inset-bottom)); width: 58px; height: 58px; padding: 0;
+                        border: 0; border-radius: 50%; background: var(--adm-orange); color: #fff; cursor: pointer;
+                        box-shadow: 0 0 0 6px rgba(238,100,36,.15), 0 10px 30px rgba(238,100,36,.55); }
+  body.admin.adm-typing .adm-orb { display: none; }
+  body.admin .adm-dim:not([hidden]) { display: block; position: fixed; inset: 0; z-index: 410;
+                                      background: rgba(2,6,14,.55); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+  body.admin .adm-sheet:not([hidden]) { display: block; position: fixed; z-index: 420; left: 10px; right: 10px;
+      bottom: calc(10px + env(safe-area-inset-bottom)); padding: 16px; border-radius: 24px;
+      background: rgba(18,28,46,.92); border: 1px solid var(--adm-edge);
+      -webkit-backdrop-filter: blur(18px) saturate(140%); backdrop-filter: blur(18px) saturate(140%);
+      clip-path: inset(calc(100% - 64px) 2px 2px calc(100% - 66px) round 32px);
+      transition: clip-path .3s var(--adm-ease); }
+  body.admin .adm-sheet.is-open { clip-path: inset(0 round 24px); transition: clip-path .48s var(--adm-spring); }
+  .adm-sheet > * { opacity: 0; transition: opacity .15s; }
+  .adm-sheet.is-open > * { opacity: 1; transition: opacity .2s .15s; }
+}
+.adm-orb svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.adm-orb .adm-badge { position: absolute; top: -3px; right: -3px; background: #fff; color: #A33200; min-width: 20px; text-align: center; }
+.adm-quick { display: flex; gap: 8px; }
+.adm-quick a { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px;
+               border-radius: 14px; background: rgba(238,100,36,.18); color: #FFB48A; font-weight: 700; font-size: 13.5px; text-decoration: none; }
+.adm-quick a[hidden] { display: none; }
+.adm-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; margin-top: 10px; }
+.adm-tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 6px;
+            min-height: 72px; border-radius: 14px; background: rgba(255,255,255,.07); color: var(--ink);
+            font-size: 12.5px; text-align: center; text-decoration: none; }
+.adm-tile[aria-current="page"] { background: rgba(238,100,36,.16); box-shadow: inset 0 0 0 1px rgba(238,100,36,.4); }
+.adm-tile .adm-badge { position: absolute; top: 6px; right: 6px; }
+.adm-sheet-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 12px; }
+.adm-plain { min-height: 44px; padding: 0 12px; border: 0; border-radius: 12px; background: none; color: var(--body);
+             font: 500 13.5px Inter, system-ui, sans-serif; text-decoration: none; display: inline-flex; align-items: center; cursor: pointer; }
+.adm-plain:hover { background: rgba(255,255,255,.08); color: #fff; }
+html.adm-open { overflow: hidden; }
+
+/* ---- Existing admin widgets on the dark page --------------------------- */
+body.admin :is(.portal-empty, .job-card, .panel-card, .bubble, .wk-day, .wk-cell, .wk-none, .mo-stat, .mo-cal,
+               .mo-day, .mo-side, .mo-block, .mo-free, .doc-list li, .data-msgs li, .haul-tally) {
+  background: var(--adm-glass);
+  border-color: var(--adm-edge);
+  color: var(--body);
+}
+body.admin :is(.portal-empty, .job-card, .panel-card, .mo-cal, .mo-side) {
+  border-radius: 16px;
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 10px 30px rgba(0,0,0,.3);
+}
+body.admin .job-card:hover { background: var(--adm-glass-2); }
+body.admin :is(.wk-cell.is-free, .mo-day.is-weekend, .mo-day.is-other, .mo-item.is-completed,
+               .mo-job.is-completed, .mo-badge.is-completed, .doc-list li.is-off) { background: rgba(255,255,255,.025); }
+body.admin :is(.admin-bar .chip, .wk-bar .chip, .chip-mini, .seg, .mo-arrow, .mo-today) {
+  background: rgba(255,255,255,.06); border-color: var(--adm-edge); color: var(--body);
+}
+body.admin :is(.admin-bar .chip, .wk-bar .chip)[aria-pressed="true"] {
+  background: rgba(238,100,36,.18); border-color: rgba(238,100,36,.5); color: #fff;
+}
+body.admin .mo-load i { background: rgba(255,255,255,.12); }
+body.admin .p-dialog { background: var(--adm-solid); color: var(--body); border-color: var(--adm-edge); }
+body.admin :is(input, select, textarea) { background: rgba(255,255,255,.06); color: var(--ink); border-color: rgba(255,255,255,.18); }
+body.admin :is(input, select, textarea):focus { border-color: var(--adm-orange); outline: 2px solid rgba(238,100,36,.35); outline-offset: 1px; }
+body.admin select option { background: var(--adm-solid); color: var(--ink); }
+body.admin ::placeholder { color: #8796AB; }
+body.admin .pill--wait { background: rgba(255,255,255,.08); color: var(--body); border-color: var(--adm-edge); }
+body.admin .pill--act  { background: rgba(238,100,36,.18); color: #FFB48A; border-color: rgba(238,100,36,.45); }
+body.admin .pill--good { background: rgba(52,211,153,.14); color: #6EE7B7; border-color: rgba(52,211,153,.35); }
+body.admin .pill--done { background: rgba(143,176,219,.18); color: #DCE6F4; border-color: rgba(143,176,219,.4); }
+body.admin .pill--off  { background: rgba(248,113,113,.14); color: #FCA5A5; border-color: rgba(248,113,113,.35); }
+body.admin .btn-outline { color: var(--ink); border-color: rgba(255,255,255,.3); background: transparent; }
+body.admin .btn-outline:hover { background: rgba(255,255,255,.08); color: #fff; }
+body.admin .portal-main a:not(.btn):not(.job-card):not(.chip):not(.ov-card):not(.adm-link) { color: #A9C4E8; }
+
+/* ---- Overview page -------------------------------------------------------- */
+body.admin .ov { display: grid; gap: 14px; padding: 6px 0 24px;
+                 grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+                 grid-template-areas: "head head" "kpis kpis" "graph reviews" "needs days"; }
+.ov-head { grid-area: head; }
+.ov-head h1 { margin: 0; font: 800 28px/1.15 Archivo, sans-serif; }
+.ov-head p { margin: 4px 0 0; color: var(--muted); }
+.ov-kpis { grid-area: kpis; display: grid; gap: 14px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.ov-graph-card { grid-area: graph; } .ov-reviews { grid-area: reviews; }
+.ov-needs-card { grid-area: needs; } .ov-days-card { grid-area: days; }
+body.admin .ov-card { display: block; padding: 16px 18px; color: var(--body); text-decoration: none; min-width: 0; }
+body.admin a.ov-card:hover { background: var(--adm-glass-2); }
+.ov-k-label { display: block; color: var(--muted); font-size: 12.5px; }
+.ov-k-value { display: block; margin: 6px 0; font: 800 28px/1.1 Archivo, sans-serif; color: var(--ink); }
+.ov-k-sub { font-size: 12.5px; color: var(--muted); }
+.ov-good { color: #34D399; font-weight: 600; }
+.ov-warn { color: #FBBF24; font-weight: 600; }
+.ov-bad  { color: #FCA5A5; font-weight: 600; }
+.ov-h { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;
+        margin: 0 0 12px; font: 700 15px Inter, system-ui, sans-serif; color: var(--ink); }
+.ov-h-note { color: var(--muted); font-weight: 500; font-size: 12.5px; }
+.ov-seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 99px; background: rgba(255,255,255,.06); }
+.ov-seg button { min-height: 32px; padding: 4px 11px; border: 0; border-radius: 99px; background: none;
+                 color: var(--muted); font: 500 12.5px Inter, system-ui, sans-serif; cursor: pointer; }
+.ov-seg button[aria-pressed="true"] { background: rgba(255,255,255,.14); color: #fff; }
+.ov-tabs { margin-bottom: 8px; border-radius: 14px; }
+.ov-graph { display: block; width: 100%; height: auto; }
+.ov-grid line { stroke: rgba(255,255,255,.08); }
+.ov-grid text, .ov-ticks text { fill: #A3B1C4; font: 11px Inter, system-ui, sans-serif; }
+.ov-line-a { fill: none; stroke: #EE6424; stroke-width: 2.5; stroke-linejoin: round; }
+.ov-line-b { fill: none; stroke: var(--adm-blue); stroke-width: 2; stroke-dasharray: 5 5; }
+.ov-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; color: var(--muted); font-size: 12.5px; }
+.ov-legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 3px; vertical-align: -1px; }
+.ov-sw-a { background: #EE6424; } .ov-sw-b { background: var(--adm-blue); }
+.ov-rev { padding: 10px 0; border-top: 1px solid rgba(255,255,255,.08); }
+.ov-rev:first-of-type { border-top: 0; padding-top: 0; }
+.ov-rev p { margin: 4px 0; color: var(--body); font-size: 13.5px; line-height: 1.5; }
+.ov-rev small, .ov-empty, .ov-note { color: var(--muted); font-size: 12.5px; }
+.ov-stars { color: #FBBF24; letter-spacing: 1px; }
+.ov-pending { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; color: var(--body) !important; text-decoration: none; font-size: 13px; }
+.ov-needs { list-style: none; margin: 0; padding: 0; }
+.ov-needs li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px 10px; align-items: center;
+               padding: 10px 2px; border-top: 1px solid rgba(255,255,255,.08); }
+.ov-needs li:first-child { border-top: 0; }
+.ov-needs a { color: var(--ink) !important; font-weight: 600; text-decoration: none; min-width: 0; }
+.ov-needs small { display: block; color: var(--muted); font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ov-tag { padding: 3px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.ov-tag--request  { background: rgba(238,100,36,.18); color: #FFB48A; }
+.ov-tag--estimate { background: rgba(251,191,36,.15); color: #FCD34D; }
+.ov-tag--review   { background: rgba(52,211,153,.14); color: #6EE7B7; }
+.ov-wait { font-size: 12.5px; text-align: right; white-space: nowrap; color: var(--muted); }
+.ov-asked { grid-column: 1 / -1; justify-self: start; min-height: 36px; padding: 0 14px; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,.3); background: transparent; color: var(--ink);
+            font: 600 13px Inter, system-ui, sans-serif; cursor: pointer; }
+.ov-asked:hover { background: rgba(255,255,255,.08); }
+.ov-heat-head, .ov-heat { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
+.ov-heat-head span { color: var(--muted); font-size: 11px; text-align: center; }
+.ov-heat { list-style: none; margin: 4px 0 10px; padding: 0; }
+.ov-heat li { height: 26px; border-radius: 6px; background: rgba(255,255,255,.06); }
+.ov-heat li.ov-pad { background: none; }
+.ov-heat .u1, .ov-u1 { background: rgba(238,100,36,.3) !important; }
+.ov-heat .u2, .ov-u2 { background: rgba(238,100,36,.58) !important; }
+.ov-heat .u3, .ov-u3 { background: #EE6424 !important; }
+.ov-u0 { background: rgba(255,255,255,.06); }
+.ov-heat .off, .ov-off { background: repeating-linear-gradient(135deg, rgba(255,255,255,.16) 0 4px, transparent 4px 8px) !important; }
+.ov-heat .is-today { outline: 2px solid #fff; outline-offset: 1px; }
+.ov-note b { color: var(--ink); }
+.ov-loading { display: flex; align-items: center; gap: 12px; color: var(--muted); }
+.ov-error h2 { margin-top: 0; }
+@media (max-width: 1099.98px) { .ov-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 767.98px) {
+  body.admin .ov { grid-template-columns: minmax(0, 1fr);
+                   grid-template-areas: "head" "kpis" "needs" "days" "graph" "reviews"; }
+  .ov-k-value { font-size: 24px; }
+  /* Name and details get the full width; tag and age share the row below */
+  .ov-needs li { grid-template-columns: minmax(0, 1fr) auto; }
+  .ov-needs li > a { grid-column: 1 / -1; }
+  .ov-needs small { white-space: normal; }
+  .ov-tag { justify-self: start; }
+  /* The graph is drawn 600 wide and shrunk to fit, so its labels are drawn bigger */
+  .ov-grid text, .ov-ticks text { font-size: 20px; }
+}
+
+/* ---- Fixes from the contrast check (Task 8 adds rules here) ------------ */
+body.admin .btn-moss { background: rgba(143,176,219,.18); color: #fff; border: 1px solid rgba(143,176,219,.45); box-shadow: none; }
+body.admin .btn-moss:hover { background: rgba(143,176,219,.3); color: #fff; }
+body.admin .seg-b { color: var(--body); }
+body.admin .seg-b[aria-pressed="true"] { background: rgba(238,100,36,.22); color: #fff; box-shadow: inset 0 0 0 1px rgba(238,100,36,.5); }
+
+/* ---- Reduced motion ------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  body.admin *, body.admin .adm-sheet, body.admin .adm-sheet > *, .adm-spin {
+    transition: none !important; animation: none !important;
+  }
+}

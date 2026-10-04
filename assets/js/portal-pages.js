@@ -67,7 +67,7 @@
        a customer sees. */
     if (pr.data && pr.data.is_admin && !P.demo &&
         new URLSearchParams(w.location.search).get('customer') !== '1') {
-      w.location.replace('../admin/index.html');
+      w.location.replace('../admin/overview.html');
       return;
     }
     if (res.error) return problem('Could not load your jobs', res.error.message);
