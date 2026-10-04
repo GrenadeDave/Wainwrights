@@ -41,7 +41,7 @@
         r.waiting ? '<span class="' + (r.oldest_hours >= 24 ? 'ov-bad' : 'ov-warn') + '">oldest ' + age(r.oldest_hours) + '</span>'
                   : '<span class="ov-good">No requests waiting</span>',
         'index.html?f=requested') +
-      card('This week', wk.booked + ' / ' + wk.capacity,
+      card(wk.start > x.today ? 'Next week' : 'This week', wk.booked + ' / ' + wk.capacity,
         '<span class="ov-good">' + Math.max(0, wk.capacity - wk.booked) + ' slots free</span>', 'schedule.html') +
       card('Estimates booked · ' + day(x.today, { month: 'short' }), dollars(e.this_month_cents),
         change == null ? 'none booked last month'
